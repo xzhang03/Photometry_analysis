@@ -86,7 +86,7 @@ xlabel('Frequency')
 % Design a filter kernel
 d = fdesign.lowpass('Fp,Fst,Ap,Ast',5,10,0.5,40,100);
 Hd = design(d,'equiripple');
-fvtool(Hd)
+% fvtool(Hd)
 
 % Filter data
 Ch1_filtered = filter(Hd,ch1_data_table(:,2));
