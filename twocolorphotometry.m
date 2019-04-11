@@ -102,4 +102,4 @@ ylabel('Photodiod voltage (V)')
 
 %% Save
 clear data timestamps
-save(fullfile(filepath, filename));
+save(fullfile(filepath, filename_output));
