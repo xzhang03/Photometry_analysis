@@ -5,15 +5,15 @@ clear all
 use_filtered = 0;
 
 % Fit mode
-fit_mode = 'mean'; % mean or median
+fit_mode = 'linear'; % mean or median
 %% IO
 % common path
 defaultpath = '\\anastasia\data\photometry';
 
 % Work out outputpath
-[filename, filepath] = uigetfile(fullfile(defaultpath , '*_preprocssed.mat'));
-filename_output_fixed = [filename(1:end-4), '_fixed.mat'];
-load(fullfile(filepath, filepath), 'data');
+[filename2, filepath2] = uigetfile(fullfile(defaultpath , '*_preprocessed.mat'));
+filename_output_fixed = [filename2(1:end-4), '_fixed.mat'];
+load(fullfile(filepath2, filename2));
 
 %% Grab points to ignore
 
@@ -139,10 +139,15 @@ for i = 1 : size(intactpoints,1)
     switch fit_mode
         case 'mean'
             fitinfo = mean(ch2_to_fix(ind1:ind2)) - mean(ch1_to_fix(ind1:ind2));
+            ch2_to_fix(ind1:ind2) = ch2_to_fix(ind1:ind2) - fitinfo;
         case 'median'
             fitinfo = median(ch2_to_fix(ind1:ind2)) - median(ch1_to_fix(ind1:ind2));
+            ch2_to_fix(ind1:ind2) = ch2_to_fix(ind1:ind2) - fitinfo;
+        case 'linear'
+            fitinfo = polyfit(ch2_to_fix(ind1:ind2), ch1_to_fix(ind1:ind2), 1);
+            ch2_to_fix(ind1:ind2) = ch2_to_fix(ind1:ind2) * fitinfo(1) + fitinfo(2);
     end
-    ch2_to_fix(ind1:ind2) = ch2_to_fix(ind1:ind2) - fitinfo;
+    
 end
 
 % Plot
@@ -164,6 +169,7 @@ ch2_fixed_filtered = filter(Hd,ch2_to_fix);
 % Perform subtraction
 signal = ch1_fixed_filtered - ch2_fixed_filtered;
 
+
 % Plot
 figure(102)
 plot((1 : n_points)'/freq/60, signal)
@@ -171,15 +177,15 @@ xlabel('Time(min)')
 ylabel('Photodiode voltage (V)')
 
 %% Clear and save
-% Clear data
-if exist('data', 'var')
-    clear data;
-end
-
-% Clear time stamps
-if exist('timestamps', 'var')
-    clear timestamps;
-end
+% % Clear data
+% if exist('data', 'var')
+%     clear data;
+% end
+% 
+% % Clear time stamps
+% if exist('timestamps', 'var')
+%     clear timestamps;
+% end
 
 % Save
-save(fullfile(filepath,filename_output_fixed));
+save(fullfile(filepath2,filename_output_fixed));

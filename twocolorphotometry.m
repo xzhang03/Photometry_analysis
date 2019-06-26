@@ -1,28 +1,57 @@
 %% Initialization
-% Channel info
-ch1_pulse_ind = 2; % Where to grab wavelength 1's pulse info
-ch2_pulse_ind = 9; % Where to grab wavelength 2's pulse info
+% No pulse info (but pulses are used during photometry)
+SINGLE_CHANNEL_MODE = false;
+
+% No pulse info (and no pulses are used during photometry)
+PULSE_SIM_MODE = false;
+
+if SINGLE_CHANNEL_MODE
+    % Channel info
+    ch1_pulse_ind = 1; % Where to grab wavelength 1's pulse info
+    ch2_pulse_ind = 1; % Where to grab wavelength 2's pulse info
+
+    % Channel thresholds (mostly depends on whether digital or analog)
+    ch1_pulse_thresh = 1;
+    ch2_pulse_thresh = 0.5;
+else
+    % Channel info
+    ch1_pulse_ind = 2; % Where to grab wavelength 1's pulse info
+    ch2_pulse_ind = 5; % Where to grab wavelength 2's pulse info
+
+    % Channel thresholds (mostly depends on whether digital or analog)
+    ch1_pulse_thresh = 2;
+    ch2_pulse_thresh = 0.5;
+end
+
+
 data_ind = 1; % Where to grab fluorescence info
 freq = 50; % Sampling rate after downsampling (i.e., pulse rate of each channel in Hz)
-
-% Channel thresholds (mostly depends on whether digital or analog)
-ch1_pulse_thresh = 2;
-ch2_pulse_thresh = 0.5;
 
 %% IO
 % common path
 defaultpath = '\\anastasia\data\photometry';
 
 % Work out outputpath
-[filename, filepath] = uigetfile(fullfile(defaultpath , '*.mat'));
-filename_output = [filename(1:end-4), '_preprocssed.mat'];
-load(fullfile(filepath, filename), 'data');
+[filename, filepath] = uigetfile(fullfile(defaultpath , '*nidaq.mat'));
+filename_output = [filename(1:end-4), '_preprocessed.mat'];
+load(fullfile(filepath, filename), 'data', 'timestamps', 'Fs');
 
 
 %% Basic channel info
-% Grab pulse info
-ch1_pulse = data(ch1_pulse_ind,:) > ch1_pulse_thresh;
-ch2_pulse = data(ch2_pulse_ind,:) > ch2_pulse_thresh;
+% Gathering pulses
+if PULSE_SIM_MODE
+    [ch1_pulse, ch2_pulse] = pulsesim(size(data,2), 2500, 9, 10);
+else
+    % Grab pulse info
+    ch1_pulse = data(ch1_pulse_ind,:) > ch1_pulse_thresh;
+    ch2_pulse = data(ch2_pulse_ind,:) > ch2_pulse_thresh;
+end
+
+if SINGLE_CHANNEL_MODE
+    % For single channel mode
+    ch2_pulse(ch1_pulse) = 0;
+    ch2_pulse = imopen(ch2_pulse,[1 1 1]);
+end
 
 % Find pulse points. This step also defines the sampling rate after
 % downsampling (which is the rate of pulses)
@@ -48,18 +77,23 @@ if size(ch2_data_table,1) > n_points
     ch2_data_table = ch2_data_table(1:n_points, :);
 end
 
+% Apply notch filter to remove 60 Hz noise
+d_notch = designfilt('bandstopiir','FilterOrder',2, 'HalfPowerFrequency1',...
+    59, 'HalfPowerFrequency2',61, 'DesignMethod','butter','SampleRate', Fs);
+data_notch = filter(d_notch, data(1,:));
+
 % Use median fluorescence during each pulse to calculate fluorescence
 % values
 for i = 1 : n_points
     % Wavelength 1
     ini_ind = ch1_data_table(i,1);
     end_ind = ch1_data_table(i,1) + ch1_data_table(i,3) - 1;
-    ch1_data_table(i,2) = median(data(1,ini_ind:end_ind));
+    ch1_data_table(i,2) = median(data_notch(ini_ind:end_ind));
     
     % Wavelength 2
     ini_ind = ch2_data_table(i,1);
     end_ind = ch2_data_table(i,1) + ch1_data_table(i,3) - 1;
-    ch2_data_table(i,2) = median(data(1,ini_ind:end_ind));
+    ch2_data_table(i,2) = median(data_notch(ini_ind:end_ind));
 end
 %% Plot raw data data
 figure(100)
@@ -84,7 +118,7 @@ xlabel('Frequency')
 
 %% Low pass filter
 % Design a filter kernel
-d = fdesign.lowpass('Fp,Fst,Ap,Ast',5,10,0.5,40,100);
+d = fdesign.lowpass('Fp,Fst,Ap,Ast',8,10,0.5,40,100);
 Hd = design(d,'equiripple');
 % fvtool(Hd)
 
@@ -101,5 +135,4 @@ xlabel('Time (s)')
 ylabel('Photodiod voltage (V)')
 
 %% Save
-clear data timestamps
 save(fullfile(filepath, filename_output));
