@@ -1,4 +1,8 @@
 %% Initialization
+% Stephen Zhang 2019/07/30
+
+clear
+
 % No pulse info (but pulses are used during photometry)
 SINGLE_CHANNEL_MODE = false;
 
@@ -118,7 +122,7 @@ xlabel('Frequency')
 
 %% Low pass filter
 % Design a filter kernel
-d = fdesign.lowpass('Fp,Fst,Ap,Ast',8,10,0.5,40,100);
+d = fdesign.lowpass('Fp,Fst,Ap,Ast',8,10,0.5,40, freq);
 Hd = design(d,'equiripple');
 % fvtool(Hd)
 
@@ -135,4 +139,6 @@ xlabel('Time (s)')
 ylabel('Photodiod voltage (V)')
 
 %% Save
-save(fullfile(filepath, filename_output));
+save(fullfile(filepath, filename_output), 'ch1_data_table', 'ch2_data_table',...
+    'data', 'freq', 'Fs', 'n_points', 'PULSE_SIM_MODE', 'SINGLE_CHANNEL_MODE',...
+    'timestamps', 'Ch1_filtered', 'Ch2_filtered');
