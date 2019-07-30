@@ -10,34 +10,34 @@ addpath('functions');
 QuietMode = false;
 %
 % Use filtered traces that are passed from preprocessing?
-AllignCfg.use_filtered = false;
+AlignCfg.use_filtered = false;
 %
 % Use filtered traces that are passed from preprocessing?
-AllignCfg.lockinused = false;
-AllignCfg.lockin_Ch1 = 1;
-AllignCfg.lockin_Ch2 = 3;
+AlignCfg.lockinused = false;
+AlignCfg.lockin_Ch1 = 1;
+AlignCfg.lockin_Ch2 = 3;
 
 % ============================ Pre-filter info ============================
 %
-% This filter is used for allignment only and will not be used to get the
+% This filter is used for alignment only and will not be used to get the
 % final trace.
-AllignCfg.useprefilter = true; % On?
-AllignCfg.prefilterFreq = 8; % Pre-filter frequency?
+AlignCfg.useprefilter = true; % On?
+AlignCfg.prefilterFreq = 8; % Pre-filter frequency?
 
 % ============================ Pre-smooth info ============================
 %
-% This pre-smooth step is used for allignment only and will not be used to
+% This pre-smooth step is used for alignment only and will not be used to
 % get the final trace
-AllignCfg.usepresmooth = true; % On?
-AllignCfg.presmoothwindow = 10; % Window size for smoothing
+AlignCfg.usepresmooth = true; % On?
+AlignCfg.presmoothwindow = 10; % Window size for smoothing
 
 % =================== Flatten info (single exponential) ===================
 %
-% This flatten step can be used either before or after the allignment to
+% This flatten step can be used either before or after the alignment to
 % the two channels. If used either before or after, the flattened results
 % will be used in the final trace. If you are only using parts of the trace
-% to allign, you should set this to either 'post_flatten' or 'none';
-AllignCfg.flatten_mode = 'post_flatten';
+% to align, you should set this to either 'post_flatten' or 'none';
+AlignCfg.flatten_mode = 'post_flatten';
 
 % =============================== Fit mode ================================
 %
@@ -48,20 +48,20 @@ AllignCfg.flatten_mode = 'post_flatten';
 % 4. 'linear': Linearly fit Ch2 to Ch1 (Ch2_new = Ch2_old * a + b)
 % 5. 'linear_shift_ch1': Linearly fit Ch1 to Ch2 (Ch1_new = Ch1_old * a + b)
 % 6. 'ratiometric': No fitting, just Ch1 ./ Ch2
-AllignCfg.fit_mode = 'linear'; 
+AlignCfg.fit_mode = 'linear'; 
 
 % ============================ Post-filter info ===========================
 %
 % This filter will be used to filter the two channels
-AllignCfg.usepostfilter = true; % On?
-AllignCfg.postfilterFreq = 8; % Post-filter frequency?
+AlignCfg.usepostfilter = true; % On?
+AlignCfg.postfilterFreq = 8; % Post-filter frequency?
 
 %% IO
 % common path
 defaultpath = '\\anastasia\data\photometry';
 
 % Work out outputpath
-if AllignCfg.lockinused
+if AlignCfg.lockinused
     % If used lock-in
     [filename2, filepath2] =...
         uigetfile(fullfile(defaultpath , '*.mat'));
@@ -96,17 +96,17 @@ if ~QuietMode
     disp('Start processing...')
 end
 
-if AllignCfg.lockinused
+if AlignCfg.lockinused
     % Using lock-in
     if ~QuietMode
         % Say something
         disp('Using raw data from lock-in')
     end
     
-    ch1_to_fix = data(AllignCfg.lockin_Ch1, :);
-    ch2_to_fix = data(AllignCfg.lockin_Ch2, :);
+    ch1_to_fix = data(AlignCfg.lockin_Ch1, :);
+    ch2_to_fix = data(AlignCfg.lockin_Ch2, :);
 
-elseif AllignCfg.use_filtered
+elseif AlignCfg.use_filtered
     % Determine if using filtered or unfiltered data
     if ~QuietMode
         % Say something
@@ -138,7 +138,7 @@ else
 end
 
 % Pre-flatten if needed
-if strcmpi(AllignCfg.flatten_mode, 'pre_flatten')
+if strcmpi(AlignCfg.flatten_mode, 'pre_flatten')
     if ~QuietMode
         % Say something
         disp('Pre-flattening')
@@ -149,12 +149,12 @@ if strcmpi(AllignCfg.flatten_mode, 'pre_flatten')
     ch2_to_fix = tcpFlatten(ch2_to_fix, n_points);
 end
     
-% Prepare a copy of the traces just for allignment
+% Prepare a copy of the traces just for alignment
 ch1_for_fitting = ch1_to_fix;
 ch2_for_fitting = ch2_to_fix;
 
 % Pre-filter if so chosen
-if AllignCfg.useprefilter
+if AlignCfg.useprefilter
     if ~QuietMode
         % Say something
         disp('Pre-filtering')
@@ -162,9 +162,9 @@ if AllignCfg.useprefilter
 
     % Filter
     ch1_for_fitting = tcpLPfilter(ch1_for_fitting,...
-        AllignCfg.prefilterFreq, freq, 1);
+        AlignCfg.prefilterFreq, freq, 1);
     ch2_for_fitting = tcpLPfilter(ch2_for_fitting,...
-        AllignCfg.prefilterFreq, freq, 1);
+        AlignCfg.prefilterFreq, freq, 1);
     
     % Remove the first 50 points if prefiltering
     ch1_for_fitting(1:50) = NaN;
@@ -172,7 +172,7 @@ if AllignCfg.useprefilter
 end
 
 % Pre-smooth if so chosen
-if AllignCfg.usepresmooth
+if AlignCfg.usepresmooth
     if ~QuietMode
         % Say something
         disp('Pre-smoothing')
@@ -180,9 +180,9 @@ if AllignCfg.usepresmooth
 
     % Apply smoothing
     ch1_for_fitting = smooth(ch1_for_fitting, ...
-        AllignCfg.presmoothwindow, 'moving');
+        AlignCfg.presmoothwindow, 'moving');
     ch2_for_fitting = smooth(ch2_for_fitting, ...
-        AllignCfg.presmoothwindow, 'moving');
+        AlignCfg.presmoothwindow, 'moving');
 end
 
 % Plot
@@ -276,7 +276,7 @@ intactpoints = chainfinder(~isnan(ch1_for_fitting));
 
 % Display fitting mode
 if ~QuietMode
-    disp(['Fitting mode: ', AllignCfg.fit_mode]);
+    disp(['Fitting mode: ', AlignCfg.fit_mode]);
 end
 
 for i = 1 : size(intactpoints,1)
@@ -285,7 +285,7 @@ for i = 1 : size(intactpoints,1)
     ind2 = intactpoints(i,1) + intactpoints(i,2) - 1;
 
     % Determine how much to shift
-    switch AllignCfg.fit_mode
+    switch AlignCfg.fit_mode
         case 'mean'
             fitinfo = mean(ch2_for_fitting(ind1:ind2)) - mean(ch1_for_fitting(ind1:ind2));
             ch2_for_fitting(ind1:ind2) = ch2_for_fitting(ind1:ind2) - fitinfo;
@@ -354,27 +354,27 @@ if ~QuietMode
     plot([ch1_for_fitting, ch2_for_fitting])
     xlabel('Index')
     ylabel('Photodiode voltage (V)')
-    title('Region used to Allign')
+    title('Region used to align')
 
     subplot(1,3,2)
     plot([ch1_to_fix, ch2_to_fix])
     xlabel('Index')
     ylabel('Photodiode voltage (V)')
-    title('Alligned data')
+    title('Aligned data')
 end
 
 
 %% Filter
 % Post filter if needed
-if AllignCfg.usepostfilter
+if AlignCfg.usepostfilter
     ch1_to_fix = tcpLPfilter(ch1_to_fix,...
-        AllignCfg.postfilterFreq, freq, 1);
+        AlignCfg.postfilterFreq, freq, 1);
     ch2_to_fix = tcpLPfilter(ch2_to_fix,...
-        AllignCfg.postfilterFreq, freq, 1);
+        AlignCfg.postfilterFreq, freq, 1);
 end
 
 % Post-flatten if needed
-if strcmpi(AllignCfg.flatten_mode, 'post_flatten')
+if strcmpi(AlignCfg.flatten_mode, 'post_flatten')
     % Say something
     disp('Post-flattening')
 
@@ -394,7 +394,7 @@ if ~QuietMode
 end
 
 % Perform subtraction
-if strcmpi(AllignCfg.fit_mode, 'ratiometric')
+if strcmpi(AlignCfg.fit_mode, 'ratiometric')
     signal = ch1_to_fix ./ ch2_to_fix;
 else
     signal = ch1_to_fix - ch2_to_fix;
@@ -415,7 +415,7 @@ if ~QuietMode
 end
 
 % Save
-save(fullfile(filepath2,filename_output_fixed), 'AllignCfg', 'ch1_data_table', ...
+save(fullfile(filepath2,filename_output_fixed), 'AlignCfg', 'ch1_data_table', ...
     'Ch1_filtered', 'ch1_for_fitting', 'ch1_to_fix', 'ch2_data_table', ...
     'Ch2_filtered', 'ch2_for_fitting', 'ch2_to_fix', 'data', 'filename2',...
     'filepath2', 'filename_output_fixed', 'fitinfo', 'fitting_segments',...
