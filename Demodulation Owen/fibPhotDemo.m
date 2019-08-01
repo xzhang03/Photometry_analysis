@@ -33,8 +33,8 @@ params.freqRange2 = [300 330]; % Min and max frequency range for channel 2 (targ
 
 % Assign the channel numbers in the raw data set
 % params.timeCol    = 1;
-params.rawSigCol1 = 1;
-params.rawSigCol2 = 1;
+params.rawSigCol1 = 1; % Where do you get raw data for Channel 1
+params.rawSigCol2 = 1; % Where do you get raw data for Channel 1
 % params.syncColIn  = 8;
 % params.syncColOut = 9;
 
