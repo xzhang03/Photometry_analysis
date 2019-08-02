@@ -10,7 +10,7 @@ Analysis for two-color photometry in the Andermann lab
 * Supports using all, a single segment, or multiple segments of the data for alignment (with gui)
 * Supports post-filtering and post-flattening after alignment
 
-If you use the photometry cubes
+If you use the photometry square-wave cubes
 1. Run tcpPreprocess
 2. Change the settings on the top of tcpAlign
 3. Run tcpAlign
@@ -18,3 +18,6 @@ If you use the photometry cubes
 If you use lock-in amplifiers
 1. Change the settings on the top of tcpAlign
 2. Run tcpAlign
+
+If you use the photometry sine-wave cubes
+1. Run demodulation_TD
