@@ -6,8 +6,12 @@ clear
 addpath('functions');
 
 % ============================= General info ==============================
+%
 % Quiet mode? Just doing its job and no fuss.
 QuietMode = false;
+%
+% Save results?
+SaveResults = true;
 %
 % Use filtered traces that are passed from preprocessing?
 AlignCfg.use_filtered = false;
@@ -22,7 +26,7 @@ AlignCfg.lockin_Ch2 = 3;
 % This filter is used for alignment only and will not be used to get the
 % final trace.
 AlignCfg.useprefilter = true; % On?
-AlignCfg.prefilterFreq = 8; % Pre-filter frequency?
+AlignCfg.prefilterFreq = 10; % Pre-filter frequency?
 
 % ============================ Pre-smooth info ============================
 %
@@ -37,7 +41,7 @@ AlignCfg.presmoothwindow = 10; % Window size for smoothing
 % the two channels. If used either before or after, the flattened results
 % will be used in the final trace. If you are only using parts of the trace
 % to align, you should set this to either 'post_flatten' or 'none';
-AlignCfg.flatten_mode = 'post_flatten';
+AlignCfg.flatten_mode = 'none';
 
 % =============================== Fit mode ================================
 %
@@ -58,6 +62,7 @@ AlignCfg.postfilterFreq = 8; % Post-filter frequency?
 
 %% IO
 % common path
+%
 defaultpath = '\\anastasia\data\photometry';
 
 % Work out outputpath
@@ -73,7 +78,7 @@ end
 
 filename_output_fixed = [filename2(1:end-4), '_fixed.mat'];
 load(fullfile(filepath2, filename2));
-
+%}
 
 %% Apply pre filters and grab points to ignore
 % See if there are breakpoints in ram
@@ -93,6 +98,7 @@ end
 
 if ~QuietMode
     % Say something
+    disp('========================================')
     disp('Start processing...')
 end
 
@@ -122,6 +128,12 @@ else
     end
     ch1_to_fix = ch1_data_table(:,2);
     ch2_to_fix = ch2_data_table(:,2);
+end
+
+% Calculate pre-fitting error
+prefiterr = sqrt(mean((ch1_to_fix - ch2_to_fix).^2));
+if ~QuietMode    
+    disp(['Pre-fitting error (RMS): ', num2str(prefiterr)]);
 end
 
 % If no redo or add more points, first applying the existing break points
@@ -347,6 +359,9 @@ for i = 1 : size(intactpoints,1)
     
 end
 
+% Calculate post-fitting error
+postfiterr = sqrt(mean((ch1_to_fix - ch2_to_fix).^2));
+
 if ~QuietMode
     % Plot
     figure(102)
@@ -361,6 +376,12 @@ if ~QuietMode
     xlabel('Index')
     ylabel('Photodiode voltage (V)')
     title('Aligned data')
+    
+    disp(['Fitting mode: ', num2str(fitinfo)]);
+    
+    disp(['Post-fitting error (RMS): ', num2str(postfiterr)]);
+    disp(['Deviance abridged(%): ',...
+        num2str((prefiterr - postfiterr) / prefiterr * 100)])
 end
 
 
@@ -409,15 +430,18 @@ if ~QuietMode
 end
 
 %% Clear and save
-% Say where the data are saved
-if ~QuietMode
-    disp(['Saving data to: ', fullfile(filepath2,filename_output_fixed)]);
-end
+if SaveResults
+    % Say where the data are saved
+    if ~QuietMode
+        disp(['Saving data to: ', fullfile(filepath2,filename_output_fixed)]);
+    end
 
-% Save
-save(fullfile(filepath2,filename_output_fixed), 'AlignCfg', 'ch1_data_table', ...
-    'Ch1_filtered', 'ch1_for_fitting', 'ch1_to_fix', 'ch2_data_table', ...
-    'Ch2_filtered', 'ch2_for_fitting', 'ch2_to_fix', 'data', 'filename2',...
-    'filepath2', 'filename_output_fixed', 'fitinfo', 'fitting_segments',...
-    'freq', 'Fs', 'intactpoints', 'n_ignorepts', 'n_points', 'signal',...
-    'SINGLE_CHANNEL_MODE', 'PULSE_SIM_MODE', 'timestamps');
+    % Save
+    save(fullfile(filepath2,filename_output_fixed), 'AlignCfg', 'ch1_data_table', ...
+        'Ch1_filtered', 'ch1_for_fitting', 'ch1_to_fix', 'ch2_data_table', ...
+        'Ch2_filtered', 'ch2_for_fitting', 'ch2_to_fix', 'data', 'filename2',...
+        'filepath2', 'filename_output_fixed', 'fitinfo', 'fitting_segments',...
+        'freq', 'Fs', 'intactpoints', 'n_ignorepts', 'n_points', 'signal',...
+        'SINGLE_CHANNEL_MODE', 'PULSE_SIM_MODE', 'timestamps', 'prefiterr',...
+        'postfiterr');
+end
