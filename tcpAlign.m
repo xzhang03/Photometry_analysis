@@ -16,11 +16,14 @@ SaveResults = true;
 % Use filtered traces that are passed from preprocessing?
 AlignCfg.use_filtered = false;
 %
-% Use filtered traces that are passed from preprocessing?
+% Used Lockin amplifier for data acquisition?
 AlignCfg.lockinused = false;
 AlignCfg.lockin_Ch1 = 1;
 AlignCfg.lockin_Ch2 = 3;
-
+%
+% Used sine-box for data acquisition
+AlignCfg.sineboxused = true;
+%
 % ============================ Pre-filter info ============================
 %
 % This filter is used for alignment only and will not be used to get the
@@ -70,6 +73,10 @@ if AlignCfg.lockinused
     % If used lock-in
     [filename2, filepath2] =...
         uigetfile(fullfile(defaultpath , '*.mat'));
+elseif AlignCfg.sineboxused
+    % If used sine box
+    [filename2, filepath2] =...
+        uigetfile(fullfile(defaultpath , '*.mat'));
 else
     % No lock-in
     [filename2, filepath2] =...
@@ -109,9 +116,27 @@ if AlignCfg.lockinused
         disp('Using raw data from lock-in')
     end
     
+    % Data
     ch1_to_fix = data(AlignCfg.lockin_Ch1, :);
     ch2_to_fix = data(AlignCfg.lockin_Ch2, :);
 
+    % Frequency
+    freq = Fs;
+    
+elseif AlignCfg.sineboxused
+    % Using lock-in
+    if ~QuietMode
+        % Say something
+        disp('Using pre-demodulated data')
+    end
+    
+    % Data
+    ch1_to_fix = c_Mag.data(:, 1);
+    ch2_to_fix = c_Mag.data(:, 1);
+
+    % Frequency
+    freq = c_Mag.samplerate;
+    
 elseif AlignCfg.use_filtered
     % Determine if using filtered or unfiltered data
     if ~QuietMode

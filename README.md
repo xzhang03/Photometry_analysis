@@ -17,7 +17,10 @@ If you use the photometry square-wave cubes
 
 If you use lock-in amplifiers
 1. Change the settings on the top of tcpAlign
-2. Run tcpAlign
+2. Change the settings on the top of tcpAlign
+3. Run tcpAlign
 
 If you use the photometry sine-wave cubes
-1. Run demodulation_TD
+1. Run tcpDemodulation_TD
+2. Change the settings on the top of tcpAlign
+3. Run tcpAlign
