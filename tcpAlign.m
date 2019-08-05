@@ -5,6 +5,9 @@ clear
 % Add subfolder
 addpath('functions');
 
+% common path
+defaultpath = '\\anastasia\data\photometry';
+
 % ============================= General info ==============================
 %
 % Quiet mode? Just doing its job and no fuss.
@@ -22,7 +25,7 @@ AlignCfg.lockin_Ch1 = 1;
 AlignCfg.lockin_Ch2 = 3;
 %
 % Used sine-box for data acquisition
-AlignCfg.sineboxused = true;
+AlignCfg.sineboxused = false;
 %
 % ============================ Pre-filter info ============================
 %
@@ -64,9 +67,6 @@ AlignCfg.usepostfilter = true; % On?
 AlignCfg.postfilterFreq = 8; % Post-filter frequency?
 
 %% IO
-% common path
-%
-defaultpath = '\\anastasia\data\photometry';
 
 % Work out outputpath
 if AlignCfg.lockinused
