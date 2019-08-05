@@ -32,7 +32,7 @@ AlignCfg.sineboxused = false;
 % This filter is used for alignment only and will not be used to get the
 % final trace.
 AlignCfg.useprefilter = true; % On?
-AlignCfg.prefilterFreq = 10; % Pre-filter frequency?
+AlignCfg.prefilterFreq = 8; % Pre-filter frequency?
 
 % ============================ Pre-smooth info ============================
 %
@@ -47,7 +47,7 @@ AlignCfg.presmoothwindow = 10; % Window size for smoothing
 % the two channels. If used either before or after, the flattened results
 % will be used in the final trace. If you are only using parts of the trace
 % to align, you should set this to either 'post_flatten' or 'none';
-AlignCfg.flatten_mode = 'none';
+AlignCfg.flatten_mode = 'post_flatten';
 
 % =============================== Fit mode ================================
 %
