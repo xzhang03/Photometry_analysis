@@ -1,8 +1,8 @@
-function binneddata = tcpBin(inputdata, inputFs, outputFs, method, dim)
+function binneddata = tcpBin(inputdata, inputFs, outputFs, method, dim, QuietMode)
 % tcpBin bins data to a different sample rate. If the binning factor is not
 % integer, the program will attempt to approximate rationalized factor, in 
-% the form of a fraction.
-% binneddata = tcpBin(inputdata, inputFs, outputFs, method, dim)
+% the form of a fraction. tcpBin can also be used to upsample data;
+% binneddata = tcpBin(inputdata, inputFs, outputFs, method, dim, QuietMode)
 % intputdata: 1 or 2 dimensional data
 % method: a string that can be 'mean', 'median', 'downsample', 'max', 'min'
 % dim: the dimension along which the binning happens
@@ -12,14 +12,17 @@ function binneddata = tcpBin(inputdata, inputFs, outputFs, method, dim)
 ds_ind = 1;
 
 % Defaults
-if nargin < 5
-    dim = 1;
-    if nargin < 4
-        method = 'mean';
-        if nargin < 3
-            outputFs = 5;
-            if nargin < 2
-                inputFs = 50;
+if nargin < 6
+    QuietMode = true;
+    if nargin < 5
+        dim = 1;
+        if nargin < 4
+            method = 'mean';
+            if nargin < 3
+                outputFs = 5;
+                if nargin < 2
+                    inputFs = 50;
+                end
             end
         end
     end
@@ -39,9 +42,11 @@ intcheck = @(x) floor(x) == x;
 
 % Divisibility check
 if intcheck (binfact)
-    disp(['Using a binning factor of ', num2str(binfact)]);
-    disp(['Throwing away the last: ', ...
-        num2str(mod(nsamples, binfact)), ' frames']);
+    if ~QuietMode
+        disp(['Using a binning factor of ', num2str(binfact)]);
+        disp(['Throwing away the last: ', ...
+            num2str(mod(nsamples, binfact)), ' frames']);
+    end
     
     % Number of samples after binning
     nsamples_result = floor(nsamples/binfact);
@@ -59,12 +64,13 @@ if intcheck (binfact)
     end
     
 else
-    [binN, binD] = rat(binfact, 0.01);
-    disp(['Binning factor is not integer. Using a fraction instead: ',...
-        num2str(binN), '/', num2str(binD)]);
-    disp(['Throwing away the last: ', ...
-        num2str(mod(nsamples * binD, binN) / binD), ' frames']);
-    
+    [binN, binD] = rat(binfact, 0.001);
+    if ~QuietMode
+        disp(['Binning factor is not integer. Using a fraction instead: ',...
+            num2str(binN), '/', num2str(binD)]);
+        disp(['Throwing away the last: ', ...
+            num2str(mod(nsamples * binD, binN) / binD), ' frames']);
+    end
     % Number of samples after binning
     nsamples_result = floor(nsamples / binN) * binD;
     
