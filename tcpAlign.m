@@ -33,6 +33,9 @@ AlignCfg.sineboxused = false;
 % final trace.
 AlignCfg.useprefilter = true; % On?
 AlignCfg.prefilterFreq = 8; % Pre-filter frequency?
+AlignCft.prefilterArtifactRange = 1 : 50;   % Number of points to remove if
+                                            % using prefiltering
+                                            % (because artifacts)
 
 % ============================ Pre-smooth info ============================
 %
@@ -180,10 +183,9 @@ if strcmpi(AlignCfg.flatten_mode, 'pre_flatten')
         % Say something
         disp('Pre-flattening')
     end
-
-    % Flatten
-    ch1_to_fix = tcpFlatten(ch1_to_fix, n_points);
-    ch2_to_fix = tcpFlatten(ch2_to_fix, n_points);
+    
+    % flatten with a ui
+    [ch1_to_fix, ch2_to_fix] = tcpUIflatten(ch1_to_fix, ch2_to_fix);
 end
     
 % Prepare a copy of the traces just for alignment
@@ -203,9 +205,9 @@ if AlignCfg.useprefilter
     ch2_for_fitting = tcpLPfilter(ch2_for_fitting,...
         AlignCfg.prefilterFreq, freq, 1);
     
-    % Remove the first 50 points if prefiltering
-    ch1_for_fitting(1:50) = NaN;
-    ch2_for_fitting(1:50) = NaN;
+    % Remove the artifact range
+    ch1_for_fitting(AlignCft.prefilterArtifactRange) = NaN;
+    ch2_for_fitting(AlignCft.prefilterArtifactRange) = NaN;
 end
 
 % Pre-smooth if so chosen
@@ -421,12 +423,13 @@ end
 
 % Post-flatten if needed
 if strcmpi(AlignCfg.flatten_mode, 'post_flatten')
-    % Say something
-    disp('Post-flattening')
-
-    % Flatten
-    ch1_to_fix = tcpFlatten(ch1_to_fix, n_points);
-    ch2_to_fix = tcpFlatten(ch2_to_fix, n_points);
+    if ~QuietMode
+        % Say something
+        disp('Post-flattening')
+    end
+    
+    % flatten with a ui
+    [ch1_to_fix, ch2_to_fix] = tcpUIflatten(ch1_to_fix, ch2_to_fix);
 end
 
 if ~QuietMode
@@ -468,5 +471,5 @@ if SaveResults
         'filepath2', 'filename_output_fixed', 'fitinfo', 'fitting_segments',...
         'freq', 'Fs', 'intactpoints', 'n_ignorepts', 'n_points', 'signal',...
         'SINGLE_CHANNEL_MODE', 'PULSE_SIM_MODE', 'timestamps', 'prefiterr',...
-        'postfiterr');
+        'postfiterr', 'ignorepoints');
 end

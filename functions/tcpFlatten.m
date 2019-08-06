@@ -1,6 +1,6 @@
-function flattened = tcpFlatten(raw, n_points)
+function [flattened, f1_exp] = tcpFlatten(raw, n_points)
 % tcpFlatten flattens the input signal with a single exponential
-% flattened = tcpFlatten(raw, n_points)
+% [flattened, f1_exp] = tcpFlatten(raw, n_points)
 
 if nargin < 2
     n_points = length(raw);
