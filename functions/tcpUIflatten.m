@@ -3,6 +3,9 @@ function [ch1_flattened, ch2_flattened] = tcpUIflatten(ch1_input, ch2_input)
 % trace flattening
 % [ch1_flattened, ch2_flattened] = tcpUIflatten(ch1_input, ch2_input)
 
+% Calculate the number of points
+n_points = length(ch1_input);
+
 % Make a plot
 figure(100)
 plot([ch1_input, ch2_input]);

@@ -2,6 +2,7 @@
 % Stephen Zhang 2019/07/30
 clear
 
+
 % Add subfolder
 addpath('functions');
 
@@ -187,7 +188,7 @@ if strcmpi(AlignCfg.flatten_mode, 'pre_flatten')
     % flatten with a ui
     [ch1_to_fix, ch2_to_fix] = tcpUIflatten(ch1_to_fix, ch2_to_fix);
 end
-    
+
 % Prepare a copy of the traces just for alignment
 ch1_for_fitting = ch1_to_fix;
 ch2_for_fitting = ch2_to_fix;
@@ -404,7 +405,7 @@ if ~QuietMode
     ylabel('Photodiode voltage (V)')
     title('Aligned data')
     
-    disp(['Fitting mode: ', num2str(fitinfo)]);
+    disp(['Fitting info: ', num2str(fitinfo)]);
     
     disp(['Post-fitting error (RMS): ', num2str(postfiterr)]);
     disp(['Deviance abridged(%): ',...
@@ -460,7 +461,7 @@ end
 %% Clear and save
 if SaveResults
     % Say where the data are saved
-    if ~QuietMode
+    if ~QuietMode %#ok<UNRCH>
         disp(['Saving data to: ', fullfile(filepath2,filename_output_fixed)]);
     end
 
