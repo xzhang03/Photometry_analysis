@@ -2,14 +2,14 @@
 photometry analysis
 Stephen Zhang 7/30/2019
 
-First-order Analysis for two-color photometry in the Andermann lab
-* Supports data that collected with or without using a lock-in amplifier
-* Supports quadratic demodulation
-* Supports pre-filtering and pre-smoothing before alignment. These steps only affects the coefficients that are used for alignment and not the data traces themselves
-* Supports pre-flattening before alignment. This step is also applied to the data traces themselves.
-* Supports several linear forms of alignment and straight-up ratio metric calculations
-* Supports using all, a single segment, or multiple segments of the data for alignment (with gui)
-* Supports post-filtering and post-flattening after alignment
+First-order analysis package for two-color photometry in the Andermann lab, which supports:
+* Data that collected with or without using a lock-in amplifier
+* Quadratic off-line demodulation
+* Pre-filtering and pre-smoothing before alignment. These steps only affects the coefficients that are used for alignment and not the data traces themselves
+* Pre-flattening before alignment. This step is also applied to the data traces themselves.
+* Several linear forms of alignment and straight-up ratio metric calculations
+* Using all, a single segment, or multiple segments of the data for alignment (with gui)
+* Post-filtering and post-flattening after alignment
 
 If you use the **square-wave photometry cubes**:
 
