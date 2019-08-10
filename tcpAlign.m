@@ -467,7 +467,7 @@ if ~QuietMode
     figure(103)
     plot((1 : length(signal))'/freq, signal)
     xlabel('Time(s)')
-    ylabel('Photodiode voltage (V)')
+    ylabel('Bulk fluorescence')
 end
 
 %% Clear and save
