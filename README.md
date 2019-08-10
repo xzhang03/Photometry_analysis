@@ -5,7 +5,7 @@ Stephen Zhang 7/30/2019
 First-order analysis package for two-color photometry in the Andermann lab, which supports:
 * Data that are collected with or without using a lock-in amplifier
 * Preprocessing for data that are collected with square-wave pulses
-* Quadratic off-line demodulation for data that are collected with frequency modulation
+* Quadratic off-line demodulation for data that are collected with frequency modulation (modified from Thomas Davidson's implementation)
 * Pre-filtering and pre-smoothing before alignment. These steps only affects the coefficients that are used for alignment and not the data traces themselves
 * Pre-flattening before alignment. This step is also applied to the data traces themselves.
 * Several linear forms of alignment and straight-up ratio metric calculations
