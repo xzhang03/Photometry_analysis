@@ -1,4 +1,4 @@
-# Photometry_analysis
+# Photometry analysis
 photometry analysis
 Stephen Zhang 7/30/2019
 
