@@ -1,4 +1,4 @@
-# Photometry analysis
+# Two-color photometry analysis
 photometry analysis
 Stephen Zhang 7/30/2019
 
