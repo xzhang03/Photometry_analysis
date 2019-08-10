@@ -11,8 +11,8 @@ PULSE_SIM_MODE = false;
 
 if SINGLE_CHANNEL_MODE
     % Channel info
-    ch1_pulse_ind = 1; % Where to grab wavelength 1's pulse info
-    ch2_pulse_ind = 1; % Where to grab wavelength 2's pulse info
+    ch1_pulse_ind = 2; % Where to grab wavelength 1's pulse info
+    ch2_pulse_ind = 2; % Where to grab wavelength 2's pulse info
 
     % Channel thresholds (mostly depends on whether digital or analog)
     ch1_pulse_thresh = 1;
@@ -27,7 +27,7 @@ else
     ch2_pulse_thresh = 0.5;
 end
 
-
+blackout_window = 9; % Ignore the first X points within each pulse due to capacitated currents
 data_ind = 1; % Where to grab fluorescence info
 freq = 50; % Sampling rate after downsampling (i.e., pulse rate of each channel in Hz)
 
@@ -90,12 +90,12 @@ data_notch = filter(d_notch, data(1,:));
 % values
 for i = 1 : n_points
     % Wavelength 1
-    ini_ind = ch1_data_table(i,1);
+    ini_ind = ch1_data_table(i,1) + blackout_window;
     end_ind = ch1_data_table(i,1) + ch1_data_table(i,3) - 1;
     ch1_data_table(i,2) = median(data_notch(ini_ind:end_ind));
     
     % Wavelength 2
-    ini_ind = ch2_data_table(i,1);
+    ini_ind = ch2_data_table(i,1) + blackout_window;
     end_ind = ch2_data_table(i,1) + ch1_data_table(i,3) - 1;
     ch2_data_table(i,2) = median(data_notch(ini_ind:end_ind));
 end

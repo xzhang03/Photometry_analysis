@@ -4,6 +4,7 @@ Stephen Zhang 7/30/2019
 
 Analysis for two-color photometry in the Andermann lab
 * Supports data that collected with or without using a lock-in amplifier
+* Supports quadratic demodulation
 * Supports pre-filtering and pre-smoothing before alignment. These steps only affects the coefficients that are used for alignment and not the data traces themselves
 * Supports pre-flattening before alignment. This step is also applied to the data traces themselves.
 * Supports several linear forms of alignment and straight-up ratio metric calculations
@@ -12,15 +13,11 @@ Analysis for two-color photometry in the Andermann lab
 
 If you use the photometry square-wave cubes
 1. Run tcpPreprocess
-2. Change the settings on the top of tcpAlign
-3. Run tcpAlign
+2. Run tcpAlign
 
 If you use lock-in amplifiers
-1. Change the settings on the top of tcpAlign
-2. Change the settings on the top of tcpAlign
-3. Run tcpAlign
+1. Run tcpAlign
 
 If you use the photometry sine-wave cubes
-1. Run tcpDemodulation_TD
-2. Change the settings on the top of tcpAlign
+1. Run tcpDemodulation
 3. Run tcpAlign

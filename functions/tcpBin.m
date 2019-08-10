@@ -64,7 +64,7 @@ if intcheck (binfact)
     end
     
 else
-    [binN, binD] = rat(binfact, 0.001);
+    [binN, binD] = rat(binfact, binfact * 0.001);
     if ~QuietMode
         disp(['Binning factor is not integer. Using a fraction instead: ',...
             num2str(binN), '/', num2str(binD)]);

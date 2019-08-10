@@ -3,9 +3,9 @@
 addpath('Demodulation Davidson')
 
 % Channel info
-data_channel = 3; % Where is the data
+data_channel = 1; % Where is the data
 sine_1_channel = 2; % Where is the sine wave collected for Channel 1
-sine_2_channel = 2; % Where is the sine wave collected for Channel 2
+sine_2_channel = 3; % Where is the sine wave collected for Channel 2
 
 % demodulation parameters (see contdemodulate.m for documentation)
 cfg.demod_BW_F = [0.01 15]; % bandwidth (Hz)

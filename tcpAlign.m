@@ -2,7 +2,6 @@
 % Stephen Zhang 2019/07/30
 clear
 
-
 % Add subfolder
 addpath('functions');
 
@@ -17,16 +16,18 @@ QuietMode = false;
 % Save results?
 SaveResults = true;
 %
+% Asking user to choose data source? 
+AlignCfg.datasource = 'Flexible';   % 'Flexible' = let users choose; Other 
+                                    % options are 'Lock-in', 
+                                    % 'Square-wave box', 
+                                    % 'Sine-wave box'
+%
 % Use filtered traces that are passed from preprocessing?
 AlignCfg.use_filtered = false;
 %
-% Used Lockin amplifier for data acquisition?
-AlignCfg.lockinused = false;
+% Channels for lock-in amplifier data?
 AlignCfg.lockin_Ch1 = 1;
 AlignCfg.lockin_Ch2 = 3;
-%
-% Used sine-box for data acquisition
-AlignCfg.sineboxused = false;
 %
 % ============================ Pre-filter info ============================
 %
@@ -72,24 +73,32 @@ AlignCfg.postfilterFreq = 8; % Post-filter frequency?
 
 %% IO
 
+% Data source
+if strcmp(AlignCfg.datasource, 'Flexible')
+    AlignCfg.datasource = questdlg('Source of data', ...
+                'Data source', 'Lock-in', 'Square-wave box',...
+                'Sine-wave box', 'Square-wave box');
+end
+        
 % Work out outputpath
-if AlignCfg.lockinused
-    % If used lock-in
-    [filename2, filepath2] =...
-        uigetfile(fullfile(defaultpath , '*.mat'));
-elseif AlignCfg.sineboxused
-    % If used sine box
-    [filename2, filepath2] =...
-        uigetfile(fullfile(defaultpath , '*.mat'));
-else
-    % No lock-in
-    [filename2, filepath2] =...
-        uigetfile(fullfile(defaultpath , '*_preprocessed.mat'));
+switch AlignCfg.datasource 
+    case 'Lock-in'
+        % If used lock-in
+        [filename2, filepath2] =...
+            uigetfile(fullfile(defaultpath , '*.mat'));
+    case 'Sine-wave box'
+        % If used sine box
+        [filename2, filepath2] =...
+            uigetfile(fullfile(defaultpath , '*_demodulated.mat'));
+    case 'Square-wave box'
+        % If used square-wave box
+        [filename2, filepath2] =...
+            uigetfile(fullfile(defaultpath , '*_preprocessed.mat'));
 end
 
 filename_output_fixed = [filename2(1:end-4), '_fixed.mat'];
 load(fullfile(filepath2, filename2));
-%}
+
 
 %% Apply pre filters and grab points to ignore
 % See if there are breakpoints in ram
@@ -113,50 +122,53 @@ if ~QuietMode
     disp('Start processing...')
 end
 
-if AlignCfg.lockinused
-    % Using lock-in
-    if ~QuietMode
-        % Say something
-        disp('Using raw data from lock-in')
-    end
-    
-    % Data
-    ch1_to_fix = data(AlignCfg.lockin_Ch1, :);
-    ch2_to_fix = data(AlignCfg.lockin_Ch2, :);
+switch AlignCfg.datasource 
+    case 'Lock-in'
+        % Using lock-in
+        if ~QuietMode
+            % Say something
+            disp('Using raw data from lock-in')
+        end
 
-    % Frequency
-    freq = Fs;
-    
-elseif AlignCfg.sineboxused
-    % Using lock-in
-    if ~QuietMode
-        % Say something
-        disp('Using pre-demodulated data')
-    end
-    
-    % Data
-    ch1_to_fix = c_Mag.data(:, 1);
-    ch2_to_fix = c_Mag.data(:, 1);
+        % Data
+        ch1_to_fix = data(AlignCfg.lockin_Ch1, :);
+        ch2_to_fix = data(AlignCfg.lockin_Ch2, :);
 
-    % Frequency
-    freq = c_Mag.samplerate;
+        % Frequency
+        freq = Fs;
     
-elseif AlignCfg.use_filtered
-    % Determine if using filtered or unfiltered data
-    if ~QuietMode
-        % Say something
-        disp('Using filtered data from preprocess')
-    end
+    case 'Sine-wave box'
+        % Using lock-in
+        if ~QuietMode
+            % Say something
+            disp('Using pre-demodulated data')
+        end
 
-    ch1_to_fix = Ch1_filtered;
-    ch2_to_fix = Ch2_filtered;
-else
-    if ~QuietMode
-        % Say something
-        disp('Using raw data from preprocess')
-    end
-    ch1_to_fix = ch1_data_table(:,2);
-    ch2_to_fix = ch2_data_table(:,2);
+        % Data
+        ch1_to_fix = Demodstruct(1).c_Mag;
+        ch2_to_fix = Demodstruct(2).c_Mag;
+
+        % Frequency (just take the in-phase frequency of channel 1)
+        freq = Demodstruct(1).c_XFs;
+    
+    case 'Square-wave box'
+        if AlignCfg.use_filtered
+            % Determine if using filtered or unfiltered data
+            if ~QuietMode
+                % Say something
+                disp('Using filtered data from preprocess')
+            end
+
+            ch1_to_fix = Ch1_filtered;
+            ch2_to_fix = Ch2_filtered;
+        else
+            if ~QuietMode
+                % Say something
+                disp('Using raw data from preprocess')
+            end
+            ch1_to_fix = ch1_data_table(:,2);
+            ch2_to_fix = ch2_data_table(:,2);
+        end
 end
 
 % Calculate pre-fitting error
@@ -453,7 +465,7 @@ end
 if ~QuietMode
     % Plot
     figure(103)
-    plot((1 : n_points)'/freq, signal)
+    plot((1 : length(signal))'/freq, signal)
     xlabel('Time(s)')
     ylabel('Photodiode voltage (V)')
 end
@@ -461,7 +473,7 @@ end
 %% Clear and save
 if SaveResults
     % Say where the data are saved
-    if ~QuietMode %#ok<UNRCH>
+    if ~QuietMode
         disp(['Saving data to: ', fullfile(filepath2,filename_output_fixed)]);
     end
 
