@@ -2,7 +2,7 @@
 photometry analysis
 Stephen Zhang 7/30/2019
 
-Analysis for two-color photometry in the Andermann lab
+First-order Analysis for two-color photometry in the Andermann lab
 * Supports data that collected with or without using a lock-in amplifier
 * Supports quadratic demodulation
 * Supports pre-filtering and pre-smoothing before alignment. These steps only affects the coefficients that are used for alignment and not the data traces themselves
