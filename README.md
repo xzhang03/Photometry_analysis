@@ -11,7 +11,8 @@ Analysis for two-color photometry in the Andermann lab
 * Supports using all, a single segment, or multiple segments of the data for alignment (with gui)
 * Supports post-filtering and post-flattening after alignment
 
-If you use the photometry **square-wave** cubes
+If you use the photometry **square-wave** cubes:
+
 Sample:
 ![Square-box data sample](https://github.com/xzhang03/Photometry_analysis/blob/master/Sample%20images/Preprocesed%20square-wave%20data.png)
 1. Run tcpPreprocess
