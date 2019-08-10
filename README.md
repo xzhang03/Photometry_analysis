@@ -14,6 +14,7 @@ Analysis for two-color photometry in the Andermann lab
 If you use the photometry square-wave cubes
 1. Run tcpPreprocess
 2. Run tcpAlign
+![Sample images](https://github.com/xzhang03/Photometry_analysis/blob/master/Sample%20images/Preprocesed%20square-wave%20data.png)
 
 If you use lock-in amplifiers
 1. Run tcpAlign
