@@ -23,5 +23,9 @@ If you use **lock-in amplifiers**:
 1. Run tcpAlign
 
 If you use the **sine-wave photometry cubes**:
+
+Sample (data credit: Andrew Lutas):
+
+![Sine-box data sample](https://github.com/xzhang03/Photometry_analysis/blob/master/Sample%20images/Preprocessed%20sine-wave%20data.png)
 1. Run tcpDemodulation
 3. Run tcpAlign
