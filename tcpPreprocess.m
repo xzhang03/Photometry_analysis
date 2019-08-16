@@ -27,7 +27,10 @@ else
     ch2_pulse_thresh = 0.5;
 end
 
+% [ Black out points ] This will change the values that come out of your analysis!
 blackout_window = 9; % Ignore the first X points within each pulse due to capacitated currents
+
+% Channel and frequency data
 data_ind = 1; % Where to grab fluorescence info
 freq = 50; % Sampling rate after downsampling (i.e., pulse rate of each channel in Hz)
 

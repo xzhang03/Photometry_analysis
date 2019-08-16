@@ -17,7 +17,7 @@ QuietMode = false;
 SaveResults = true;
 %
 % Asking user to choose data source? 
-AlignCfg.datasource = 'Flexible';   % 'Flexible' = let users choose; Other 
+AlignCfg.datasource = 'Square-wave box';   % 'Flexible' = let users choose; Other 
                                     % options are 'Lock-in', 
                                     % 'Square-wave box', 
                                     % 'Sine-wave box'
@@ -172,7 +172,8 @@ switch AlignCfg.datasource
 end
 
 % Calculate pre-fitting error
-prefiterr = sqrt(mean((ch1_to_fix - ch2_to_fix).^2));
+prefiterr = sqrt(mean((ch1_to_fix(~isnan(ch1_to_fix))...
+    - ch2_to_fix(~isnan(ch2_to_fix))).^2));
 if ~QuietMode    
     disp(['Pre-fitting error (RMS): ', num2str(prefiterr)]);
 end
@@ -400,7 +401,8 @@ for i = 1 : size(intactpoints,1)
 end
 
 % Calculate post-fitting error
-postfiterr = sqrt(mean((ch1_to_fix - ch2_to_fix).^2));
+postfiterr = sqrt(mean((ch1_to_fix(~isnan(ch1_to_fix))...
+    - ch2_to_fix(~isnan(ch1_to_fix))).^2));
 
 if ~QuietMode
     % Plot
@@ -442,7 +444,8 @@ if strcmpi(AlignCfg.flatten_mode, 'post_flatten')
     end
     
     % flatten with a ui
-    [ch1_to_fix, ch2_to_fix] = tcpUIflatten(ch1_to_fix, ch2_to_fix);
+    [ch1_to_fix, ch2_to_fix] =...
+        tcpUIflatten(ch1_to_fix, ch2_to_fix);
 end
 
 if ~QuietMode

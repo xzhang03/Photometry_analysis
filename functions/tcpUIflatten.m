@@ -34,7 +34,7 @@ else
     ch2_to_flatten = ch2_input;
 end
 
-% fit
+% fit (ignore NaNs)
 [~, ch1_expfit] = tcpFlatten(ch1_to_flatten);
 [~, ch2_expfit] = tcpFlatten(ch2_to_flatten);
 

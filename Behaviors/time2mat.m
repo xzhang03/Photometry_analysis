@@ -29,7 +29,9 @@ else
     [PKS,LOCS]= findpeaks(p_ch1);
     [~, id] = max(PKS);
     cam_pulse_fps = freq_ch1(LOCS(id));
-
+    
+    disp(['Pulse rate (Hz): ', num2str(cam_pulse_fps)]);
+    
     % If more than one row of behvioral scoring
     if size(A,2) > 1
         A = A';
@@ -41,6 +43,7 @@ else
     
     % Calculate delay
     delay =  find(data(cam_pulse_ch,:) > 0.5, 1) / Fs;
+    disp(['Delay (s): ', num2str(delay)]);
     
     % Get aligned behavioral matrix ready
     B = A;
