@@ -3,6 +3,10 @@ function dataz = tcpZscore(datainput, badframes)
 % involved in calculating either standard deviation or mean
 % dataz = tcpZscore(datainput, badframes)
 
+if nargin < 2
+    badframes = [];
+end
+
 % Make a copy of the data
 datacopy = datainput;
 
