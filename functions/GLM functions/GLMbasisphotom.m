@@ -5,6 +5,9 @@ function [basis, nbasis] = GLMbasisphotom(inputvector, varargin)
 % Parse inputs
 p = inputParser;
 
+% Sampling rate
+addOptional(p, 'Fs', 1); % Default Fs
+
 % Gaussian options
 addOptional(p, 'UseGaussian', true); % Use gaussians
 addOptional(p, 'GauSigma', 1);  % Sigma of the gaussians
@@ -66,11 +69,11 @@ lengths = E_chains(:, 2);
 if p.UseGaussian
         
     % Number of gaussians within each event
-    E_GauN = ceil(E_chains(:,2) / p.GauSpacing) + 1;
+    E_GauN = ceil(E_chains(:,2) / (p.GauSpacing * p.Fs)) + 1;
     E_GauN_max = max(E_GauN);
     
     % Generate Gaussian kernel
-    ker_Gau = normpdf(-p.nSigma: 1/p.GauSigma: p.nSigma);
+    ker_Gau = normpdf(-p.nSigma: 1/(p.GauSigma * p.Fs): p.nSigma);
     
     % Initialize basis function (as delta functions)
     basis_Gau = zeros(L, E_GauN_max + p.nGauBefore + p.nGauAfter);
@@ -80,7 +83,7 @@ if p.UseGaussian
     for i = 1 : p.nGauBefore
         % Delta function
         gau_ind = gau_ind + 1;
-        basis_Gau(startinds - i * p.GauSpacing, gau_ind) = 1;
+        basis_Gau(startinds - i * (p.GauSpacing * p.Fs), gau_ind) = 1;
         
         % Convolve
         basis_Gau(:, gau_ind) = conv(basis_Gau(:, gau_ind), ker_Gau, 'same');
@@ -95,7 +98,7 @@ if p.UseGaussian
         E_GauN_curr = min(E_GauN, i);
         
         % Put in the delta functions
-        basis_Gau(startinds + (E_GauN_curr - 1) * p.GauSpacing, gau_ind) = 1;
+        basis_Gau(startinds + (E_GauN_curr - 1) * (p.GauSpacing * p.Fs), gau_ind) = 1;
         
         % Convolve
         basis_Gau(:, gau_ind) = conv(basis_Gau(:, gau_ind), ker_Gau, 'same');
@@ -105,7 +108,7 @@ if p.UseGaussian
     for i = 1 : p.nGauAfter
         % Delta function
         gau_ind = gau_ind + 1;
-        basis_Gau(startinds + (E_GauN + i) * p.GauSpacing, gau_ind) = 1;
+        basis_Gau(startinds + (E_GauN + i) * (p.GauSpacing * p.Fs), gau_ind) = 1;
         
         % Convolve
         basis_Gau(:, gau_ind) = conv(basis_Gau(:, gau_ind), ker_Gau, 'same');
@@ -134,14 +137,14 @@ if p.useRampUp
         % Jiggle left
         RU_ind = RU_ind + 1;
         basis_RU(:, RU_ind) =...
-            [basis_RU(p.RampUpJitterSpacing * i + 1 : end, 1);...
-            zeros(p.RampUpJitterSpacing * i, 1)];
+            [basis_RU(p.RampUpJitterSpacing * p.Fs * i + 1 : end, 1);...
+            zeros(p.RampUpJitterSpacing * p.Fs * i, 1)];
         
         % Jiggle right
         RU_ind = RU_ind + 1;
         basis_RU(:, RU_ind) =...
-            [zeros(p.RampUpJitterSpacing * i, 1);
-            basis_RU(1 : (L - p.RampUpJitterSpacing * i), 1)];
+            [zeros(p.RampUpJitterSpacing * p.Fs * i, 1);
+            basis_RU(1 : (L - p.RampUpJitterSpacing * p.Fs * i), 1)];
     end
     
     % Ramp-up basis numbers
@@ -169,14 +172,14 @@ if p.useRampDown
         % Jiggle left
         RD_ind = RD_ind + 1;
         basis_RD(:, RD_ind) =...
-            [basis_RD(p.RampDownJitterSpacing * i + 1 : end, 1);...
-            zeros(p.RampDownJitterSpacing * i, 1)];
+            [basis_RD(p.RampDownJitterSpacing * p.Fs * i + 1 : end, 1);...
+            zeros(p.RampDownJitterSpacing * p.Fs * i, 1)];
         
         % Jiggle right
         RD_ind = RD_ind + 1;
         basis_RD(:, RD_ind) =...
-            [zeros(p.RampDownJitterSpacing * i, 1);
-            basis_RD(1 : (L - p.RampDownJitterSpacing * i), 1)];
+            [zeros(p.RampDownJitterSpacing * p.Fs * i, 1);
+            basis_RD(1 : (L - p.RampDownJitterSpacing * p.Fs * i), 1)];
     end
     
     % Ramp-down basis numbers
@@ -200,14 +203,14 @@ if p.useCopy
         % Jiggle left
         Cp_ind = Cp_ind + 1;
         basis_Cp(:, Cp_ind) =...
-            [basis_Cp(p.CopyJitterSpacing * i + 1 : end, 1);...
-            zeros(p.CopyJitterSpacing * i, 1)];
+            [basis_Cp(p.CopyJitterSpacing * p.Fs * i + 1 : end, 1);...
+            zeros(p.CopyJitterSpacing * p.Fs * i, 1)];
         
         % Jiggle right
         Cp_ind = Cp_ind + 1;
         basis_Cp(:, Cp_ind) =...
-            [zeros(p.CopyJitterSpacing * i, 1);
-            basis_Cp(1 : (L - p.CopyJitterSpacing * i), 1)];
+            [zeros(p.CopyJitterSpacing * p.Fs * i, 1);
+            basis_Cp(1 : (L - p.CopyJitterSpacing * p.Fs * i), 1)];
     end
     
     % Copy basis numbers
@@ -249,14 +252,14 @@ if p.useStep
         % Jiggle left
         St_ind = St_ind + 1;
         basis_St(:, St_ind) =...
-            [basis_St(p.StepJitterSpacing * i + 1 : end, 1);...
-            ones(p.StepJitterSpacing * i, 1)];
+            [basis_St(p.StepJitterSpacing * p.Fs * i + 1 : end, 1);...
+            ones(p.StepJitterSpacing * p.Fs * i, 1)];
         
         % Jiggle right
         St_ind = St_ind + 1;
         basis_St(:, St_ind) =...
-            [zeros(p.StepJitterSpacing * i, 1);
-            basis_St(1 : (L - p.StepJitterSpacing * i), 1)];
+            [zeros(p.StepJitterSpacing * p.Fs * i, 1);
+            basis_St(1 : (L - p.StepJitterSpacing * p.Fs * i), 1)];
     end
     
     % Copy basis numbers

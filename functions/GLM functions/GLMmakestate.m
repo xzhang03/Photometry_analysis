@@ -6,6 +6,7 @@ function [States, nstates] = GLMmakestate(dynamic_input, static_input, varargin)
 p = inputParser;
 
 % Input options
+addOptional(p, 'Name', ''); % name (place holder)
 addOptional(p, 'DynamicOnOffset', 'onset'); % which part of the dynamic 
                                             % data to use
 addOptional(p, 'WhichStaticEvent', 'first');    % Which static event to use 
