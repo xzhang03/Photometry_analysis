@@ -1,15 +1,27 @@
-function [Modeled_data, Model_coef, Actual_data] = GLMdophotom(datastruct, basisstruct, varargin)
+function [Model_coef, devex, Modeled_data, Actual_data] = GLMdophotom(datastruct, basisstruct, varargin)
 % GLMdophotom uses matlab native function glmfit to implement a GLM
-% [Modeled_data, Model_coef, Actual_data] = GLMdophotom(datastruct, basisstruct, varargin)
+% [Model_coef, devex, Modeled_data, Actual_data] = GLMdophotom(datastruct, basisstruct, varargin)
 
 % Parse inputs
 p = inputParser;
 
+% Master variables
+addOptional(p, 'MODE', 'fit'); % Do GLM 'fit' or 'test' existing GLM variables
+
 % General variables
 addOptional(p, 'PlotOrNot', true); % Plot or not
 addOptional(p, 'DataFieldName', 'photometry'); % Field name for what data to do GLM on
-addOptional(p, 'SetsToUse', []);
-
+addOptional(p, 'SetsToUse', []); % Which sets to use
+addOptional(p, 'Regularization', 'none');   % Regularization methods:
+                                            % 'none', 'lasso'
+addOptional(p, 'Lambda', 0.01); % Regularization strength
+addOptional(p, 'Alpha', 1); % L1 (1) vs L2 (2) optimization wegihts.
+                            % L2 takes a while.
+addOptional(p, 'Standardize', false);   % Make basis functions all mu = 0, and sigma = 1;
+                                        % Modeled data is inaccuarate is
+                                        % this is set to true right now.
+addOptional(p, 'Coef', []);
+                                        
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
     varargin = varargin{:};
@@ -59,22 +71,51 @@ end
 
 % Total basis function
 BASISfun = [basis_cell_total{:}];
-% BASISfun = [ones(size(BASISfun,1),1),BASISfun];
 
 % Actual data
 Actual_data = cell2mat(Actual_data_cell(:));
 
-% Fit
-Model_coef = lassoglm(BASISfun, Actual_data, 'normal', 'Standardize', false, 'Lambda', 0.01);
+switch p.MODE
+    case 'fit'
+        switch p.Regularization
+            case 'none'
+                % Fit
+                Model_coef = glmfit(BASISfun, Actual_data, 'normal');
 
-% Calculate model data
-% Modeled_data = BASISfun * Model_coef(2:end) + Model_coef(1);
-Modeled_data = BASISfun * Model_coef;
+                % Calculate model data
+                Modeled_data = BASISfun * Model_coef(2:end) + Model_coef(1);
+            case 'lasso'
+                % Fit
+                Model_coef = lassoglm(BASISfun, Actual_data, 'normal',...
+                    'Standardize', p.Standardize, 'Lambda', p.Lambda, 'Alpha',...
+                    p.Alpha);
+
+                % Calculate model data
+                Modeled_data = BASISfun * Model_coef;
+        end
+    case 'test'
+        % Grab coefficient
+        Model_coef = p.Coef;
+        
+        switch p.Regularization
+            case 'none'
+                % Grab coefficient and calculate modeled data
+                Modeled_data = BASISfun * p.Coef(2:end) + p.Coef(1);
+            case 'lasso'
+                % Grab coefficient and calculate modeled data
+                Modeled_data = BASISfun * p.Coef;
+        end
+end
+
+% Calculate deviance explained
+devex = devexp(Modeled_data, Actual_data);
 
 % Plot if asked for
 if p.PlotOrNot
+    figure
     plot([Actual_data, Modeled_data]);
     legend({'Actual data', 'Modeled data'})
+    title(p.MODE);
 end
 
 end
