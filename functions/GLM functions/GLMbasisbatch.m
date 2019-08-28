@@ -1,9 +1,9 @@
-function basisstruct = GLMbasisbatch(datastruct, basis_formula, state_formula)
+function basisstruct = GLMbasisbatch(datastruct, datafield, basis_formula, state_formula)
 % GLMbasisbatch makes and organizes simple and state basis functions.
-% basisstruct = GLMbasisbatch(datastruct, basis_formula, state_formula)
+% basisstruct = GLMbasisbatch(datastruct, datafield, basis_formula, state_formula)
 
 % No state condition
-if nargin < 3
+if nargin < 4
     state_formula = [];
 end
 
@@ -23,13 +23,16 @@ nstate = size(state_formula, 1);
 nset = size(datastruct, 1);
 
 % Initialize output
-basisstruct = struct('Fs', [], 'Length', []);
+basisstruct = struct('data', [], 'Fs', [], 'Length', []);
 basisstruct = repmat(basisstruct, [nset, 1]);
 
 % Loop through sets to add fields
 for setind = 1 : nset
     % Fill in Fs to basis structure
     basisstruct(setind).Fs = datastruct(setind).Fs;
+    
+    % Fill in the data
+    basisstruct(setind).data = datastruct(setind).(datafield);
     
     % Fill in length to basis structure
     basisstruct(setind).Length = length(datastruct(setind).photometry);

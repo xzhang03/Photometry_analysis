@@ -9,6 +9,11 @@ addOptional(p, 'Fs_ds', 5); % Fps to downsample to
 addOptional(p, 'smooth_window', 5); % Window size for smoothing
 addOptional(p, 'zscore_badframes', 1:10);   % Frames to throw away when 
                                             % calculating z-scores
+addOptional(p, 'BlankTime', 20);    % Numerb of seconds to keep  after the 
+                                    % last behavioral score. Leave empty if
+                                    % no chopping.
+                                            
+
 
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -36,6 +41,7 @@ zscore_badframes = p.zscore_badframes;
 
 % loop through and parse
 for i = 1 : size(datastruct,1)
+        
     % Photometry
     % Binning
     datastruct_pp(i).photometry =...
@@ -99,5 +105,30 @@ for i = 1 : size(datastruct,1)
     datastruct_pp(i).UBgroom =...
         tcpBin(datastruct(i).LBgroom, datastruct(i).Fs, Fs_ds, 'max', 1, true);
     datastruct_pp(i).nUBgroom = datastruct(i).nUBgroom;
+    
+    % Chopping if needed
+    if ~isempty(p.BlankTime)
+        
+        % Last time point
+        last_active_time = max(datastruct(i).behavior(:,3)) * 60;
+        last_kept_point = round((last_active_time + p.BlankTime) * Fs_ds);
+        
+        % Chop if needed
+        if last_kept_point < length(datastruct_pp(i).photometry)
+            % Chop everything
+            datastruct_pp(i).photometry = datastruct_pp(i).photometry(1:last_kept_point);
+            datastruct_pp(i).FemInvest = datastruct_pp(i).FemInvest(1:last_kept_point);
+            datastruct_pp(i).CloseExam = datastruct_pp(i).CloseExam(1:last_kept_point);
+            datastruct_pp(i).Mount = datastruct_pp(i).Mount(1:last_kept_point);
+            datastruct_pp(i).Introm = datastruct_pp(i).Introm(1:last_kept_point);
+            datastruct_pp(i).Transfer = datastruct_pp(i).Transfer(1:last_kept_point);
+            datastruct_pp(i).Escape = datastruct_pp(i).Escape(1:last_kept_point);
+            datastruct_pp(i).Dig = datastruct_pp(i).Dig(1:last_kept_point);
+            datastruct_pp(i).Feed = datastruct_pp(i).Feed(1:last_kept_point);
+            datastruct_pp(i).LBgroom = datastruct_pp(i).LBgroom(1:last_kept_point);
+            datastruct_pp(i).UBgroom = datastruct_pp(i).UBgroom(1:last_kept_point);
+        end
+    end
+    
 end
 end

@@ -4,7 +4,7 @@ clear
 % Default path
 defaultpath = '\\anastasia\data\photometry';
 
-% Which data files to look at
+% Which data files to look at {mouse, date, run}
 inputloadingcell = {'SZ129', 190707, 2; 'SZ132', 190720, 2;...
                     'SZ133', 190709, 2; 'SZ133', 190720, 2;...
                     'SZ133', 190720, 3};
@@ -16,7 +16,7 @@ inputloadingcell = {'SZ129', 190707, 2; 'SZ132', 190720, 2;...
 %% Postprocess photometry data
 
 % Inputs
-varargin_pp = {'Fs_ds', 5, 'smooth_window', 5, 'zscore_badframes', 1 : 10};
+varargin_pp = {'Fs_ds', 5, 'smooth_window', 5, 'zscore_badframes', 1 : 10, 'BlankTime', 20};
 datastruct_pp = ppdatastruct(datastruct, varargin_pp);
 
 %% GLM basis functions
@@ -69,7 +69,7 @@ basis_formula = {'FemInvest', ''; 'CloseExam', 'varargin_GLMGeneral'; ...
 state_formula = {'Introm', 'Transfer', varargin_State_IntroTransfer};
 
 % Make basis functions
-basisstruct = GLMbasisbatch(datastruct_pp, basis_formula, state_formula);
+basisstruct = GLMbasisbatch(datastruct_pp, 'photometry', basis_formula, state_formula);
 
 % Formula for aligning basis functions
 sync_formula = {'FemInvest', ''; 'CloseExam', 'alignfront'; 'Mount',...
@@ -80,6 +80,16 @@ sync_formula = {'FemInvest', ''; 'CloseExam', 'alignfront'; 'Mount',...
 
 % Align basis functions
 basisstruct_sync = GLMbasissync(basisstruct, sync_formula);
+
+%% Split up the dataset in to a training set and a testing set
+% Trainig set matrix
+tr_mat = [1 1 1 1 0; 1 1 1 0 1; 1 1 0 1 1; 1 0 1 1 1; 0 1 1 1 1];
+
+% Testing set matrix
+te_mat = 1 - tr_mat;
+
+varargin_split = {'train_mat', tr_mat, 'test_mat', te_mat};
+[basisstruct_train, basisstruct_test] = GLMbasissplit(basisstruct_sync, varargin_split);
 
 %% GLM fitting and testing
 % Regularizaiton method;
