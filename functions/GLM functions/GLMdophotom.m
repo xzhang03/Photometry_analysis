@@ -1,6 +1,6 @@
-function [Model_coef, devex, Modeled_data, Actual_data] = GLMdophotom(datastruct, basisstruct, varargin)
+function [Model_coef, devex, Modeled_data, Actual_data] = GLMdophotom(basisstruct, varargin)
 % GLMdophotom uses matlab native function glmfit to implement a GLM
-% [Model_coef, devex, Modeled_data, Actual_data] = GLMdophotom(datastruct, basisstruct, varargin)
+% [Model_coef, devex, Modeled_data, Actual_data] = GLMdophotom(basisstruct, varargin)
 
 % Parse inputs
 p = inputParser;
@@ -10,7 +10,7 @@ addOptional(p, 'MODE', 'fit'); % Do GLM 'fit' or 'test' existing GLM variables
 
 % General variables
 addOptional(p, 'PlotOrNot', true); % Plot or not
-addOptional(p, 'DataFieldName', 'photometry'); % Field name for what data to do GLM on
+addOptional(p, 'DataFieldName', 'data'); % Field name for what data to do GLM on
 addOptional(p, 'SetsToUse', []); % Which sets to use
 addOptional(p, 'Regularization', 'none');   % Regularization methods:
                                             % 'none', 'lasso'
@@ -33,7 +33,7 @@ p = p.Results;
 
 % Fix sets to use if needed
 if isempty(p.SetsToUse)
-    p.SetsToUse = 1 : size(datastruct, 1);
+    p.SetsToUse = 1 : size(basisstruct, 1);
 end
 
 % Find basisfunctions fields
@@ -53,7 +53,7 @@ for i = 1 : length(p.SetsToUse)
     setind = p.SetsToUse(i);
     
     % Fill in data
-    Actual_data_cell{i} = datastruct(setind).(p.DataFieldName);
+    Actual_data_cell{i} = basisstruct(setind).(p.DataFieldName);
     
     for j = 1 : sum(basisfields)
         % Fill in

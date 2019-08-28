@@ -14,7 +14,6 @@ inputloadingcell = {'SZ129', 190707, 2; 'SZ132', 190720, 2;...
 [datastruct, n_series] = mkdatastruct(inputloadingcell, defaultpath);
 
 %% Postprocess photometry data
-
 % Inputs
 varargin_pp = {'Fs_ds', 5, 'smooth_window', 5, 'zscore_badframes', 1 : 10, 'BlankTime', 20};
 datastruct_pp = ppdatastruct(datastruct, varargin_pp);
@@ -96,29 +95,29 @@ varargin_split = {'train_mat', tr_mat, 'test_mat', te_mat};
 regmet = 'lasso';
 
 % GLM fitting parameters
-varargin_GLMfit = {'MODE', 'fit', 'PlotOrNot', true, 'SetsToUse', [1, 2, 3, 4, 5],...
-    'Regularization', regmet, 'Lambda', 0.01, 'Alpha', 0.01,...
+varargin_GLMfit = {'MODE', 'fit', 'PlotOrNot', true, 'SetsToUse', [],...
+    'Regularization', regmet, 'Lambda', 0.01, 'Alpha', 1,...
     'Standardize', false};
 
 % GLM fitting
 fprintf('GLM fitting...')
 tic;
 [Model_coef, Deviance_explained, ~, ~] =...
-    GLMdophotom(datastruct_pp, basisstruct_sync, varargin_GLMfit);
+    GLMdophotom(basisstruct_train, varargin_GLMfit);
 fprintf('Done.');
 toc
 disp(['Deviance explained (fitting): ', num2str(Deviance_explained)]);
 
 
 % GLM testing parameters
-varargin_GLMtest = {'MODE', 'test', 'PlotOrNot', true, 'SetsToUse', [2],...
+varargin_GLMtest = {'MODE', 'test', 'PlotOrNot', true, 'SetsToUse', [],...
     'Coef', Model_coef, 'Regularization', regmet};
 
 % GLM fitting
 fprintf('GLM testing...')
 tic;
 [~, Deviance_explained, ~, ~] =...
-    GLMdophotom(datastruct_pp, basisstruct_sync, varargin_GLMtest);
+    GLMdophotom(basisstruct_test, varargin_GLMtest);
 fprintf('Done.');
 toc
 disp(['Deviance explained (testing): ', num2str(Deviance_explained)]);
