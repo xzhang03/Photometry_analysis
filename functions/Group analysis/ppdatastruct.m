@@ -12,7 +12,7 @@ addOptional(p, 'zscore_badframes', 1:10);   % Frames to throw away when
 addOptional(p, 'BlankTime', 20);    % Numerb of seconds to keep  after the 
                                     % last behavioral score. Leave empty if
                                     % no chopping.
-                                            
+addOptional(p, 'First_point', 1); % Throw away the first X points.                                            
 
 
 % Unpack if needed
@@ -113,21 +113,22 @@ for i = 1 : size(datastruct,1)
         last_active_time = max(datastruct(i).behavior(:,3)) * 60;
         last_kept_point = round((last_active_time + p.BlankTime) * Fs_ds);
         
-        % Chop if needed
-        if last_kept_point < length(datastruct_pp(i).photometry)
-            % Chop everything
-            datastruct_pp(i).photometry = datastruct_pp(i).photometry(1:last_kept_point);
-            datastruct_pp(i).FemInvest = datastruct_pp(i).FemInvest(1:last_kept_point);
-            datastruct_pp(i).CloseExam = datastruct_pp(i).CloseExam(1:last_kept_point);
-            datastruct_pp(i).Mount = datastruct_pp(i).Mount(1:last_kept_point);
-            datastruct_pp(i).Introm = datastruct_pp(i).Introm(1:last_kept_point);
-            datastruct_pp(i).Transfer = datastruct_pp(i).Transfer(1:last_kept_point);
-            datastruct_pp(i).Escape = datastruct_pp(i).Escape(1:last_kept_point);
-            datastruct_pp(i).Dig = datastruct_pp(i).Dig(1:last_kept_point);
-            datastruct_pp(i).Feed = datastruct_pp(i).Feed(1:last_kept_point);
-            datastruct_pp(i).LBgroom = datastruct_pp(i).LBgroom(1:last_kept_point);
-            datastruct_pp(i).UBgroom = datastruct_pp(i).UBgroom(1:last_kept_point);
-        end
+        % Keep the last point in range
+        last_kept_point = min(last_kept_point, length(datastruct_pp(i).photometry));
+
+        % Chopping
+        datastruct_pp(i).photometry = datastruct_pp(i).photometry(p.First_point : last_kept_point);
+        datastruct_pp(i).FemInvest = datastruct_pp(i).FemInvest(p.First_point : last_kept_point);
+        datastruct_pp(i).CloseExam = datastruct_pp(i).CloseExam(p.First_point : last_kept_point);
+        datastruct_pp(i).Mount = datastruct_pp(i).Mount(p.First_point : last_kept_point);
+        datastruct_pp(i).Introm = datastruct_pp(i).Introm(p.First_point : last_kept_point);
+        datastruct_pp(i).Transfer = datastruct_pp(i).Transfer(p.First_point : last_kept_point);
+        datastruct_pp(i).Escape = datastruct_pp(i).Escape(p.First_point : last_kept_point);
+        datastruct_pp(i).Dig = datastruct_pp(i).Dig(p.First_point : last_kept_point);
+        datastruct_pp(i).Feed = datastruct_pp(i).Feed(p.First_point : last_kept_point);
+        datastruct_pp(i).LBgroom = datastruct_pp(i).LBgroom(p.First_point : last_kept_point);
+        datastruct_pp(i).UBgroom = datastruct_pp(i).UBgroom(p.First_point : last_kept_point);
+
     end
     
 end

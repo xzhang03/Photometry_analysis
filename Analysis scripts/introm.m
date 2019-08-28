@@ -15,7 +15,7 @@ inputloadingcell = {'SZ129', 190707, 2; 'SZ132', 190720, 2;...
 
 %% Postprocess photometry data
 % Inputs
-varargin_pp = {'Fs_ds', 5, 'smooth_window', 5, 'zscore_badframes', 1 : 10, 'BlankTime', 20};
+varargin_pp = {'Fs_ds', 5, 'smooth_window', 5, 'zscore_badframes', 1 : 10, 'First_point', 15, 'BlankTime', 20};
 datastruct_pp = ppdatastruct(datastruct, varargin_pp);
 
 %% GLM basis functions
@@ -25,7 +25,7 @@ SpacingBasis = 1; % in seconds
 
 % General inputs
 varargin_GLMGeneral = {'Fs', [], 'UseGaussian', true, 'GauSigma', GauSigma,...
-    'GauSpacing', SpacingBasis, 'nGauBefore', 3, 'nGauAfter', 3 'useRampUp', false,...
+    'GauSpacing', SpacingBasis, 'nGauBefore', 3, 'nGauAfter', 3, 'useRampUp', false,...
     'useRampDown', false, 'useCopy', false, 'useStep', false};
 
 % Introm inputs
@@ -82,7 +82,7 @@ basisstruct_sync = GLMbasissync(basisstruct, sync_formula);
 
 %% Split up the dataset in to a training set and a testing set
 % Trainig set matrix
-tr_mat = [1 1 1 1 0; 1 1 1 0 1; 1 1 0 1 1; 1 0 1 1 1; 0 1 1 1 1];
+tr_mat = [1 1 0 1 0; 0 1 1 1 1; 1 1 0 1 1; 1 1 1 0 0; 0 1 1 1 1];
 
 % Testing set matrix
 te_mat = 1 - tr_mat;
@@ -96,10 +96,11 @@ regmet = 'lasso';
 
 % GLM fitting parameters
 varargin_GLMfit = {'MODE', 'fit', 'PlotOrNot', true, 'SetsToUse', [],...
-    'Regularization', regmet, 'Lambda', 0.01, 'Alpha', 1,...
+    'Regularization', regmet, 'Lambda', 0.1, 'Alpha', 0.01,...
     'Standardize', false};
 
 % GLM fitting
+disp('=============================================')
 fprintf('GLM fitting...')
 tic;
 [Model_coef, Deviance_explained, ~, ~] =...
@@ -108,12 +109,11 @@ fprintf('Done.');
 toc
 disp(['Deviance explained (fitting): ', num2str(Deviance_explained)]);
 
-
 % GLM testing parameters
 varargin_GLMtest = {'MODE', 'test', 'PlotOrNot', true, 'SetsToUse', [],...
     'Coef', Model_coef, 'Regularization', regmet};
 
-% GLM fitting
+% GLM testing
 fprintf('GLM testing...')
 tic;
 [~, Deviance_explained, ~, ~] =...
@@ -122,8 +122,11 @@ fprintf('Done.');
 toc
 disp(['Deviance explained (testing): ', num2str(Deviance_explained)]);
 
-
-
+% GLM visrualize parameters
+varargin_GLMvis = {'MODE', 'visualize', 'PlotOrNot', true, 'SetsToUse', 2,...
+    'Coef', Model_coef, 'Regularization', regmet};
+[~, ~, ~, ~] =...
+    GLMdophotom(basisstruct_sync, varargin_GLMvis);
 %% Make an intromission construct
 %{
 % Normalized length (in points)

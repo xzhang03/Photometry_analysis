@@ -105,6 +105,18 @@ switch p.MODE
                 % Grab coefficient and calculate modeled data
                 Modeled_data = BASISfun * p.Coef;
         end
+    case 'visualize'
+        % Grab coefficient
+        Model_coef = p.Coef;
+        
+        switch p.Regularization
+            case 'none'
+                % Grab coefficient and calculate modeled data
+                Modeled_data = BASISfun * p.Coef(2:end) + p.Coef(1);
+            case 'lasso'
+                % Grab coefficient and calculate modeled data
+                Modeled_data = BASISfun * p.Coef;
+        end
 end
 
 % Calculate deviance explained

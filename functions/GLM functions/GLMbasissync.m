@@ -2,7 +2,7 @@ function basisstruct_sync = GLMbasissync(basisstruct, syncformula)
 % GLMbasissync alligns the basis functions between multiple trials
 % basisstruct_sync = GLMbasissync(basisstruct, syncformula)
 % Sync options are: alignfront (default), alignback, chopback (keeping
-% front), chop front (keeping back)
+% front), chop front (keeping back). 
 
 % If no sync formula, everything defaults to syncfront
 if nargin < 2
@@ -26,6 +26,17 @@ nset = size(basisstruct, 1);
 % Initialize output
 basisstruct_sync = basisstruct;
 
+%% Offset
+%{
+for setind = 1 : nset
+    % Add offset
+    basisstruct_sync(setind).Offset_sbf =...
+        zeros(basisstruct_sync(setind).Length, nset);
+    basisstruct_sync(setind).Offset_sbf(:, setind) = 1;
+end
+%}
+
+%% Syncing
 % Loop through event type
 for eventind = 1 : nevent
     % Grab sync mode
