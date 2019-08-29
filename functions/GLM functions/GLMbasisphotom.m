@@ -116,12 +116,14 @@ if p.UseGaussian
     
     % Gaussian basis numbers
     nbasis(1) = gau_ind;
+    
+    % Make sure that the gaussians do not go over
+    basis_Gau = datasplitter(basis_Gau, [1, L], 1);
 else
     basis_Gau = [];
 end
    
-% Make sure that the gaussians do not go over
-basis_Gau = datasplitter(basis_Gau, [1, L], 1);
+
 %% Ramp up
 if p.useRampUp
     % Initialize ramp-ups
