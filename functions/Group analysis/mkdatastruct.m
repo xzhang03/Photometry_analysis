@@ -26,7 +26,7 @@ for i = 1 : n_series
     
     % Load behavior things
     loaded = load (fullfile(loadingcell{i,1}, [loadingcell{i,3}, '.mat']), 'B');
-    datastruct(i).behavior = loaded.B;
+    datastruct(i).behavior = unique(loaded.B,'rows'); % Remove duplicate rows
 end
 
 %% Parse behavior codes

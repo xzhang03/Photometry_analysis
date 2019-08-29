@@ -50,9 +50,23 @@ for i = 1 : size(datastruct,1)
     % Binning
     datastruct_pp(i).photometry =...
         tcpBin(datastruct(i).photometry, datastruct(i).Fs, Fs_ds, 'mean', 1, true);
+    
     % Smoothing
     datastruct_pp(i).photometry =...
         smooth(datastruct_pp(i).photometry, smooth_window);
+    
+    % Chopping the end if needed
+    if ~isempty(p.BlankTime)
+        % Last time point
+        last_active_time = max(datastruct(i).behavior(:,3)) * 60;
+        last_kept_point = round((last_active_time + p.BlankTime) * Fs_ds);
+        
+        % Keep the last point in range
+        last_kept_point = min(last_kept_point, length(datastruct_pp(i).photometry));
+        
+        datastruct_pp(i).photometry = datastruct_pp(i).photometry(p.First_point : last_kept_point);
+    end
+    
     % Zscoring
     datastruct_pp(i).photometry =...
         tcpZscore(datastruct_pp(i).photometry, zscore_badframes);
@@ -110,18 +124,9 @@ for i = 1 : size(datastruct,1)
         tcpBin(datastruct(i).LBgroom, datastruct(i).Fs, Fs_ds, 'max', 1, true);
     datastruct_pp(i).nUBgroom = datastruct(i).nUBgroom;
     
-    % Chopping if needed
+    % Chopping the end if needed
     if ~isempty(p.BlankTime)
-        
-        % Last time point
-        last_active_time = max(datastruct(i).behavior(:,3)) * 60;
-        last_kept_point = round((last_active_time + p.BlankTime) * Fs_ds);
-        
-        % Keep the last point in range
-        last_kept_point = min(last_kept_point, length(datastruct_pp(i).photometry));
-
         % Chopping
-        datastruct_pp(i).photometry = datastruct_pp(i).photometry(p.First_point : last_kept_point);
         datastruct_pp(i).FemInvest = datastruct_pp(i).FemInvest(p.First_point : last_kept_point);
         datastruct_pp(i).CloseExam = datastruct_pp(i).CloseExam(p.First_point : last_kept_point);
         datastruct_pp(i).Mount = datastruct_pp(i).Mount(p.First_point : last_kept_point);
@@ -147,5 +152,64 @@ if ~isempty(p.merging) && max(p.merging) > 0
     
     % never remove the first set
     setstoremove = [0, setstoremove] > 0;
+    
+    for i = 1 : length(mergesets)
+        if mergesets(i) ~= 0
+            % Which
+            merge_sets_curr = p.merging == mergesets(i);
+
+            % Where to put the merged data (first of the ones)
+            settoputin = find(merge_sets_curr, 1, 'first');
+
+            % Go through and merge data
+            datastruct_pp(settoputin).photometry =...
+                cell2mat({datastruct_pp(merge_sets_curr).photometry}');
+            datastruct_pp(settoputin).FemInvest =...
+                cell2mat({datastruct_pp(merge_sets_curr).FemInvest}');
+            datastruct_pp(settoputin).CloseExam =...
+                cell2mat({datastruct_pp(merge_sets_curr).CloseExam}');
+            datastruct_pp(settoputin).Mount =...
+                cell2mat({datastruct_pp(merge_sets_curr).Mount}');
+            datastruct_pp(settoputin).Introm =...
+                cell2mat({datastruct_pp(merge_sets_curr).Introm}');
+            datastruct_pp(settoputin).Transfer =...
+                cell2mat({datastruct_pp(merge_sets_curr).Transfer}');
+            datastruct_pp(settoputin).Escape =...
+                cell2mat({datastruct_pp(merge_sets_curr).Escape}');
+            datastruct_pp(settoputin).Dig =...
+                cell2mat({datastruct_pp(merge_sets_curr).Dig}');
+            datastruct_pp(settoputin).Feed =...
+                cell2mat({datastruct_pp(merge_sets_curr).Feed}');
+            datastruct_pp(settoputin).LBgroom =...
+                cell2mat({datastruct_pp(merge_sets_curr).LBgroom}');
+            datastruct_pp(settoputin).UBgroom =...
+                cell2mat({datastruct_pp(merge_sets_curr).UBgroom}');
+            
+            % Go through and sum counts
+            datastruct_pp(settoputin).nFemInvest =...
+                sum([datastruct_pp(merge_sets_curr).nFemInvest]);
+            datastruct_pp(settoputin).nCloseExam =...
+                sum([datastruct_pp(merge_sets_curr).nCloseExam]);
+            datastruct_pp(settoputin).nMount =...
+                sum([datastruct_pp(merge_sets_curr).nMount]);
+            datastruct_pp(settoputin).nIntrom =...
+                sum([datastruct_pp(merge_sets_curr).nIntrom]);
+            datastruct_pp(settoputin).nTransfer =...
+                sum([datastruct_pp(merge_sets_curr).nTransfer]);
+            datastruct_pp(settoputin).nEscape =...
+                sum([datastruct_pp(merge_sets_curr).nEscape]);
+            datastruct_pp(settoputin).nDig =...
+                sum([datastruct_pp(merge_sets_curr).nDig]);
+            datastruct_pp(settoputin).nFeed =...
+                sum([datastruct_pp(merge_sets_curr).nFeed]);
+            datastruct_pp(settoputin).nLBgroom =...
+                sum([datastruct_pp(merge_sets_curr).nLBgroom]);
+            datastruct_pp(settoputin).nUBgroom =...
+                sum([datastruct_pp(merge_sets_curr).nUBgroom]);
+        end
+    end
+    
+    % Reorganize the sets
+    datastruct_pp = datastruct_pp(~setstoremove);
 end
 end

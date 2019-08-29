@@ -120,6 +120,7 @@ if p.trim_data
     
     % loop through and trim
     for i = 1 : nevents
+        
         % data
         bhvstruct(i).data_trim = datasplitter(bhvstruct(i).data, [1, triml + trimr]);
         
@@ -134,9 +135,16 @@ end
 if p.trim_lndata
     % loop through and trim
     for i = 1 : nevents
-        disp(i)
+
         % data
         bhvstruct(i).ln_data_trim = datasplitter(bhvstruct(i).ln_data,...
             bhvstruct(i).lnbhvind(1) + [-triml_ln, trimr_ln]);
+        
+        % number of points that are removed on the left
+        pt_rm_l = bhvstruct(i).lnbhvind(1) - triml_ln - 1;
+        
+        % index
+        bhvstruct(i).ln_data_trimind =...
+            bhvstruct(i).lnbhvind - pt_rm_l;
     end
 end

@@ -62,7 +62,7 @@ basisstruct_sync = GLMbasissync(basisstruct, sync_formula);
 
 %% Split up the dataset in to a training set and a testing set
 % Trainig set matrix
-tr_mat = [1 1 0 1 0; 0 1 1 1 1; 1 1 0 1 1; 1 1 1 0 0; 0 1 1 1 1];
+tr_mat = [1 1 0 1 0; 0 1 1 1 1; 1 1 0 1 1; 1 1 1 0 1];
 
 % Testing set matrix
 te_mat = 1 - tr_mat;
