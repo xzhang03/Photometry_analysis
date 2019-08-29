@@ -1,12 +1,22 @@
 %% Initialization
 % Stephen Zhang 2019/07/30
-clear
+
+% Use previous path if exists
+if ~exist('filepath', 'var') && ~exist('filepath2', 'var')
+    clear
+    % common path
+    defaultpath = '\\anastasia\data\photometry';
+elseif exist('filepath', 'var')
+    defaultpath = filepath;
+    keep defaultpath
+else
+    defaultpath = filepath2;
+    keep defaultpath
+end
 
 % Add subfolder
 addpath('functions');
 
-% common path
-defaultpath = '\\anastasia\data\photometry';
 
 % ============================= General info ==============================
 %

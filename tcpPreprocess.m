@@ -1,7 +1,16 @@
 %% Initialization
 % Stephen Zhang 2019/07/30
 
-clear
+% Use previous path if exists
+if ~exist('filepath', 'var')
+    clear
+    % common path
+    defaultpath = '\\anastasia\data\photometry';
+else
+    defaultpath = filepath;
+    keep defaultpath
+end
+
 
 % No pulse info (but pulses are used during photometry)
 SINGLE_CHANNEL_MODE = false;
@@ -35,8 +44,6 @@ data_ind = 1; % Where to grab fluorescence info
 freq = 50; % Sampling rate after downsampling (i.e., pulse rate of each channel in Hz)
 
 %% IO
-% common path
-defaultpath = '\\anastasia\data\photometry';
 
 % Work out outputpath
 [filename, filepath] = uigetfile(fullfile(defaultpath , '*nidaq.mat'));
