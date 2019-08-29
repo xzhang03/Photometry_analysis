@@ -12,7 +12,11 @@ addOptional(p, 'zscore_badframes', 1:10);   % Frames to throw away when
 addOptional(p, 'BlankTime', 20);    % Numerb of seconds to keep  after the 
                                     % last behavioral score. Leave empty if
                                     % no chopping.
-addOptional(p, 'First_point', 1); % Throw away the first X points.                                            
+addOptional(p, 'First_point', 1); % Throw away the first X points.
+addOptional(p, 'merging', []);  % merge datasets if needed. Input is a 
+                                % vector where 0 means no merging, and 
+                                % every non-zero number is merged with the
+                                % dataset with the same number
 
 
 % Unpack if needed
@@ -131,5 +135,17 @@ for i = 1 : size(datastruct,1)
 
     end
     
+end
+
+%% Merging datasets
+if ~isempty(p.merging) && max(p.merging) > 0
+    % Find unique sets to merge
+    mergesets = unique(p.merging);
+    
+    % Find sets to remove (afterward)
+    setstoremove = (diff(p.merging) == 0) .* p.merging(2:end);
+    
+    % never remove the first set
+    setstoremove = [0, setstoremove] > 0;
 end
 end

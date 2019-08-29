@@ -64,7 +64,7 @@ if intcheck (binfact)
     end
     
 else
-    [binN, binD] = rat(binfact, binfact * 0.001);
+    [binN, binD] = rat(binfact, binfact * 0.0001);
     if ~QuietMode
         disp(['Binning factor is not integer. Using a fraction instead: ',...
             num2str(binN), '/', num2str(binD)]);
@@ -72,22 +72,25 @@ else
             num2str(mod(nsamples * binD, binN) / binD), ' frames']);
     end
     % Number of samples after binning
-    nsamples_result = floor(nsamples / binN) * binD;
+    nsamples_result = floor(nsamples / binN * binD);
     
     % Data after binning
     binneddata_tensor = nan(binN, nsamples_result, nseries);
     
     for i = 1 : nseries
         % Grab data
-        datavec = inputdata(1 : nsamples_result / binD * binN, i);
+        datavec = inputdata(:, i);
         
         % Expand the data
         datavec2 = ones(binD,1) * datavec';
         datavec2 = datavec2(:);
         
+        % Only take the part of the vector that is needed
+        datavec3 = datavec2(1 : nsamples_result * binN);
+        
         % Reshape and fill
         binneddata_tensor(:,:,i) =...
-            reshape(datavec2, binN, nsamples_result);
+            reshape(datavec3, binN, nsamples_result);
     end
 end
 
