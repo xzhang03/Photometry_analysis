@@ -16,7 +16,8 @@ inputloadingcell = {'SZ129', 190707, 2; 'SZ132', 190720, 2;...
 %% Postprocess photometry data
 % Inputs
 varargin_pp = {'Fs_ds', 5, 'smooth_window', 5, 'zscore_badframes', 1 : 10,...
-    'First_point', 25, 'BlankTime', 60, 'merging', [0 0 0 1 1]};
+    'First_point', 25, 'BlankTime', 60, 'merging', [0 0 0 1 1],...
+    'combinedzscore', false};
 datastruct_pp = ppdatastruct(datastruct, varargin_pp);
 
 %% Add a new mount-introm field
@@ -40,11 +41,11 @@ varargin_bhvstruct = {'bhvfield', 'MI', 'norm_length', 10, 'pre_space',...
 bhvstruct = mkbhvstruct(datastruct_pp, varargin_bhvstruct);
 
 %% Visualize intromission-trggered data
-structkeep = ([bhvstruct(:).rorder] <= 3) .* ([bhvstruct(:).rorder] > 0);
+structkeep = ([bhvstruct(:).rorder] <= 12) .* ([bhvstruct(:).rorder] > 9);
 % structkeep = structkeep .* [bhvstruct(:).session] == 3;
 bhvstruct2 = bhvstruct(structkeep > 0);
 
-[~, structorder] = sort([bhvstruct2(:).order], 'ascend');
+[~, structorder] = sort([bhvstruct2(:).rorder], 'descend');
 bhvstruct2 = bhvstruct2(structorder);
 
 data2view_ln = [bhvstruct2(:).ln_data_trim]';

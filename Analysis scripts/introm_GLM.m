@@ -90,7 +90,7 @@ tic;
 fprintf('Done. ');
 toc
 % disp(['Deviance explained (fitting): ', num2str(Deviance_explained.all)]);
-
+%%
 % GLM testing parameters
 varargin_GLMtest = {'MODE', 'test', 'PlotOrNot', true, 'SetsToUse', [],...
     'Coef', Model_coef, 'Regularization', regmet, 'detailedDevex', true};

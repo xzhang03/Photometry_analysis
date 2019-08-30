@@ -17,7 +17,7 @@ addOptional(p, 'merging', []);  % merge datasets if needed. Input is a
                                 % vector where 0 means no merging, and 
                                 % every non-zero number is merged with the
                                 % dataset with the same number
-
+addOptional(p, 'combinedzscore', false); % Combine the data together before z-scoring.
 
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -42,6 +42,12 @@ smooth_window = p.smooth_window;
 
 % Bad frames for zscore (filter artifacts)
 zscore_badframes = p.zscore_badframes;
+
+% Initialize a cell to contain all the photometry data to do combined
+% zscore [data, number of points, bad points]
+if p.combinedzscore
+    combined_photom_cell = cell(size(datastruct,1), 3);
+end
 
 % loop through and parse
 for i = 1 : size(datastruct,1)
@@ -70,6 +76,25 @@ for i = 1 : size(datastruct,1)
     % Zscoring
     datastruct_pp(i).photometry =...
         tcpZscore(datastruct_pp(i).photometry, zscore_badframes);
+    
+    % Store data for combined zscore if needed
+    if p.combinedzscore
+        % Data
+        combined_photom_cell{i, 1} = datastruct_pp(i).photometry';
+        
+        % Number of points
+        combined_photom_cell{i, 2} = length(datastruct_pp(i).photometry);
+        
+        % Bad points
+        if i == 1
+            % bad points
+            combined_photom_cell{i, 3} = p.zscore_badframes;
+        else
+            % bad points
+            combined_photom_cell{i, 3} = p.zscore_badframes...
+                + sum([combined_photom_cell{1:(i-1), 2}]);
+        end
+    end
     
     % New frame rate
     datastruct_pp(i).Fs = Fs_ds;
@@ -140,6 +165,30 @@ for i = 1 : size(datastruct,1)
 
     end
     
+end
+
+%% Do combined zscore if needed
+if p.combinedzscore
+
+    % Combined data
+    combined_data = [combined_photom_cell{:,1}];
+    
+    % Combined bad points
+    combined_badpoints = [combined_photom_cell{:,3}];
+    
+    % Combined zscored data
+    combined_zscored_data = tcpZscore(combined_data, combined_badpoints);
+    
+    % Figure out how to distribute the data back
+    nvec = [combined_photom_cell{:,2}];
+    distmat = [cumsum([1,nvec(1:end-1)]) ;cumsum(nvec)]';
+    
+    % Distribute back
+    for i = 1 : size(datastruct,1)
+        % Distribute back data
+        datastruct_pp(i).photometry =...
+            combined_zscored_data(distmat(i,1) : distmat(i,2))';
+    end
 end
 
 %% Merging datasets

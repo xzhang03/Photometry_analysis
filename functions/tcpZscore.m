@@ -12,7 +12,7 @@ datacopy = datainput;
 
 % Remove bad frames
 if ~isempty(badframes)
-    datacopy(badframes) = '';
+    datacopy(badframes) = [];
 end
 
 % Calculate things
