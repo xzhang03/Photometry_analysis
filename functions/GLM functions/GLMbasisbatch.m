@@ -76,27 +76,19 @@ for setind = 1 : nset
         % state input
         varargin_state_curr = state_formula{stateind, 3};
         
-        % statebasis input
-        varagin_statebasis_curr = state_formula{stateind, 4};
-        
-        % Fill in Fs
-        varagin_statebasis_curr{find(strcmp(varargin_curr, 'Fs')) + 1} = datastruct(setind).Fs;
-        
-            % State name
+        % State name
         statename = varargin_state_curr{find(strcmp(varargin_state_curr, 'Name')) + 1};
         
         % If both dynamic and static event occur
         if datastruct(setind).(['n',state_formula{stateind, 1}]) > 0 &&...
                 datastruct(setind).(['n',state_formula{stateind, 2}]) > 0
-            
-            % Calculate the state functions
-            statefunctions =...
-                GLMmakestate(dyn_event_curr, sta_event_curr, varargin_state_curr);
-            
+           
             % Fill in state basis functions
             [basisstruct(setind).([statename, '_sbf']),...
                     basisstruct(setind).([statename, '_nsbf'])] =...
-                    GLMbasisphotom(statefunctions, varagin_statebasis_curr);
+                    GLMmakestate(dyn_event_curr, sta_event_curr, varargin_state_curr);
+            
+            
         else
             basisstruct(setind).([statename, '_sbf']) = [];
             basisstruct(setind).([statename, '_nsbf']) = 0;

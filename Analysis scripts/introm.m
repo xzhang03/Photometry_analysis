@@ -25,28 +25,32 @@ varargin_stitch = {'Name', 'MI', 'Event1', 'Mount', 'Event2', 'Introm',...
     'window', 2, 'keepjustEvent1', false, 'keepjustEvent2', true};
 datastruct_pp = afdatastruct(datastruct_pp, varargin_stitch);
 
+% Inputs for mount_introm_transfer field
+varargin_stitch2 = {'Name', 'MIT', 'Event1', 'MI', 'Event2', 'Transfer',...
+    'window', 2, 'keepjustEvent1', true, 'keepjustEvent2', false};
+datastruct_pp = afdatastruct(datastruct_pp, varargin_stitch2);
 %% GLM
 % A different script
-introm_GLM;
+% introm_GLM;
 
 %% Make an intromission construct
 % Input for introm structure
-varargin_introm = {'bhvfield', 'MI', 'norm_length', 10, 'pre_space',...
+varargin_bhvstruct = {'bhvfield', 'MI', 'norm_length', 10, 'pre_space',...
     20, 'post_space',50, 'trim_data', true, 'trim_lndata', true};
-intromstruct = mkbhvstruct(datastruct_pp, varargin_introm);
+bhvstruct = mkbhvstruct(datastruct_pp, varargin_bhvstruct);
 
 %% Visualize intromission-trggered data
-structkeep = ([intromstruct(:).rorder] <= 12) .* ([intromstruct(:).rorder] > 0);
-structkeep = structkeep .* [intromstruct(:).session] == 1;
-intromstruct2 = intromstruct(structkeep > 0);
+structkeep = ([bhvstruct(:).rorder] <= 3) .* ([bhvstruct(:).rorder] > 0);
+% structkeep = structkeep .* [bhvstruct(:).session] == 3;
+bhvstruct2 = bhvstruct(structkeep > 0);
 
-% [~, structorder] = sort([intromstruct2(:).rorder], 'descend');
-% intromstruct2 = intromstruct2(structorder);
+[~, structorder] = sort([bhvstruct2(:).order], 'ascend');
+bhvstruct2 = bhvstruct2(structorder);
 
-data2view_ln = [intromstruct2(:).ln_data_trim]';
-data2view = [intromstruct2(:).data_trim]';
+data2view_ln = [bhvstruct2(:).ln_data_trim]';
+data2view = [bhvstruct2(:).data_trim]';
 
-figure
+figure('position',[200 350 600 300])
 
 subplot(6,2,3:2:12);
 imagesc(data2view, [-3 3])
@@ -55,9 +59,9 @@ xlabel('Time')
 set(gca,'YTickLabel',[]);
 set(gca,'XTickLabel',[]);
 hold on
-for i = 1 : length(intromstruct2)
-%     plot(intromstruct2(i).ln_data_trimind, [i i], 'r-');
-    plot(intromstruct2(i).data_trimind, [i i], 'r-');
+for i = 1 : length(bhvstruct2)
+
+    plot(bhvstruct2(i).data_trimind, [i i], 'r-');
 end
 hold off
 
@@ -78,8 +82,8 @@ xlabel('Time (warped)')
 set(gca,'YTickLabel',[]);
 set(gca,'XTickLabel',[]);
 hold on
-for i = 1 : length(intromstruct2)
-    plot(intromstruct2(i).ln_data_trimind, [i i], 'r-');
+for i = 1 : length(bhvstruct2)
+    plot(bhvstruct2(i).ln_data_trimind, [i i], 'r-');
     
 end
 hold off

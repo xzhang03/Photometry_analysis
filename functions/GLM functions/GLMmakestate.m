@@ -17,6 +17,9 @@ addOptional(p, 'useDynBeforeSta', true); % Use data when dynamic
                                                 % event happens before the statis event
 addOptional(p, 'useDynAfterSta', true);  % Use data when dynamic 
                                                 % event happens after the statis event
+addOptional(p, 'useRampUp', false); % use ramp-up state functions
+addOptional(p, 'useRampDown', false); % use ramp-up state functions
+addOptional(p, 'useCopy', true); % use a copy of the states
 
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -72,31 +75,80 @@ switch p.DynamicOnOffset
         DynamicTimes = Dyn_chains(:,1) + Dyn_chains(:,2) - 1;
 end
 
-% Initialize states
-States = zeros(L, n_Dyn_chains);
-nstates = 0;
+% Initialize states (third dimesion labels rampup, rampdown and
+% square-waves)
+States = zeros(L, n_Dyn_chains, 3);
+nstates = [0 0 0 0]'; % Keep the tradition of gaussian, ramp-up, ramp-down, square
+
+% Keep track of of the state variety
+state_types = [p.useCopy p.useRampUp p.useRampDown];
+
 
 % Loop through
 for i = 1 : n_Dyn_chains
     % Determine if this is a state that should be recorded
     if (DynamicTimes(i) < StaticTime) && p.useDynBeforeSta
-        % Make state
-        States(DynamicTimes(i) : StaticTime, i) = 1;
+        if p.useCopy
+            % Make state (square)
+            States(DynamicTimes(i) : StaticTime, i, 3) = 1;
+            nstates(4) = nstates(4) + 1;
+        end
+        if p.useRampUp
+            % length
+            state_l = StaticTime - DynamicTimes(i) + 1;
+
+            % Make state (ramp-up)
+            States(DynamicTimes(i) : StaticTime, i, 1) = 1 / state_l *...
+                (1 : state_l);
+            nstates(2) = nstates(2) + 1;            
+        end
+        
+        if p.useRampDown
+            % length
+            state_l = StaticTime - DynamicTimes(i) + 1;
+
+            % Make state (ramp-down)
+            States(DynamicTimes(i) : StaticTime, i, 2) = 1 - 1 / state_l *...
+                (1 : state_l);
+            nstates(3) = nstates(3) + 1;
+        end
         
         % Register state
-        nstates = nstates + 1;
         states2use(i) = 1;
     elseif (DynamicTimes(i) > StaticTime) && p.useDynAfterSta
-        % Make state
-        States(StaticTime : DynamicTimes(i), i) = 1;
+        if p.useCopy
+            % Make state (square)
+            States(StaticTime : DynamicTimes(i), i, 3) = 1;
+            nstates(4) = nstates(4) + 1;
+        end
+        
+        if p.useRampUp
+            % length
+            state_l = StaticTime - DynamicTimes(i) + 1;
+
+            % Make state (ramp-up)
+            States(DynamicTimes(i) : StaticTime, i, 1) = 1 / state_l *...
+                (1 : state_l);
+            nstates(2) = nstates(2) + 1;
+        end
+        
+        if p.useRampDown
+            % length
+            state_l = StaticTime - DynamicTimes(i) + 1;
+            
+            % Make state (ramp-down)
+            States(DynamicTimes(i) : StaticTime, i, 2) = 1 - 1 / state_l *...
+                (1 : state_l);
+            nstates(3) = nstates(3) + 1;
+        end
         
         % Register state
-        nstates = nstates + 1;
         states2use(i) = 1;
     end
 end
 
 % Clean up the state data
-States = States(:, states2use == 1);
+States = States(:, states2use == 1, state_types == 1);
+States = reshape(States, [L, sum(states2use * sum(state_types))]);
 
 end

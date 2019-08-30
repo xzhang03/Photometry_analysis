@@ -34,14 +34,8 @@ varargin_simplebasis = {'varargin_GLMGeneral', varargin_GLMGeneral;...
 % IntroTransfer state input
 varargin_State_IntroTransfer = {'Name', 'IntroTransfer', 'DynamicOnOffset', 'onset',...
     'WhichStaticEvent', 'last', 'StaticOnOffset', 'offset',...
-    'useDynBeforeSta', true, 'useDynAfterSta', true};
-
-% Basis function parameters for the intro-transfer state
-varargin_statebasis_IntroTransfer = {'Fs', [], 'UseGaussian', false, 'useRampUp', true,...
-    'RampUpJitterSpacing', SpacingBasis, 'RampUpJitterN', 2, ...
-    'useRampDown', true, 'RampDownJitterSpacing', SpacingBasis,...
-    'RampDownJitterN', 2, 'useCopy', true, 'CopyJitterSpacing',...
-    SpacingBasis, 'CopyJitterN', 2, 'useStep', false};
+    'useDynBeforeSta', true, 'useDynAfterSta', true, 'useRampUp', true,...
+    'useRampDown', true, 'useCopy', true};
 
 % Formula for generating simple basis functions
 basis_formula = {'FemInvest', ''; 'CloseExam', 'varargin_GLMGeneral'; ...
@@ -52,11 +46,12 @@ basis_formula = {'FemInvest', ''; 'CloseExam', 'varargin_GLMGeneral'; ...
     'varargins', varargin_simplebasis};
 
 % Formula for generating state basis functions
-state_formula = {'Introm', 'Transfer', varargin_State_IntroTransfer, varargin_statebasis_IntroTransfer};
+state_formula = {'Introm', 'Transfer', varargin_State_IntroTransfer};
 
 % Make basis functions
 basisstruct = GLMbasisbatch(datastruct_pp, 'photometry', basis_formula, state_formula);
 
+%% Align basis functions
 % Formula for aligning basis functions
 sync_formula = {'FemInvest', ''; 'CloseExam', 'alignfront'; 'Mount',...
     'alignfront'; 'Introm', 'alignback'; 'Transfer', 'alignfront';...
@@ -90,26 +85,26 @@ varargin_GLMfit = {'MODE', 'fit', 'PlotOrNot', true, 'SetsToUse', [],...
 disp('=============================================')
 fprintf('GLM fitting...')
 tic;
-[Model_coef, Deviance_explained, ~, ~] =...
+[Model_coef, ~, ~, ~] =...
     GLMdophotom(basisstruct_train, varargin_GLMfit);
-fprintf('Done.');
+fprintf('Done. ');
 toc
-disp(['Deviance explained (fitting): ', num2str(Deviance_explained)]);
+% disp(['Deviance explained (fitting): ', num2str(Deviance_explained.all)]);
 
 % GLM testing parameters
 varargin_GLMtest = {'MODE', 'test', 'PlotOrNot', true, 'SetsToUse', [],...
-    'Coef', Model_coef, 'Regularization', regmet};
+    'Coef', Model_coef, 'Regularization', regmet, 'detailedDevex', true};
 
 % GLM testing
 fprintf('GLM testing...')
 tic;
 [~, Deviance_explained, ~, ~] =...
     GLMdophotom(basisstruct_test, varargin_GLMtest);
-fprintf('Done.');
+fprintf('Done. ');
 toc
-disp(['Deviance explained (testing): ', num2str(Deviance_explained)]);
+disp(['Deviance explained (testing): ', num2str(Deviance_explained.all)]);
 
-% GLM visrualize parameters
+% GLM visualize parameters
 varargin_GLMvis = {'MODE', 'visualize', 'PlotOrNot', true, 'SetsToUse', 2,...
     'Coef', Model_coef, 'Regularization', regmet};
 [~, ~, ~, ~] =...
