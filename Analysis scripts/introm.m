@@ -41,60 +41,10 @@ varargin_bhvstruct = {'bhvfield', 'MI', 'norm_length', 10, 'pre_space',...
 bhvstruct = mkbhvstruct(datastruct_pp, varargin_bhvstruct);
 
 %% Visualize intromission-trggered data
-structkeep = ([bhvstruct(:).rorder] <= 12) .* ([bhvstruct(:).rorder] > 9);
-% structkeep = structkeep .* [bhvstruct(:).session] == 3;
-bhvstruct2 = bhvstruct(structkeep > 0);
-
-[~, structorder] = sort([bhvstruct2(:).rorder], 'descend');
-bhvstruct2 = bhvstruct2(structorder);
-
-data2view_ln = [bhvstruct2(:).ln_data_trim]';
-data2view = [bhvstruct2(:).data_trim]';
-
-figure('position',[200 350 600 300])
-
-subplot(6,2,3:2:12);
-imagesc(data2view, [-3 3])
-xrange = get(gca,'xlim');
-xlabel('Time')
-set(gca,'YTickLabel',[]);
-set(gca,'XTickLabel',[]);
-hold on
-for i = 1 : length(bhvstruct2)
-
-    plot(bhvstruct2(i).data_trimind, [i i], 'r-');
-end
-hold off
-
-subplot(6,2,1)
-plot(mean(data2view,1));
-hold on
-plot(xrange, [0 0], 'Color', [0 0 0]);
-xlim(xrange);
-ylim([min(mean(data2view,1)), max(mean(data2view,1))]);
-set(gca,'YTickLabel',[]);
-set(gca,'XTickLabel',[]);
-hold off
-
-subplot(6,2,4:2:12);
-imagesc(data2view_ln, [-3 3])
-xrange = get(gca,'xlim');
-xlabel('Time (warped)')
-set(gca,'YTickLabel',[]);
-set(gca,'XTickLabel',[]);
-hold on
-for i = 1 : length(bhvstruct2)
-    plot(bhvstruct2(i).ln_data_trimind, [i i], 'r-');
-    
-end
-hold off
-
-subplot(6,2,2)
-plot(mean(data2view_ln,1));
-hold on
-plot(xrange, [0 0], 'Color', [0 0 0]);
-xlim(xrange);
-ylim([min(mean(data2view_ln,1)), max(mean(data2view_ln,1))]);
-set(gca,'YTickLabel',[]);
-set(gca,'XTickLabel',[]);
-hold off
+% Input
+varargin_viewbhvstruct =...
+    {'keepc', {'rorder', [1 2 3]; 'session', []},...
+    'sortc', 'rorder', 'sortdir', 'ascend', 'heatmaprange', [-3 3],...
+    'datatoplot', {'data_trim', 'ln_data_trim'},...
+    'linefields', {'data_trimind', 'ln_data_trimind'}};
+viewbhvstruct(bhvstruct, varargin_viewbhvstruct)
