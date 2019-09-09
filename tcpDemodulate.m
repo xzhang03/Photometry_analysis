@@ -1,19 +1,24 @@
 %% Initialization
 % Demodulation by quadratic method
-% Modified from Thomas Davidson's code
+% Modified by Stephen Zhang from Thomas Davidson's code
+% The original code can be found at 
+% https://github.com/tjd2002/tjd-shared-code/tree/d110d151202070adbf06ffb3321f6393eb1a0970/matlab
 
 clear
 
 % Add path
 addpath('functions')
 
-% Channel info
-data_channel = 3; % Where is the data
-sine_1_channel = 2; % Where is the sine wave collected for Channel 1
-sine_2_channel = 2; % Where is the sine wave collected for Channel 2
+% Chatty
+verbose = false;
 
-% demodulation parameters (see contdemodulate.m for documentation)
-cfg.BW_F = [10 15]; % bandwidth (Hz) [pass, stop]
+% Channel info
+data_channel = 1; % Where is the data
+sine_1_channel = 2; % Where is the sine wave collected for Channel 1
+sine_2_channel = 3; % Where is the sine wave collected for Channel 2
+
+% demodulation parameters 
+cfg.BW_F = [10 15]; % Low-pass filter frequency (Hz) [pass, stop]
 cfg.ripp_db = 0.1; % filter design parameter: bandpass ripple
 cfg.atten_db = 50; % filter design parameter: stopband rejection
 cfg.LPF_repeats = 2; % How many times to run the low-pass filter per sample
@@ -109,14 +114,18 @@ fprintf('Demodulating raw photometry signal ...\n');
 % Loop through channels
 for i = 1 : 2
     % Pre-bandpass-filter
-%     disp(['Bandpass filter Channel ', num2str(i)]);
+    if  verbose
+        disp(['Bandpass filter Channel ', num2str(i)]); 
+    end
     [Demodstruct(i).Prefilt_data, filtcache(i).BPfilter, Demodstruct(i).Prefilt_Fs] =...
         TDfilt(Demodstruct(i).Preds_data, 'filt', filtcache(i).BPfilter,...
         'filtopt', filtcache(i).BPopt, 'samplerate', Demodstruct(i).Preds_Fs,...
         'nonlinphaseok', false, 'nodelaycorrect', false, 'autoresample', false);
 
     % In-phase product detector. pseudocode: X = Det.*RefX (-> LPF)xN;
-%     disp(['Calculating phase-locked Channel ', num2str(i)]);
+    if verbose 
+        disp(['Calculating phase-locked Channel ', num2str(i)]); 
+    end
     [Demodstruct(i).c_X, filtcache(i).LPfilter, Demodstruct(i).c_XFs] = ...
         TDfilt(Demodstruct(i).Prefilt_data .* data2_ds(:,sine_1_channel),...
         'filt', filtcache(i).LPfilter, 'filtopt', filtcache(i).LPopt,...
@@ -135,7 +144,9 @@ for i = 1 : 2
     end
     
     % In-phase product detector. pseudocode: Y = Det.*RefY (-> LPF)xN;
-%     disp(['Calculating orthogonal Channel ', num2str(i)]);
+    if verbose
+        disp(['Calculating orthogonal Channel ', num2str(i)]);
+    end
     [Demodstruct(i).c_Y, filtcache(i).LPfilter, Demodstruct(i).c_YFs] = ...
         TDfilt(Demodstruct(i).Prefilt_data .* data2_ds(:,end - 2 + i),...
         'filt', filtcache(i).LPfilter, 'filtopt', filtcache(i).LPopt,...
@@ -154,7 +165,9 @@ for i = 1 : 2
     end
     
     % Add the estimates of X & Y in quadrature to recover magnitude R
-%     disp(['Calculating magnitude of Channel ', num2str(i)]);
+    if verbose
+        disp(['Calculating magnitude of Channel ', num2str(i)]);
+    end
     Demodstruct(i).c_Mag = hypot(Demodstruct(i).c_X, Demodstruct(i).c_Y);
 
 end
