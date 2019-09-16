@@ -51,6 +51,10 @@ for i = 1 : size(inputcell,1)
     loadingcell{i,4} =...
         sprintf('%s-%s-%s-nidaq_preprocessed.mat', mouse, date, runind);
     
+    % raw data name
+    loadingcell{i,5} =...
+        sprintf('%s-%s-%s-nidaq.mat', mouse, date, runind);
+    
 end
 
 end
