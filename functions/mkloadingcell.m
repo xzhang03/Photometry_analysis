@@ -8,7 +8,7 @@ if nargin < 2
 end
 
 % Initialize loading cell
-loadingcell = cell(size(inputcell));
+loadingcell = cell(size(inputcell, 1), 4);
 
 for i = 1 : size(inputcell,1)
     % Mouse
@@ -41,11 +41,15 @@ for i = 1 : size(inputcell,1)
     
     % Photometry data name
     loadingcell{i,2} =...
-        sprintf('%s-%s-%s-nidaq_preprocessed_fixed', mouse, date, runind);
+        sprintf('%s-%s-%s-nidaq_preprocessed_fixed.mat', mouse, date, runind);
     
     % Behavior data name
     loadingcell{i,3} =...
-        sprintf('%s-%s-%s-nidaq_A', mouse, date, runind);
+        sprintf('%s-%s-%s-nidaq_A.mat', mouse, date, runind);
+    
+    % Preprocessed data name
+    loadingcell{i,4} =...
+        sprintf('%s-%s-%s-nidaq_preprocessed.mat', mouse, date, runind);
     
 end
 

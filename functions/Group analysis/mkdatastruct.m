@@ -20,12 +20,12 @@ datastruct = repmat(datastruct, [size(loadingcell,1), 1]);
 % Load data
 for i = 1 : n_series
     % Load photometry things
-    loaded = load (fullfile(loadingcell{i,1}, [loadingcell{i,2}, '.mat']), 'signal', 'freq');
+    loaded = load (fullfile(loadingcell{i,1}, loadingcell{i,2}), 'signal', 'freq');
     datastruct(i).photometry = loaded.signal;
     datastruct(i).Fs = loaded.freq;
     
     % Load behavior things
-    loaded = load (fullfile(loadingcell{i,1}, [loadingcell{i,3}, '.mat']), 'B');
+    loaded = load (fullfile(loadingcell{i,1}, loadingcell{i,3}), 'B');
     datastruct(i).behavior = unique(loaded.B,'rows'); % Remove duplicate rows
 end
 
