@@ -7,6 +7,11 @@ p = inputParser;
 
 addOptional(p, 'Fs_ds', 5); % Fps to downsample to
 addOptional(p, 'smooth_window', 5); % Window size for smoothing
+addOptional(p, 'usedff', false); % Use a sliding window df/f
+addOptional(p, 'dffwindow', 32); % Number of seconds used to calculate df/f
+addOptional(p, 'dffpercentile', 10); % Default percentile for df/f
+addOptional(p, 'dffOffset', 5); % Positive offset to data before df/f to 
+                                % prevent sign switches
 addOptional(p, 'zscore_badframes', 1:10);   % Frames to throw away when 
                                             % calculating z-scores
 addOptional(p, 'BlankTime', 20);    % Numerb of seconds to keep  after the 
@@ -57,9 +62,18 @@ for i = 1 : size(datastruct,1)
     datastruct_pp(i).photometry =...
         tcpBin(datastruct(i).photometry, datastruct(i).Fs, Fs_ds, 'mean', 1, true);
     
-    % Smoothing
-    datastruct_pp(i).photometry =...
-        smooth(datastruct_pp(i).photometry, smooth_window);
+    if smooth_window > 0
+        % Smoothing
+        datastruct_pp(i).photometry =...
+            smooth(datastruct_pp(i).photometry, smooth_window);
+    end
+    
+    % Use df/f if needed
+    if p.usedff
+        datastruct_pp(i).photometry =...
+            tcpPercentiledff(datastruct_pp(i).photometry + p.dffOffset, ...
+            Fs_ds, p.dffwindow, p.dffpercentile);
+    end
     
     % Chopping the end if needed
     if ~isempty(p.BlankTime)

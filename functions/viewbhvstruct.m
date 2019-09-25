@@ -92,7 +92,12 @@ for i = 1 : nfieldstoplot
         nfieldstoplot : (nfieldstoplot * p.subplotrows));
     
     % Imagesc
-    imagesc(data2view{i}, p.heatmaprange);
+    if ~isempty(p.heatmaprange)
+        imagesc(data2view{i}, p.heatmaprange);
+    else
+        imagesc(data2view{i});
+    end
+    
     xrange = get(gca,'xlim');
     xlabel('Time')
     set(gca,'YTickLabel',[]);

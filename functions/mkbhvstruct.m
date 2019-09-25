@@ -43,6 +43,10 @@ bhvstruct = struct('session', 0, 'data', 0, 'ln_data', 0, 'bhvind', [], ...
 nevents = sum([datastruct(:).(['n', p.bhvfield])]);
 bhvstruct = repmat(bhvstruct, [nevents, 1]);
 
+% Record the actual number of events (two consequtive events are now
+% counted as one)
+nevents_real = 0;
+
 % loop through and parse
 ind = 0;
 
@@ -53,6 +57,9 @@ trimr_ln = inf;
 for i = 1 : size(datastruct, 1)
     % Get behavior table
     bhv_tab_temp = chainfinder(datastruct(i).(p.bhvfield) > 0.5);
+    
+    % Update the number of true events
+    nevents_real = nevents_real + size(bhv_tab_temp, 1);
     
     % Loop through each event
     for j = 1 : size(bhv_tab_temp, 1)
@@ -76,9 +83,19 @@ for i = 1 : size(datastruct, 1)
         bhvstruct(ind).rorder = datastruct(i).(['n', p.bhvfield]) - j + 1;
         
         % Fill data
-        bhvstruct(ind).data = datasplitter(datastruct(i).(p.datafield), ...
-            [bhv_tab_temp(j, 1) - Fs * p.pre_space,...
-            bhv_tab_temp(j, 1) + Fs * p.post_space + bhv_tab_temp(j, 2) - 1]);
+        ind_start = bhv_tab_temp(j, 1) - Fs * p.pre_space;
+        ind_stop = bhv_tab_temp(j, 1) + Fs * p.post_space + bhv_tab_temp(j, 2) - 1;
+        
+        if ind_start > 0
+            if ind_stop <= length(datastruct(i).(p.bhvfield))
+                bhvstruct(ind).data = datasplitter(datastruct(i).(p.datafield), ...
+                    [ind_start,ind_stop]);
+            else
+                fprintf('Throwing away Expt %i Event %i, because the end time is out of bounds.\n', i, j)
+            end
+        else
+            fprintf('Throwing away Expt %i Event %i, because the start time is out of bounds.\n', i, j)
+        end
         
         % Fill index
         bhvstruct(ind).bhvind = [Fs * p.pre_space + 1,...
@@ -110,6 +127,10 @@ for i = 1 : size(datastruct, 1)
     end
 end
 
+
+% Remove the extra events
+bhvstruct = bhvstruct(1:nevents_real);
+
 %% Trim data
 if p.trim_data
     % left trim
@@ -119,7 +140,7 @@ if p.trim_data
     trimr = min([bhvstruct(:).length]) + Fs * p.post_space;
     
     % loop through and trim
-    for i = 1 : nevents
+    for i = 1 : nevents_real
         
         % data
         bhvstruct(i).data_trim = datasplitter(bhvstruct(i).data, [1, triml + trimr]);
@@ -134,7 +155,7 @@ end
 %% Trim length-normalized data
 if p.trim_lndata
     % loop through and trim
-    for i = 1 : nevents
+    for i = 1 : nevents_real
 
         % data
         bhvstruct(i).ln_data_trim = datasplitter(bhvstruct(i).ln_data,...
