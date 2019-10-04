@@ -109,7 +109,10 @@ end
 filename_output_fixed = [filename2(1:end-4), '_fixed.mat'];
 load(fullfile(filepath2, filename2));
 
-
+% Fix opto_mode vs single_channel_mode (historical reasons)
+if ~exist('OPTO_MODE', 'var') && exist('SINGLE_CHANNEL_MODE', 'var')
+    OPTO_MODE = SINGLE_CHANNEL_MODE;
+end
 %% Apply pre filters and grab points to ignore
 % See if there are breakpoints in ram
 if exist('n_ignorepts', 'var')
@@ -471,6 +474,8 @@ end
 % Perform subtraction
 if strcmpi(AlignCfg.fit_mode, 'ratiometric')
     signal = ch1_to_fix ./ ch2_to_fix;
+elseif OPTO_MODE
+    signal = ch1_to_fix;
 else
     signal = ch1_to_fix - ch2_to_fix;
 end
@@ -496,6 +501,6 @@ if SaveResults
         'Ch2_filtered', 'ch2_for_fitting', 'ch2_to_fix', 'data', 'filename2',...
         'filepath2', 'filename_output_fixed', 'fitinfo', 'fitting_segments',...
         'freq', 'Fs', 'intactpoints', 'n_ignorepts', 'n_points', 'signal',...
-        'SINGLE_CHANNEL_MODE', 'PULSE_SIM_MODE', 'timestamps', 'prefiterr',...
+        'OPTO_MODE', 'PULSE_SIM_MODE', 'timestamps', 'prefiterr',...
         'postfiterr', 'ignorepoints');
 end
