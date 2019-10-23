@@ -29,6 +29,8 @@ addOptional(p, 'trim_lndata', false); % Add a field that trims all the
 addOptional(p, 'diffmean', false);  % Add a field that is the mean of the
                                     % intra-stim mean minus the pre-stim
                                     % mean
+addOptional(p, 'premean', false);   % Add a field that is the mean fluorescence 
+                                    % during the pre-stim period
 addOptional(p, 'removenantrials', true);    % Remove any trials with nans in 
                                             % data. Tolerance is set by
                                             % nantolerance.
@@ -99,11 +101,19 @@ for i = 1 : size(datastruct, 1)
                 bhvstruct(ind).data = datasplitter(datastruct(i).(p.datafield), ...
                     [ind_start,ind_stop]);
                 
+                % Diff mean
                 if p.diffmean
                     % Fill diff-mean (mean of intra-stim minus mean of pre-stim)
                     bhvstruct(ind).diffmean =...
                         mean(bhvstruct(ind).data(Fs * p.pre_space + 1 :...
                         Fs * p.pre_space + bhvstruct(ind).length)) - ...
+                        mean(bhvstruct(ind).data(1 : Fs * p.pre_space));
+                end
+                
+                % Pre mean
+                if p.premean
+                    % Fill pre-mean (mean during pre-stim)
+                    bhvstruct(ind).premean =...
                         mean(bhvstruct(ind).data(1 : Fs * p.pre_space));
                 end
                 
@@ -193,21 +203,24 @@ if p.trim_lndata
 end
 
 %% Remove trials with nans
-% vector to see if data pass the nan test
-nan_fraction = nan(nevents_real, 1);
-
 if p.removenantrials
+    % vector to see if data pass the nan test
+    nan_fraction = nan(nevents_real, 1);
+    
     % loop through and trim
     for i = 1 : nevents_real
-        if ~isempty(bhvstruct(i).data)
-            nan_fraction(i) = sum(isnan(bhvstruct(i).data)) / length(bhvstruct(i).data);
-        else
-            nan_fraction(i) = inf; % Empty entries
-        end
+        nan_fraction(i) = sum(isnan(bhvstruct(i).data)) / length(bhvstruct(i).data);
     end
+    
+    % Remove data
+    bhvstruct = bhvstruct(nan_fraction <= p.nantolerance);
 end
 
-% Remove data
-bhvstruct = bhvstruct(nan_fraction <= p.nantolerance);
+%% Remove empty trials
+% Find the empty trials
+emptytrials = cellfun(@isempty, {bhvstruct(:).data});
+
+% Remove
+bhvstruct = bhvstruct(~emptytrials);
 
 end

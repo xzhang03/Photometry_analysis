@@ -14,6 +14,7 @@ addOptional(p, 'linefields', {'data_trimind', 'ln_data_trimind'}); % Fields to a
 addOptional(p, 'subplotrows', 6); % Number of rows for the subplot
 addOptional(p, 'heatmaprange', []); % Range for the heatmap
 addOptional(p, 'minlinelength', 0.5); % Minimal length of line (in graph units)
+addOptional(p, 'showX', []); % Just show X of the trials in the heatmap
                                                              
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -41,14 +42,15 @@ for i = 1 : nkeepc
     cri = p.keepc{i,2};
     
     if ~isempty(cri) % Empty means keep everything
+        % Using field as a keep option
         % Grab the relevant data
         keepvec_curr = [bhvstruct(:).(p.keepc{i,1})]';
-                
+
         % Do the comparison
         keepvec_curr = keepvec_curr * ones(1, length(cri)) ==...
             ones(nset, 1) * cri;
         keepvec_curr = sum(keepvec_curr, 2) > 0;
-        
+
         % Update the keep vector
         keepvec = keepvec .* keepvec_curr;
     end
@@ -71,7 +73,7 @@ else
 end
 
 % Grab the datastructure
-bhvstruct2 = bhvstruct(sortvec);
+bhvstruct2view = bhvstruct(sortvec);
 
 % Grab the data
 data2view = cell(nfieldstoplot, 1);
@@ -82,6 +84,24 @@ for i = 1 : nfieldstoplot
     end
 end
 
+% Make a copy of the data for making mean-traces;
+data2average = data2view;
+
+% If using the showX option
+if ~isempty(p.showX)
+    % Grab X number of trials
+    showind = randperm(nset, p.showX);
+    showvec = zeros(nset, 1);
+    showvec(showind) = 1;
+    
+    % Only show them
+    bhvstruct2view = bhvstruct2view(showvec > 0);
+    
+    for i = 1 : nfieldstoplot
+        datatemp = data2view{i};
+        data2view{i} = datatemp(showvec > 0, :);
+    end
+end
 
 % Plot
 figure('position',[200 350 600 300])
@@ -105,14 +125,14 @@ for i = 1 : nfieldstoplot
     set(gca,'XTickLabel',[]);
     if ~isempty(p.linefields)
         hold on
-        for j = 1 : length(bhvstruct2)
+        for j = 1 : length(bhvstruct2view)
             % Draw line
-            if diff(bhvstruct2(j).(p.linefields{i})) > 0 
+            if diff(bhvstruct2view(j).(p.linefields{i})) > 0 
                 % If there is line length > 0
-                plot(bhvstruct2(j).(p.linefields{i}), [j j], 'r-');
+                plot(bhvstruct2view(j).(p.linefields{i}), [j j], 'r-');
             else
                 % If there is line length > 0
-                plot(bhvstruct2(j).(p.linefields{i}) + [0 p.minlinelength],...
+                plot(bhvstruct2view(j).(p.linefields{i}) + [0 p.minlinelength],...
                     [j j], 'r-');
             end
         end
@@ -123,7 +143,7 @@ for i = 1 : nfieldstoplot
     subplot(p.subplotrows, nfieldstoplot, i)
     
     % Plot average data
-    plot(nanmean(data2view{i},1));
+    plot(nanmean(data2average{i},1));
     
     % Add an y = 0 line
     hold on
@@ -132,7 +152,7 @@ for i = 1 : nfieldstoplot
     
     % Align ranges
     xlim(xrange);
-	ylim([min(mean(data2view{i},1)), max(mean(data2view{i},1))]);
+	ylim([min(mean(data2average{i},1)), max(mean(data2average{i},1))]);
     
 %     set(gca,'YTickLabel',[]);
     set(gca,'XTickLabel',[]);

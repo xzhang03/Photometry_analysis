@@ -7,14 +7,9 @@ p = inputParser;
 
 addOptional(p, 'Fs_ds', 5); % Fps to downsample to
 addOptional(p, 'smooth_window', 5); % Window size for smoothing
-addOptional(p, 'usedff', false); % Use a sliding window df/f
-addOptional(p, 'dffwindow', 32); % Number of seconds used to calculate df/f
-addOptional(p, 'dffpercentile', 10); % Default percentile for df/f
-addOptional(p, 'dffOffset', 5); % Positive offset to data before df/f to 
-                                % prevent sign switches
-addOptional(p, 'zscore_badframes', 1:10);   % Frames to throw away when 
-                                            % calculating z-scores
-addOptional(p, 'BlankTime', 20);    % Numerb of seconds to keep  after the 
+
+
+addOptional(p, 'BlankTime', 20);    % Number of seconds to keep  after the 
                                     % last behavioral score. Leave empty if
                                     % no chopping.
 addOptional(p, 'First_point', 1); % Throw away the first X points.
@@ -22,7 +17,18 @@ addOptional(p, 'merging', []);  % merge datasets if needed. Input is a
                                 % vector where 0 means no merging, and 
                                 % every non-zero number is merged with the
                                 % dataset with the same number
+% Zscore parameters
+addOptional(p, 'nozscore', false); % Use non-zscored data
+addOptional(p, 'zscore_badframes', 1:10);   % Frames to throw away when 
+                                            % calculating z-scores
 addOptional(p, 'combinedzscore', false); % Combine the data together before z-scoring.
+
+% Sliding window dff parameters
+addOptional(p, 'usedff', false); % Use a sliding window df/f
+addOptional(p, 'dffwindow', 32); % Number of seconds used to calculate df/f
+addOptional(p, 'dffpercentile', 10); % Default percentile for df/f
+addOptional(p, 'dffOffset', 5); % Positive offset to data before df/f to 
+                                % prevent sign switches
 
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -88,8 +94,10 @@ for i = 1 : size(datastruct,1)
     end
     
     % Zscoring
-    datastruct_pp(i).photometry =...
-        tcpZscore(datastruct_pp(i).photometry, zscore_badframes);
+    if ~p.nozscore
+        datastruct_pp(i).photometry =...
+            tcpZscore(datastruct_pp(i).photometry, zscore_badframes);
+    end
     
     % Store data for combined zscore if needed
     if p.combinedzscore
@@ -114,68 +122,118 @@ for i = 1 : size(datastruct,1)
     datastruct_pp(i).Fs = Fs_ds;
     
     % Female investigation
-    datastruct_pp(i).FemInvest =...
-        tcpBin(datastruct(i).FemInvest, datastruct(i).Fs, Fs_ds, 'max', 1, true);
-    datastruct_pp(i).nFemInvest = datastruct(i).nFemInvest;
+    if isfield(datastruct, 'FemInvest')
+        datastruct_pp(i).FemInvest =...
+            tcpBin(datastruct(i).FemInvest, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nFemInvest = datastruct(i).nFemInvest;
+    end
     
     % Close examination
-    datastruct_pp(i).CloseExam =...
-        tcpBin(datastruct(i).CloseExam, datastruct(i).Fs, Fs_ds, 'max', 1, true);
-    datastruct_pp(i).nCloseExam = datastruct(i).nCloseExam;
+    if isfield(datastruct, 'CloseExam')
+        datastruct_pp(i).CloseExam =...
+            tcpBin(datastruct(i).CloseExam, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nCloseExam = datastruct(i).nCloseExam;
+    end
     
     % Mount
-    datastruct_pp(i).Mount =...
-        tcpBin(datastruct(i).Mount, datastruct(i).Fs, Fs_ds, 'max', 1, true);
-    datastruct_pp(i).nMount = datastruct(i).nMount;
+    if isfield(datastruct, 'Mount')
+        datastruct_pp(i).Mount =...
+            tcpBin(datastruct(i).Mount, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nMount = datastruct(i).nMount;
+    end
     
     % Intromission
-    datastruct_pp(i).Introm =...
-        tcpBin(datastruct(i).Introm, datastruct(i).Fs, Fs_ds, 'max', 1, true);
-    datastruct_pp(i).nIntrom = datastruct(i).nIntrom;
+    if isfield(datastruct, 'Introm')
+        datastruct_pp(i).Introm =...
+            tcpBin(datastruct(i).Introm, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nIntrom = datastruct(i).nIntrom;
+    end
     
     % Transfer
-    datastruct_pp(i).Transfer =...
-        tcpBin(datastruct(i).Transfer, datastruct(i).Fs, Fs_ds, 'max', 1, true);
-    datastruct_pp(i).nTransfer = datastruct(i).nTransfer;
+    if isfield(datastruct, 'Introm')
+        datastruct_pp(i).Transfer =...
+            tcpBin(datastruct(i).Transfer, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nTransfer = datastruct(i).nTransfer;
+    end
     
     % Escape
-    datastruct_pp(i).Escape =...
-        tcpBin(datastruct(i).Escape, datastruct(i).Fs, Fs_ds, 'max', 1, true);
-    datastruct_pp(i).nEscape = datastruct(i).nEscape;
+    if isfield(datastruct, 'Escape')
+        datastruct_pp(i).Escape =...
+            tcpBin(datastruct(i).Escape, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nEscape = datastruct(i).nEscape;
+    end
     
     % Dig
-    datastruct_pp(i).Dig =...
-        tcpBin(datastruct(i).Dig, datastruct(i).Fs, Fs_ds, 'max', 1, true);
-    datastruct_pp(i).nDig = datastruct(i).nDig;
+    if isfield(datastruct, 'Dig')
+        datastruct_pp(i).Dig =...
+            tcpBin(datastruct(i).Dig, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nDig = datastruct(i).nDig;
+    end
     
     % Feed
-    datastruct_pp(i).Feed =...
-        tcpBin(datastruct(i).Feed, datastruct(i).Fs, Fs_ds, 'max', 1, true);
-    datastruct_pp(i).nFeed = datastruct(i).nFeed;
+    if isfield(datastruct, 'Feed')
+        datastruct_pp(i).Feed =...
+            tcpBin(datastruct(i).Feed, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nFeed = datastruct(i).nFeed;
+    end
     
     % LBGroom
-    datastruct_pp(i).LBgroom =...
-        tcpBin(datastruct(i).LBgroom, datastruct(i).Fs, Fs_ds, 'max', 1, true);
-    datastruct_pp(i).nLBgroom = datastruct(i).nLBgroom;
+    if isfield(datastruct, 'LBgroom')
+        datastruct_pp(i).LBgroom =...
+            tcpBin(datastruct(i).LBgroom, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nLBgroom = datastruct(i).nLBgroom;
+    end
     
     % UBGroom
-    datastruct_pp(i).UBgroom =...
-        tcpBin(datastruct(i).LBgroom, datastruct(i).Fs, Fs_ds, 'max', 1, true);
-    datastruct_pp(i).nUBgroom = datastruct(i).nUBgroom;
+    if isfield(datastruct, 'UBgroom')
+        datastruct_pp(i).UBgroom =...
+            tcpBin(datastruct(i).LBgroom, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nUBgroom = datastruct(i).nUBgroom;
+    end
+    
+    % UBGroom
+    if isfield(datastruct, 'Approach')
+        datastruct_pp(i).Approach =...
+            tcpBin(datastruct(i).Approach, datastruct(i).Fs, Fs_ds, 'max', 1, true);
+        datastruct_pp(i).nApproach = datastruct(i).nApproach;
+    end
     
     % Chopping the end if needed
     if ~isempty(p.BlankTime)
         % Chopping
-        datastruct_pp(i).FemInvest = datastruct_pp(i).FemInvest(p.First_point : last_kept_point);
-        datastruct_pp(i).CloseExam = datastruct_pp(i).CloseExam(p.First_point : last_kept_point);
-        datastruct_pp(i).Mount = datastruct_pp(i).Mount(p.First_point : last_kept_point);
-        datastruct_pp(i).Introm = datastruct_pp(i).Introm(p.First_point : last_kept_point);
-        datastruct_pp(i).Transfer = datastruct_pp(i).Transfer(p.First_point : last_kept_point);
-        datastruct_pp(i).Escape = datastruct_pp(i).Escape(p.First_point : last_kept_point);
-        datastruct_pp(i).Dig = datastruct_pp(i).Dig(p.First_point : last_kept_point);
-        datastruct_pp(i).Feed = datastruct_pp(i).Feed(p.First_point : last_kept_point);
-        datastruct_pp(i).LBgroom = datastruct_pp(i).LBgroom(p.First_point : last_kept_point);
-        datastruct_pp(i).UBgroom = datastruct_pp(i).UBgroom(p.First_point : last_kept_point);
+        if isfield(datastruct, 'FemInvest')
+            datastruct_pp(i).FemInvest = datastruct_pp(i).FemInvest(p.First_point : last_kept_point);
+        end
+        if isfield(datastruct, 'CloseExam')
+            datastruct_pp(i).CloseExam = datastruct_pp(i).CloseExam(p.First_point : last_kept_point);
+        end
+        if isfield(datastruct, 'Mount')
+            datastruct_pp(i).Mount = datastruct_pp(i).Mount(p.First_point : last_kept_point);
+        end
+        if isfield(datastruct, 'Introm')
+            datastruct_pp(i).Introm = datastruct_pp(i).Introm(p.First_point : last_kept_point);
+        end
+        if isfield(datastruct, 'Transfer')
+            datastruct_pp(i).Transfer = datastruct_pp(i).Transfer(p.First_point : last_kept_point);
+        end
+        if isfield(datastruct, ').Escape')
+            datastruct_pp(i).Escape = datastruct_pp(i).Escape(p.First_point : last_kept_point);
+        end
+        if isfield(datastruct, 'Dig')
+            datastruct_pp(i).Dig = datastruct_pp(i).Dig(p.First_point : last_kept_point);
+        end
+        if isfield(datastruct, 'Feed')
+            datastruct_pp(i).Feed = datastruct_pp(i).Feed(p.First_point : last_kept_point);
+        end
+        if isfield(datastruct, 'LBgroom')
+            datastruct_pp(i).LBgroom = datastruct_pp(i).LBgroom(p.First_point : last_kept_point);
+        end
+        if isfield(datastruct, 'UBgroom')
+            datastruct_pp(i).UBgroom = datastruct_pp(i).UBgroom(p.First_point : last_kept_point);
+        end
+        if isfield(datastruct, 'Approach')
+            datastruct_pp(i).Approach = datastruct_pp(i).Approach(p.First_point : last_kept_point);
+        end
 
     end
     
