@@ -26,6 +26,14 @@ addOptional(p, 'trim_lndata', false); % Add a field that trims all the
                                     % concatenatable). The resulting data
                                     % will still be aligned at onsets and
                                     % offsets.
+addOptional(p, 'diffmean', false);  % Add a field that is the mean of the
+                                    % intra-stim mean minus the pre-stim
+                                    % mean
+addOptional(p, 'removenantrials', true);    % Remove any trials with nans in 
+                                            % data. Tolerance is set by
+                                            % nantolerance.
+addOptional(p, 'nantolerance', 0);  % Fraction of data allowed to be nan. 
+                                    % Only used if removenantrials is true.
                                      
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -85,45 +93,56 @@ for i = 1 : size(datastruct, 1)
         % Fill data
         ind_start = bhv_tab_temp(j, 1) - Fs * p.pre_space;
         ind_stop = bhv_tab_temp(j, 1) + Fs * p.post_space + bhv_tab_temp(j, 2) - 1;
-        
+         
         if ind_start > 0
             if ind_stop <= length(datastruct(i).(p.bhvfield))
                 bhvstruct(ind).data = datasplitter(datastruct(i).(p.datafield), ...
                     [ind_start,ind_stop]);
+                
+                if p.diffmean
+                    % Fill diff-mean (mean of intra-stim minus mean of pre-stim)
+                    bhvstruct(ind).diffmean =...
+                        mean(bhvstruct(ind).data(Fs * p.pre_space + 1 :...
+                        Fs * p.pre_space + bhvstruct(ind).length)) - ...
+                        mean(bhvstruct(ind).data(1 : Fs * p.pre_space));
+                end
+                
+                % Fill index
+                bhvstruct(ind).bhvind = [Fs * p.pre_space + 1,...
+                    Fs * p.pre_space + bhvstruct(ind).length];
+
+                % Fill length-normalized data
+                % resampling factor
+                rsfactor = p.norm_length * Fs / bhvstruct(ind).length;
+                if rsfactor == 1
+                    bhvstruct(ind).ln_data = bhvstruct(ind).data;
+                else
+                    bhvstruct(ind).ln_data = ...
+                        tcpBin(bhvstruct(ind).data, bhvstruct(ind).Fs,...
+                        bhvstruct(ind).Fs * rsfactor, p.BinMethod, 1, true);
+                end
+
+                % Fill post-binning index
+                bhvstruct(ind).lnbhvind = round([Fs * p.pre_space * rsfactor + 1,...
+                    Fs * p.pre_space * rsfactor + p.norm_length * Fs]);
+
+                % Fill post-binning Fs
+                bhvstruct(ind).ln_Fs = rsfactor * Fs;
+
+                % Record trims for length-normalized data
+                triml_ln = min(triml_ln, bhvstruct(ind).lnbhvind(1) - 1);
+                trimr_ln = min(trimr_ln, length(bhvstruct(ind).ln_data) -...
+                    bhvstruct(ind).lnbhvind(1));
             else
                 fprintf('Throwing away Expt %i Event %i, because the end time is out of bounds.\n', i, j)
+                bhvstruct(ind).data = [];
+                bhvstruct(ind).ln_data = [];
             end
         else
             fprintf('Throwing away Expt %i Event %i, because the start time is out of bounds.\n', i, j)
+            bhvstruct(ind).data = [];
+            bhvstruct(ind).ln_data = [];
         end
-        
-        % Fill index
-        bhvstruct(ind).bhvind = [Fs * p.pre_space + 1,...
-            Fs * p.pre_space + bhvstruct(ind).length];
-        
-        % Fill length-normalized data
-        % resampling factor
-        rsfactor = p.norm_length * Fs / bhvstruct(ind).length;
-        if rsfactor == 1
-            bhvstruct(ind).ln_data = bhvstruct(ind).data;
-        else
-            bhvstruct(ind).ln_data = ...
-                tcpBin(bhvstruct(ind).data, bhvstruct(ind).Fs,...
-                bhvstruct(ind).Fs * rsfactor, p.BinMethod, 1, true);
-        end
-        
-        % Fill post-binning index
-        bhvstruct(ind).lnbhvind = round([Fs * p.pre_space * rsfactor + 1,...
-            Fs * p.pre_space * rsfactor + p.norm_length * Fs]);
-        
-        % Fill post-binning Fs
-        bhvstruct(ind).ln_Fs = rsfactor * Fs;
-        
-        % Record trims for length-normalized data
-        triml_ln = min(triml_ln, bhvstruct(ind).lnbhvind(1) - 1);
-        trimr_ln = min(trimr_ln, length(bhvstruct(ind).ln_data) -...
-            bhvstruct(ind).lnbhvind(1));
-        
     end
 end
 
@@ -142,12 +161,14 @@ if p.trim_data
     % loop through and trim
     for i = 1 : nevents_real
         
-        % data
-        bhvstruct(i).data_trim = datasplitter(bhvstruct(i).data, [1, triml + trimr]);
-        
-        % index
-        bhvstruct(i).data_trimind =...
-            [triml + 1, min(bhvstruct(i).bhvind(2), triml + trimr)];
+        if ~isempty(bhvstruct(i).data)
+            % data
+            bhvstruct(i).data_trim = datasplitter(bhvstruct(i).data, [1, triml + trimr]);
+
+            % index
+            bhvstruct(i).data_trimind =...
+                [triml + 1, min(bhvstruct(i).bhvind(2), triml + trimr)];
+        end
     end
 end
 
@@ -156,16 +177,37 @@ end
 if p.trim_lndata
     % loop through and trim
     for i = 1 : nevents_real
+        if ~isempty(bhvstruct(i).data)
+            % data
+            bhvstruct(i).ln_data_trim = datasplitter(bhvstruct(i).ln_data,...
+                bhvstruct(i).lnbhvind(1) + [-triml_ln, trimr_ln]);
 
-        % data
-        bhvstruct(i).ln_data_trim = datasplitter(bhvstruct(i).ln_data,...
-            bhvstruct(i).lnbhvind(1) + [-triml_ln, trimr_ln]);
-        
-        % number of points that are removed on the left
-        pt_rm_l = bhvstruct(i).lnbhvind(1) - triml_ln - 1;
-        
-        % index
-        bhvstruct(i).ln_data_trimind =...
-            bhvstruct(i).lnbhvind - pt_rm_l;
+            % number of points that are removed on the left
+            pt_rm_l = bhvstruct(i).lnbhvind(1) - triml_ln - 1;
+
+            % index
+            bhvstruct(i).ln_data_trimind =...
+                bhvstruct(i).lnbhvind - pt_rm_l;
+        end
     end
+end
+
+%% Remove trials with nans
+% vector to see if data pass the nan test
+nan_fraction = nan(nevents_real, 1);
+
+if p.removenantrials
+    % loop through and trim
+    for i = 1 : nevents_real
+        if ~isempty(bhvstruct(i).data)
+            nan_fraction(i) = sum(isnan(bhvstruct(i).data)) / length(bhvstruct(i).data);
+        else
+            nan_fraction(i) = inf; % Empty entries
+        end
+    end
+end
+
+% Remove data
+bhvstruct = bhvstruct(nan_fraction <= p.nantolerance);
+
 end

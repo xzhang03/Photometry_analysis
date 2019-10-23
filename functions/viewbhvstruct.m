@@ -6,13 +6,14 @@ function viewbhvstruct(bhvstruct, varargin)
 p  = inputParser;
 
 addOptional(p, 'keepc', {}); % Criteria for keeping the data.
-addOptional(p, 'sortc', ''); % Criteria for sorting the data
+addOptional(p, 'sortc', ''); % Criteria for sorting the data.
 addOptional(p, 'sortdir', 'ascend'); % Direction of sorting
 addOptional(p, 'datatoplot', {'data_trim', 'ln_data_trim'}); % Default data
                                                              % to plot
 addOptional(p, 'linefields', {'data_trimind', 'ln_data_trimind'}); % Fields to add as a line in the plot
 addOptional(p, 'subplotrows', 6); % Number of rows for the subplot
 addOptional(p, 'heatmaprange', []); % Range for the heatmap
+addOptional(p, 'minlinelength', 0.5); % Minimal length of line (in graph units)
                                                              
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -56,7 +57,7 @@ end
 % Grab the sort vector
 if ~isempty(p.sortc)
     % Grab the vector to sort and sort it
-    sortvec = [bhvstruct(:).(p.keepc{i,1})];
+    sortvec = [bhvstruct(:).(p.sortc)];
     [~, sortvec] = sort(sortvec, p.sortdir);
     
     % Only keep some of the datasets according to the keeping criteria
@@ -106,7 +107,14 @@ for i = 1 : nfieldstoplot
         hold on
         for j = 1 : length(bhvstruct2)
             % Draw line
-            plot(bhvstruct2(j).(p.linefields{i}), [j j], 'r-');
+            if diff(bhvstruct2(j).(p.linefields{i})) > 0 
+                % If there is line length > 0
+                plot(bhvstruct2(j).(p.linefields{i}), [j j], 'r-');
+            else
+                % If there is line length > 0
+                plot(bhvstruct2(j).(p.linefields{i}) + [0 p.minlinelength],...
+                    [j j], 'r-');
+            end
         end
         hold off
     end
@@ -115,7 +123,7 @@ for i = 1 : nfieldstoplot
     subplot(p.subplotrows, nfieldstoplot, i)
     
     % Plot average data
-    plot(mean(data2view{i},1));
+    plot(nanmean(data2view{i},1));
     
     % Add an y = 0 line
     hold on
@@ -126,7 +134,7 @@ for i = 1 : nfieldstoplot
     xlim(xrange);
 	ylim([min(mean(data2view{i},1)), max(mean(data2view{i},1))]);
     
-    set(gca,'YTickLabel',[]);
+%     set(gca,'YTickLabel',[]);
     set(gca,'XTickLabel',[]);
 end
 

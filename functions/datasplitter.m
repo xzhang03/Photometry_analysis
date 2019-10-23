@@ -1,7 +1,7 @@
 function data_out = datasplitter(data_in, ind_matrix, dim)
-% datagrabber take out data based on the (m-by-2) index matrix of
+% datasplitter take out data based on the (m-by-2) index matrix of
 % [start_index, end_index].
-% data_out = datagrabber(data_in, ind_matrix, dim)
+% data_out = datasplitter(data_in, ind_matrix, dim)
 
 % Default to going down
 if nargin < 3
