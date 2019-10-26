@@ -5,8 +5,13 @@ function Flags = tcpCheck(inputloadingcell, varargin)
 % Parser inputs
 p = inputParser;
 addOptional(p, 'defaultpath', '\\anastasia\data\photometry');
-addOptional(p, 'twocolor', true);
-addOptional(p, 'headfixed', false);
+addOptional(p, 'twocolor', true); % Check for alignment
+addOptional(p, 'headfixed', false); % Head fix mode (no A mat and with triggers)
+
+% A mat check and fixing
+addOptional(p, 'checkAmat', false); % Open and check A mats (will take longer)
+addOptional(p, 'RangeRatioThresh', 1.3); % When the warn that the ratios are off
+addOptional(p, 'AskToFixAmat', true);
 
 if size(varargin,1) == 1 && size(varargin,2) == 1
     varargin = varargin{:};
@@ -81,6 +86,44 @@ for i = 1 : n_expts
         % No behavioral flie
         if Flags(i, 2) == 0
             fprintf('%s: missing behavioral file\n', experiment_name);
+        elseif p.checkAmat
+            % Load
+            AMAT = load(fullfile(loadingcell{i, 1}, loadingcell{i, 3}));
+            
+            % Time range for A (using starting points)
+            arange = range(AMAT.A(:,2));
+            
+            % Time range for B (using starting points)
+            brange = range(AMAT.B(:,2));
+            
+            if brange/arange > p.RangeRatioThresh || arange/brange > p.RangeRatioThresh
+                % Warn about range
+                fprintf('%s: time ratio too large: %1.2f\n', experiment_name, brange/arange);
+                
+                % Try to fix A mat
+                if p.AskToFixAmat
+                    % Ask
+                    fixornot = questdlg(sprintf('%s: time ratio too large: %1.2f. Fix?', experiment_name, brange/arange), ...
+                        'Fix or not', 'Scale down 2x', 'Scale up 2x', 'No', 'Scale down 2x');
+                    
+                    switch fixornot
+                        case 'Scale down 2x'
+                            % Scale down
+                            AMAT.B(:,2) = AMAT.B(:,2) / 2;
+                            AMAT.B(:,3) = AMAT.B(:,3) / 2;
+                            
+                            % Save
+                            save(fullfile(loadingcell{i, 1}, loadingcell{i, 3}), '-struct', 'AMAT');
+                        case 'Scale up 2x'
+                            % Scale down
+                            AMAT.B(:,2) = AMAT.B(:,2) * 2;
+                            AMAT.B(:,3) = AMAT.B(:,3) * 2;
+                            
+                            % Save
+                            save(fullfile(loadingcell{i, 1}, loadingcell{i, 3}), '-struct', 'AMAT');
+                    end
+                end
+            end
         end
     end
     
