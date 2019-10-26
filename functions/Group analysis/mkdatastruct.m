@@ -1,9 +1,25 @@
-function [datastruct, n_series] = mkdatastruct(inputloadingcell, defaultpath)
+function [datastruct, n_series] = mkdatastruct(inputloadingcell, varargin)
 % mkdatastruct makes a data structure based on the input data addresses.
 % [datastruct, n_series] = mkdatastruct(inputloadingcell, defaultpath)
 
+% Parse input
+p = inputParser;
+
+addOptional(p, 'defaultpath', '\\anastasia\data\photometry'); % Defaul where to find data
+addOptional(p, 'loadisosbetic', false); % Load the 405 channel data instead of the signal
+
+% Unpack if needed
+if size(varargin,1) == 1 && size(varargin,2) == 1
+    varargin = varargin{:};
+end
+
+% Parse
+parse(p, varargin{:});
+p = p.Results;
+
+%% Initialize
 % Make actual loading cell
-loadingcell = mkloadingcell(inputloadingcell,defaultpath);
+loadingcell = mkloadingcell(inputloadingcell, p.defaultpath);
 
 % data samples
 n_series = size(loadingcell, 1);
@@ -19,10 +35,17 @@ datastruct = repmat(datastruct, [size(loadingcell,1), 1]);
 
 % Load data
 for i = 1 : n_series
-    % Load photometry things
-    loaded = load (fullfile(loadingcell{i,1}, loadingcell{i,2}), 'signal', 'freq');
-    datastruct(i).photometry = loaded.signal;
-    datastruct(i).Fs = loaded.freq;
+    if ~p.loadisosbetic
+        % Load photometry things
+        loaded = load (fullfile(loadingcell{i,1}, loadingcell{i,2}), 'signal', 'freq');
+        datastruct(i).photometry = loaded.signal;
+        datastruct(i).Fs = loaded.freq;
+    else
+        % Load photometry things
+        loaded = load (fullfile(loadingcell{i,1}, loadingcell{i,2}), 'ch2_to_fix', 'freq');
+        datastruct(i).photometry = loaded.ch2_to_fix;
+        datastruct(i).Fs = loaded.freq;
+    end
     
     % Load behavior things
     loaded = load (fullfile(loadingcell{i,1}, loadingcell{i,3}), 'B');

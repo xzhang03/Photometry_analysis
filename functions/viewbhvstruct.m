@@ -152,7 +152,7 @@ for i = 1 : nfieldstoplot
     
     % Align ranges
     xlim(xrange);
-	ylim([min(mean(data2average{i},1)), max(mean(data2average{i},1))]);
+	ylim([min(nanmean(data2average{i},1)), max(nanmean(data2average{i},1))]);
     
 %     set(gca,'YTickLabel',[]);
     set(gca,'XTickLabel',[]);

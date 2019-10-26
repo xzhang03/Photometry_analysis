@@ -98,6 +98,8 @@ for i = 1 : size(datastruct, 1)
          
         if ind_start > 0
             if ind_stop <= length(datastruct(i).(p.bhvfield))
+%                 disp([num2str(i), ' - ', num2str(j)]);
+                
                 bhvstruct(ind).data = datasplitter(datastruct(i).(p.datafield), ...
                     [ind_start,ind_stop]);
                 

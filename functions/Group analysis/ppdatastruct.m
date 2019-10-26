@@ -19,6 +19,8 @@ addOptional(p, 'merging', []);  % merge datasets if needed. Input is a
                                 % dataset with the same number
 % Zscore parameters
 addOptional(p, 'nozscore', false); % Use non-zscored data
+addOptional(p, 'externalsigma', []);     % An external value for zscoring
+                                         % (used for zscoring across conditions)
 addOptional(p, 'zscore_badframes', 1:10);   % Frames to throw away when 
                                             % calculating z-scores
 addOptional(p, 'combinedzscore', false); % Combine the data together before z-scoring.
@@ -39,6 +41,13 @@ end
 parse(p, varargin{:});
 p = p.Results;
 
+%% Clean up inputs
+% no zscore
+if p.nozscore
+    p.combinedzscore = false;
+end
+
+%% Initialize
 % Initialize
 datastruct_pp = struct('photometry', 0, 'Fs', 0,...
     'FemInvest', 0, 'CloseExam', 0, 'Mount', 0, 'Introm', 0, 'Transfer', 0,...
@@ -93,10 +102,10 @@ for i = 1 : size(datastruct,1)
         datastruct_pp(i).photometry = datastruct_pp(i).photometry(p.First_point : last_kept_point);
     end
     
-    % Zscoring
-    if ~p.nozscore
+    % Zscoring (non-combined)
+    if ~p.nozscore && ~p.combinedzscore
         datastruct_pp(i).photometry =...
-            tcpZscore(datastruct_pp(i).photometry, zscore_badframes);
+            tcpZscore(datastruct_pp(i).photometry, zscore_badframes, p.externalsigma);
     end
     
     % Store data for combined zscore if needed
@@ -249,7 +258,7 @@ if p.combinedzscore
     combined_badpoints = [combined_photom_cell{:,3}];
     
     % Combined zscored data
-    combined_zscored_data = tcpZscore(combined_data, combined_badpoints);
+    combined_zscored_data = tcpZscore(combined_data, combined_badpoints, p.externalsigma);
     
     % Figure out how to distribute the data back
     nvec = [combined_photom_cell{:,2}];
