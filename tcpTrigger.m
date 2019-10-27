@@ -12,7 +12,7 @@ else
 end
 
 % Use filtered traces that are passed from preprocessing?
-TrigCfg.use_filtered = false;
+TrigCfg.use_filtered = true;
 
 % Where to grab wavelength 1's pulse info
 TrigCfg.ch1_pulse_ind = 2; 

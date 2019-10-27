@@ -31,6 +31,10 @@ if  OPTO_MODE
     % Channel thresholds (mostly depends on whether digital or analog)
     ch1_pulse_thresh = 1;
     ch2_pulse_thresh = 0.5;
+    
+    % Filter out stim artifact
+    filt_stim = true;
+    stim_filt_range = [9 11]; % Notch filter to remove stim artifacts (in Hz)
 else
     % Where to grab data
     data_channel = 1;
@@ -43,6 +47,10 @@ else
     ch1_pulse_thresh = 2;
     ch2_pulse_thresh = 0.5;
 end
+
+% Use 60 Hz filter
+use_fnotch_60 = true;
+fnotch_60 = [59 61];
 
 % [ Black out points ] This will change the values that come out of your analysis!
 blackout_window = 9; % Ignore the first X points within each pulse due to capacitated currents
@@ -59,7 +67,7 @@ filename_output = [filename(1:end-4), '_preprocessed.mat'];
 load(fullfile(filepath, filename), 'data', 'timestamps', 'Fs');
 
 
-%% Basic channel info
+%% Basic channel info and point indices
 % Gathering pulses
 if PULSE_SIM_MODE
     [ch1_pulse, ch2_pulse] = pulsesim(size(data,2), 2500, 9, 10);
@@ -93,11 +101,28 @@ if size(ch2_data_table,1) > n_points
     ch2_data_table = ch2_data_table(1:n_points, :);
 end
 
-% Apply notch filter to remove 60 Hz noise
-d_notch = designfilt('bandstopiir','FilterOrder',2, 'HalfPowerFrequency1',...
-    59, 'HalfPowerFrequency2',61, 'DesignMethod','butter','SampleRate', Fs);
-data_notch = filter(d_notch, data(data_channel,:));
+%% Notch filters
+if use_fnotch_60
+    % Apply notch filter to remove 60 Hz noise
+    d_notch = designfilt('bandstopiir','FilterOrder',2, 'HalfPowerFrequency1',...
+        fnotch_60(1), 'HalfPowerFrequency2',fnotch_60(2), 'DesignMethod','butter','SampleRate', Fs);
+    data_notch = filter(d_notch, data(data_channel,:));
+else
+    data_notch = data(data_channel,:);
+end
 
+% Apply another filter to filter out stim artifacts if neded
+if OPTO_MODE
+    if filt_stim
+        d_notch_stim = designfilt('bandstopiir','FilterOrder',2, 'HalfPowerFrequency1',...
+            stim_filt_range(1), 'HalfPowerFrequency2',stim_filt_range(2),...
+            'DesignMethod','butter','SampleRate', Fs);
+        data_notch = filter(d_notch_stim, data_notch);
+    end
+end
+
+
+%% Grab data points
 % Use median fluorescence during each pulse to calculate fluorescence
 % values
 for i = 1 : n_points
