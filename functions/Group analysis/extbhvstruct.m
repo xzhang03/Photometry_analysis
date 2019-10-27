@@ -59,7 +59,7 @@ if ~p.useLN
     ind1 = bhvstruct(1).bhvind(1) - p.pretrim * Fs;
     
     for i = 1 : ntrials
-        disp(num2str(i)) % debug
+%         disp(num2str(i)) % debug
         % end ind
         ind2 = bhvstruct(i).bhvind(1) + p.posttrim * Fs;
         

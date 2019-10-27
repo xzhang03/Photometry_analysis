@@ -5,8 +5,8 @@ function viewbhvstruct(bhvstruct, varargin)
 % Parse input
 p  = inputParser;
 
-addOptional(p, 'keepc', {}); % Criteria for keeping the data.
-addOptional(p, 'sortc', ''); % Criteria for sorting the data.
+addOptional(p, 'keepc', {}); % Criteria for keeping the data. Leave blank to keep all data.
+addOptional(p, 'sortc', ''); % Criteria for sorting the data. Leave blank for no sorting.
 addOptional(p, 'sortdir', 'ascend'); % Direction of sorting
 addOptional(p, 'datatoplot', {'data_trim', 'ln_data_trim'}); % Default data
                                                              % to plot
@@ -14,7 +14,10 @@ addOptional(p, 'linefields', {'data_trimind', 'ln_data_trimind'}); % Fields to a
 addOptional(p, 'subplotrows', 6); % Number of rows for the subplot
 addOptional(p, 'heatmaprange', []); % Range for the heatmap
 addOptional(p, 'minlinelength', 0.5); % Minimal length of line (in graph units)
-addOptional(p, 'showX', []); % Just show X of the trials in the heatmap
+addOptional(p, 'showX', []);    % Just show X of the trials in the heatmap. 
+                                % The input can also be a vector to show
+                                % specifically those trials. Leave blank
+                                % to show all data.
                                                              
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -89,10 +92,22 @@ data2average = data2view;
 
 % If using the showX option
 if ~isempty(p.showX)
-    % Grab X number of trials
-    showind = randperm(nset, p.showX);
+    
+    if isscalar(p.showX)
+        % If specifying the number of trials
+        % Grab X number of trials
+        showind = randperm(nset, p.showX);
+    else
+        % If specifying the exact trial indices
+        showind = p.showX;
+    end
+    
+    % Label the ones to show
     showvec = zeros(nset, 1);
     showvec(showind) = 1;
+    
+    % Apply sort
+    showvec = showvec(sortvec);
     
     % Only show them
     bhvstruct2view = bhvstruct2view(showvec > 0);
@@ -121,7 +136,7 @@ for i = 1 : nfieldstoplot
     
     xrange = get(gca,'xlim');
     xlabel('Time')
-    set(gca,'YTickLabel',[]);
+%     set(gca,'YTickLabel',[]);
     set(gca,'XTickLabel',[]);
     if ~isempty(p.linefields)
         hold on
@@ -139,6 +154,7 @@ for i = 1 : nfieldstoplot
         hold off
     end
     
+    % Subplot 2
     % Subplot for average data
     subplot(p.subplotrows, nfieldstoplot, i)
     

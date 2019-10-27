@@ -26,11 +26,24 @@ addOptional(p, 'trim_lndata', false); % Add a field that trims all the
                                     % concatenatable). The resulting data
                                     % will still be aligned at onsets and
                                     % offsets.
+% Things to sort
 addOptional(p, 'diffmean', false);  % Add a field that is the mean of the
                                     % intra-stim mean minus the pre-stim
-                                    % mean
+                                    % mean (in 2 second windows)
 addOptional(p, 'premean', false);   % Add a field that is the mean fluorescence 
                                     % during the pre-stim period
+addOptional(p, 'premean2s', false);   % Add a field that is the mean fluorescence 
+                                    % during the 2s pre-stim period
+addOptional(p, 'postmean', false);   % Add a field that is the mean fluorescence 
+                                    % during the post-stim period
+addOptional(p, 'diffbox', false); % Add a field that the difference in mean fluorescence
+                                  % in and out of the box in
+                                  % length-normalized data
+addOptional(p, 'boxmean', false); % Add a field that is the mean fluorescence
+                                  % in the box in length-normalized data
+
+                                    
+% nan things
 addOptional(p, 'removenantrials', true);    % Remove any trials with nans in 
                                             % data. Tolerance is set by
                                             % nantolerance.
@@ -105,11 +118,13 @@ for i = 1 : size(datastruct, 1)
                 
                 % Diff mean
                 if p.diffmean
-                    % Fill diff-mean (mean of intra-stim minus mean of pre-stim)
+                    % Fill diff-mean (mean of 2s post-stim  minus mean of 2s
+                    % pre-stim
                     bhvstruct(ind).diffmean =...
                         mean(bhvstruct(ind).data(Fs * p.pre_space + 1 :...
-                        Fs * p.pre_space + bhvstruct(ind).length)) - ...
-                        mean(bhvstruct(ind).data(1 : Fs * p.pre_space));
+                        Fs * p.pre_space + 2 * Fs)) - ...
+                        mean(bhvstruct(ind).data(Fs * p.pre_space - 2 * Fs + 1 :...
+                        Fs * p.pre_space));
                 end
                 
                 % Pre mean
@@ -117,6 +132,20 @@ for i = 1 : size(datastruct, 1)
                     % Fill pre-mean (mean during pre-stim)
                     bhvstruct(ind).premean =...
                         mean(bhvstruct(ind).data(1 : Fs * p.pre_space));
+                end
+                
+                % Pre mean 2s
+                if p.premean2s
+                    % Fill pre-mean (mean of 2s pre-stim)
+                    bhvstruct(ind).premean2s =...
+                        mean(bhvstruct(ind).data(Fs * p.pre_space - 2 * Fs + 1 : Fs * p.pre_space));
+                end
+                
+                % Post mean
+                if p.postmean
+                    % Fill pre-mean (mean during post-stim)
+                    bhvstruct(ind).postmean =...
+                        mean(bhvstruct(ind).data(Fs * p.pre_space + 1 : end));
                 end
                 
                 % Fill index
@@ -137,7 +166,24 @@ for i = 1 : size(datastruct, 1)
                 % Fill post-binning index
                 bhvstruct(ind).lnbhvind = round([Fs * p.pre_space * rsfactor + 1,...
                     Fs * p.pre_space * rsfactor + p.norm_length * Fs]);
-
+                
+                % Calculate difference between data in and out of the
+                % length-normalized boxes
+                if p.diffbox
+                    boxind = bhvstruct(ind).lnbhvind;
+                    boxdata = bhvstruct(ind).ln_data(boxind(1):boxind(2));
+                    outofboxdata = bhvstruct(ind).ln_data([1 : boxind(1) - 1,...
+                        boxind(2) + 1 : end]);
+                    bhvstruct(ind).diffbox = nanmean(boxdata) - nanmean(outofboxdata);
+                end
+                
+                % Calculate mean of data in the length-normalized boxes
+                if p.boxmean
+                    boxind = bhvstruct(ind).lnbhvind;
+                    boxdata = bhvstruct(ind).ln_data(boxind(1):boxind(2));
+                    bhvstruct(ind).diffbox = nanmean(boxdata);
+                end
+                
                 % Fill post-binning Fs
                 bhvstruct(ind).ln_Fs = rsfactor * Fs;
 

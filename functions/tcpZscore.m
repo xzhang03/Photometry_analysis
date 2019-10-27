@@ -22,7 +22,7 @@ end
 % Calculate things
 mu = nanmean(datacopy);
 
-if isnan(external_sigma) || isempty(external_sigma)
+if isempty(external_sigma)
     sigma = nanstd(datacopy);
 else
     sigma = external_sigma;
