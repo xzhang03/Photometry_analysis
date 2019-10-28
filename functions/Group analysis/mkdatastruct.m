@@ -6,7 +6,7 @@ function [datastruct, n_series] = mkdatastruct(inputloadingcell, varargin)
 p = inputParser;
 
 addOptional(p, 'defaultpath', '\\anastasia\data\photometry'); % Defaul where to find data
-addOptional(p, 'loadisosbetic', false); % Load the 405 channel data instead of the signal
+addOptional(p, 'loadisosbestic', false); % Load the 405 channel data instead of the signal
 
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -35,7 +35,7 @@ datastruct = repmat(datastruct, [size(loadingcell,1), 1]);
 
 % Load data
 for i = 1 : n_series
-    if ~p.loadisosbetic
+    if ~p.loadisosbestic
         % Load photometry things
         loaded = load (fullfile(loadingcell{i,1}, loadingcell{i,2}), 'signal', 'freq');
         datastruct(i).photometry = loaded.signal;

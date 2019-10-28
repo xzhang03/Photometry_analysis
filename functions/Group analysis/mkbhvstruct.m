@@ -26,6 +26,10 @@ addOptional(p, 'trim_lndata', false); % Add a field that trims all the
                                     % concatenatable). The resulting data
                                     % will still be aligned at onsets and
                                     % offsets.
+addOptional(p, 'lntrim_pts', []); % Define the number of points for trimming
+                                  % for length-normalized data (also
+                                  % turning off auto trimming)
+
 % Things to sort
 addOptional(p, 'diffmean', false);  % Add a field that is the mean of the
                                     % intra-stim mean minus the pre-stim
@@ -73,9 +77,15 @@ nevents_real = 0;
 % loop through and parse
 ind = 0;
 
-% Record trim for length-normalized data
-triml_ln = inf;
-trimr_ln = inf;
+if isempty(p.lntrim_pts)
+    % Record trim for length-normalized data (autotrimming)
+    triml_ln = inf;
+    trimr_ln = inf;
+else
+    % User defined trimming
+    triml_ln = p.lntrim_pts(1);
+    trimr_ln = p.lntrim_pts(2);
+end
 
 for i = 1 : size(datastruct, 1)
     % Get behavior table
@@ -181,16 +191,18 @@ for i = 1 : size(datastruct, 1)
                 if p.boxmean
                     boxind = bhvstruct(ind).lnbhvind;
                     boxdata = bhvstruct(ind).ln_data(boxind(1):boxind(2));
-                    bhvstruct(ind).diffbox = nanmean(boxdata);
+                    bhvstruct(ind).boxmean = nanmean(boxdata);
                 end
                 
                 % Fill post-binning Fs
                 bhvstruct(ind).ln_Fs = rsfactor * Fs;
-
-                % Record trims for length-normalized data
-                triml_ln = min(triml_ln, bhvstruct(ind).lnbhvind(1) - 1);
-                trimr_ln = min(trimr_ln, length(bhvstruct(ind).ln_data) -...
-                    bhvstruct(ind).lnbhvind(1));
+                
+                if isempty(p.lntrim_pts)
+                    % Record trims for length-normalized data (auto trimming)
+                    triml_ln = min(triml_ln, bhvstruct(ind).lnbhvind(1) - 1);
+                    trimr_ln = min(trimr_ln, length(bhvstruct(ind).ln_data) -...
+                        bhvstruct(ind).lnbhvind(1));
+                end
             else
                 fprintf('Throwing away Expt %i Event %i, because the end time is out of bounds.\n', i, j)
                 bhvstruct(ind).data = [];

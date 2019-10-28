@@ -63,10 +63,14 @@ end
 if ~isempty(p.sortc)
     % Grab the vector to sort and sort it
     sortvec = [bhvstruct(:).(p.sortc)];
-    [~, sortvec] = sort(sortvec, p.sortdir);
     
     % Only keep some of the datasets according to the keeping criteria
-    sortvec = sortvec(keepvec > 0);
+    [~, sortvec] = sort(sortvec, p.sortdir);
+    
+    sortvec = sortvec(keepvec(sortvec) > 0);
+
+    
+    
 else
     % Keep the original order
     sortvec = 1 : nset;
@@ -83,7 +87,7 @@ data2view = cell(nfieldstoplot, 1);
 for i = 1 : nfieldstoplot
     if isfield(bhvstruct, p.datatoplot{i})
         data2view{i} =...
-            [bhvstruct(sortvec).(p.datatoplot{i})]'; 
+            [bhvstruct2view.(p.datatoplot{i})]'; 
     end
 end
 
@@ -102,19 +106,15 @@ if ~isempty(p.showX)
         showind = p.showX;
     end
     
-    % Label the ones to show
-    showvec = zeros(nset, 1);
-    showvec(showind) = 1;
-    
     % Apply sort
-    showvec = showvec(sortvec);
+    [~, trials2keep, ~] = intersect(sortvec,showind, 'stable');
     
     % Only show them
-    bhvstruct2view = bhvstruct2view(showvec > 0);
+    bhvstruct2view = bhvstruct2view(trials2keep);
     
     for i = 1 : nfieldstoplot
         datatemp = data2view{i};
-        data2view{i} = datatemp(showvec > 0, :);
+        data2view{i} = datatemp(trials2keep, :);
     end
 end
 
