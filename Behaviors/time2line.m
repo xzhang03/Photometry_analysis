@@ -2,7 +2,7 @@
 clear
 
 % Default path
-defaultpath = '\\anastasia\data\photometry';
+defaultpath = '\\anastasia\data\behavior';
 
 %% IO
 % Which data files to look at {mouse, date, run}
@@ -12,7 +12,7 @@ inputloadingcell = {'SZ04', 181225, 2};
 loadingcell = mkloadingcell(inputloadingcell,defaultpath);
 
 % Load behavior things
-A = load (fullfile(loadingcell{1,1}, [loadingcell{1,3}, '.mat']), 'A');
+A = load (fullfile(loadingcell{1,1}, loadingcell{1,3}), 'A');
 A = A.A;
 
 
@@ -37,6 +37,7 @@ minimallinelength = 0;
 % Line width
 Linewidth = 9;
 %% Make plot
+close(101)
 figure(101)
 hold on
 for i =1 : size(A,1)

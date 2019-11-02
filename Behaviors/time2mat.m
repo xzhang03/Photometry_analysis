@@ -1,10 +1,14 @@
-function time2mat(A)
+function time2mat(A, filepath)
 % time2mat convert scoring data to behavioral matrix
-% time2mat(A)
+% time2mat(A, filepath)
 
 %% Initialization
-% Default path
-defaultpath = '\\anastasia\data\photometry';
+if nargin < 2 
+    % Default path
+    defaultpath = '\\anastasia\data\photometry';
+else
+    defaultpath = filepath;
+end
 
 % Recording frame rate
 cam_save_fps = 30;
