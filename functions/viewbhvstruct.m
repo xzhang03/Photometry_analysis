@@ -12,7 +12,7 @@ addOptional(p, 'datatoplot', {'data_trim', 'ln_data_trim'}); % Default data
                                                              % to plot
 addOptional(p, 'linefields', {'data_trimind', 'ln_data_trimind'}); % Fields to add as a line in the plot
 addOptional(p, 'subplotrows', 6); % Number of rows for the subplot
-addOptional(p, 'heatmaprange', []); % Range for the heatmap
+addOptional(p, 'heatmaprange', [-3, 3]); % Range for the heatmap
 addOptional(p, 'minlinelength', 0.5); % Minimal length of line (in graph units)
 addOptional(p, 'showX', []);    % Just show X of the trials in the heatmap. 
                                 % The input can also be a vector to show
@@ -128,11 +128,8 @@ for i = 1 : nfieldstoplot
         nfieldstoplot : (nfieldstoplot * p.subplotrows));
     
     % Imagesc
-    if ~isempty(p.heatmaprange)
-        imagesc(data2view{i}, p.heatmaprange);
-    else
-        imagesc(data2view{i});
-    end
+    imagesc(data2view{i});
+    colormap(b2r_arbitrary_input(p.heatmaprange(1), p.heatmaprange(2), [1 0 0], [0 0 1], [1 1 1]));
     
     xrange = get(gca,'xlim');
     xlabel('Time')
@@ -144,11 +141,11 @@ for i = 1 : nfieldstoplot
             % Draw line
             if diff(bhvstruct2view(j).(p.linefields{i})) > 0 
                 % If there is line length > 0
-                plot(bhvstruct2view(j).(p.linefields{i}), [j j], 'r-');
+                plot(bhvstruct2view(j).(p.linefields{i}), [j j], 'g-');
             else
                 % If there is line length > 0
                 plot(bhvstruct2view(j).(p.linefields{i}) + [0 p.minlinelength],...
-                    [j j], 'r-');
+                    [j j], 'g-');
             end
         end
         hold off
