@@ -12,10 +12,15 @@ addOptional(p, 'flip_signal', false); % Flip signal
 
 addOptional(p, 'showX', []);    % Just show X of the trials in the heatmap. 
                                 % The input can also be a vector to show
-                                % specifically those trials. Leave blank
+                                % specifically those trials (not recommended now). Leave blank
                                 % to show all data.
 addOptional(p, 'optolength', []); % Optolength (train)
 addOptional(p, 'usemedian', false); % Plot median instead of mean for the plot
+addOptional(p, 'yrange', []); % y range for plotting
+
+addOptional(p, 'removenans', true); % Remove nans or not
+addOptional(p, 'nantolerance', 0); % Remove trials with more than this fraction of nan data
+addOptional(p, 'keepc', {'order',[]}); % Criteria for keeping data (just a 1 x 2 cell)
                                                              
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -40,11 +45,45 @@ end
 
 % Number of trials
 ntrials = size(datamat, 2);
+    
+% Keep data as criteria
+if ~isempty(p.keepc{1,2})
+    if isempty(p.datasets)
+        % vector for keeping stuff
+        keepvec_curr = cell2mat({optostruct(:).(p.keepc{1,1})})';
+    else
+        keepvec_curr = cell2mat({optostruct(p.datasets).(p.keepc{1,1})})';
+    end
+    
+    % Grab the critia
+    cri = p.keepc{1,2};
+    
+    % Do the comparison
+    keepvec_curr = keepvec_curr * ones(1, length(cri)) ==...
+        ones(ntrials, 1) * cri;
+    keepvec_curr = sum(keepvec_curr, 2) > 0;
+    
+    % Update data
+    datamat = datamat(:, keepvec_curr);
+    
+    % Update Number of trials
+    ntrials = size(datamat, 2);
+   
+    % *need to update showX*
+end
 
 % Pre window
 prew_f = optostruct(1).window_info(1);
 
 %% Grab a data matrix to show
+% Remove nans
+if p.removenans
+    goodtrials = mean(isnan(datamat),1) >= p.nantolerance;
+    datamat = datamat(:, goodtrials);
+    
+    % *need to update showX*
+end
+
 % Datamat to show
 if isempty(p.showX)
     datamat2show = datamat;
@@ -57,6 +96,8 @@ else
     % If specifying the exact trial indices
     datamat2show = datamat(:, p.showX);
 end
+
+
 
 %% Plot
 % Plot
@@ -97,7 +138,11 @@ xlim(xrange)
 ymax = max(trace2plot);
 
 % Y lim
-ylim([-0.03 ymax + 0.03])
+if isempty(p.yrange)
+    ylim([-0.03 ymax + 0.03])
+else
+    ylim(p.yrange);
+end
 
 % Add an y = 0 line
 hold on
