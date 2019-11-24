@@ -126,9 +126,9 @@ subplot(p.subplotrows, 1, 1);
 
 % Plot average data
 if p.usemedian
-    trace2plot = median(datamat,2);
+    trace2plot = nanmedian(datamat,2);
 else
-    trace2plot = mean(datamat,2);
+    trace2plot = nanmean(datamat,2);
 end
 
 plot(trace2plot);
@@ -136,10 +136,11 @@ xlim(xrange)
 
 % Y max
 ymax = max(trace2plot);
+ymin = min(trace2plot);
 
 % Y lim
 if isempty(p.yrange)
-    ylim([-0.03 ymax + 0.03])
+    ylim([ymin - 0.03 ymax + 0.03])
 else
     ylim(p.yrange);
 end

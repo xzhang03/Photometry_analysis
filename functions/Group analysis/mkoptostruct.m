@@ -12,9 +12,11 @@ addOptional(p, 'zscore_firstpt', 50); % First point for zscore
 addOptional(p, 'externalsigma', []); % Feed a sigma for zscoring
 addOptional(p, 'badtrials', []); % Bad trials to remove (X by 2 matrix of [Session# Sweep#])
 
+% Baseline and slope
 addOptional(p, 'zero_baseline', false); % Add a Y-offset to zero the pre-stim baselines
 addOptional(p, 'zero_baseline_per_session', true); % Zero baseline once per session (Using median
                                                    % from the first sweep)
+addOptional(p, 'linearleveling', false); % Use pre-stim data to linearly fix slope.
 
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -59,6 +61,15 @@ for i = 1 : n_series
         datastruct(i).photometry_trig = (loaded.trigmat - mu) / gamma;
     end
     
+    % Remove bad trials
+    if ~isempty(p.badtrials)
+        % Current bad trials
+        currentbt = p.badtrials(p.badtrials(:,1) == i, 2);
+        
+        % Remove
+        datastruct(i).photometry_trig(:,currentbt) = [];
+    end
+    
     % Zero baseline
     if p.zero_baseline % Per sweep
         % Baseline vector
@@ -76,13 +87,21 @@ for i = 1 : n_series
             baselineval;
     end
     
-    % Remove bad trials 
-    if ~isempty(p.badtrials)
-        % Current bad trials
-        currentbt = p.badtrials(p.badtrials(:,1) == i, 2);
+    % Fix slope
+    if p.linearleveling
+        % Pre-stim data
+        y = nanmean(datastruct(i).photometry_trig(1:loaded.prew_f, :), 2);
+        x = (-loaded.prew_f + 1 : 0)';
         
-        % Remove
-        datastruct(i).photometry_trig(:,currentbt) = [];
+        % fit
+        fitinfo = fit(x, y, 'poly1');
+        
+        % Correct data
+        fitdata = fitinfo(-loaded.prew_f:loaded.postw_f) * ones(1, size(datastruct(i).photometry_trig,2));
+        datastruct(i).photometry_trig = datastruct(i).photometry_trig - fitdata;
+        
+        % Get slope
+        datastruct(i).sloperemoved = fitinfo.p1;
     end
     
     % Calculate average
