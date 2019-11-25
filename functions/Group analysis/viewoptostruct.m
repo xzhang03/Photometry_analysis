@@ -1,4 +1,4 @@
-function viewoptostruct(optostruct, varargin)
+function dataout = viewoptostruct(optostruct, varargin);
 % View opto structures
 
 % Parse input
@@ -21,6 +21,8 @@ addOptional(p, 'yrange', []); % y range for plotting
 addOptional(p, 'removenans', true); % Remove nans or not
 addOptional(p, 'nantolerance', 0); % Remove trials with more than this fraction of nan data
 addOptional(p, 'keepc', {'order',[]}); % Criteria for keeping data (just a 1 x 2 cell)
+
+addOptional(p, 'outputdata', false); % Output data
                                                              
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -154,4 +156,11 @@ if ~isempty(p.optolength)
 end
 hold off
 ylabel('-F/F (z)')
+
+%% Output data
+if p.outputdata
+    dataout = datamat;
+else
+    dataout = [];
+end
 end

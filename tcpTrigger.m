@@ -11,9 +11,6 @@ else
     keep defaultpath
 end
 
-% Use filtered traces that are passed from preprocessing?
-TrigCfg.use_filtered = true;
-
 % Flatten data
 TrigCfg.flatten_data = true;
 
@@ -64,7 +61,7 @@ end
 
 % Grab the opto pulse info and snap it to the photometry pulses
 opto = tcpDatasnapper(data(TrigCfg.opto_channel,:), data(TrigCfg.ch1_pulse_ind,:), 'max', 'pulsetopulse');
-opto = opto(1:n_points,:);
+opto = opto(1:n_points, 2);
 
 % Grab opto onsets
 opto_ons = chainfinder(opto(:,2));
@@ -93,15 +90,14 @@ n_optostims = length(opto_ons);
 
 %% Flatten data
 % Pull data
-if TrigCfg.use_filtered
-    data2use = Ch1_filtered;
-else
-    data2use = ch1_data_table(:, 2);
-end
+data2use = Ch1_filtered;
 
 % Flatten if needed
 if TrigCfg.flatten_data
-    [data2use, ~] = tcpUIflatten(data2use, opto(:,2));
+    [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, opto(:,2));
+    data2use_unfilt = ch1_data_table(:, 2) - exp_fit;
+else
+    data2use_unfilt = ch1_data_table(:, 2);
 end
 plot([data2use, opto(:,2)])
 
@@ -131,4 +127,4 @@ ylabel('Fluorescence')
 %% Save  results
 save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
     'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
-    'trigmat_avg', 'data2use' , 'tl', 'opto')
+    'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', 'exp_fit');

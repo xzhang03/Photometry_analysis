@@ -6,9 +6,14 @@ function [datastruct, n_series] = mkoptostruct(inputloadingcell, varargin)
 p  = inputParser;
 
 addOptional(p, 'defaultpath', '\\anastasia\data\photometry'); % Default photometry path
+
+% Data type
+addOptional(p, 'useunfiltered', false); % Use unfiltered data (and retrigger)
+addOptional(p, 'refilter', []); % Pass a filter to refilter data (only usable on unfiltered data)
+
+% zscore
 addOptional(p, 'nozscore', false); % No zscore of data
 addOptional(p, 'zscore_firstpt', 50); % First point for zscore
-
 addOptional(p, 'externalsigma', []); % Feed a sigma for zscoring
 addOptional(p, 'badtrials', []); % Bad trials to remove (X by 2 matrix of [Session# Sweep#])
 
@@ -17,6 +22,10 @@ addOptional(p, 'zero_baseline', false); % Add a Y-offset to zero the pre-stim ba
 addOptional(p, 'zero_baseline_per_session', true); % Zero baseline once per session (Using median
                                                    % from the first sweep)
 addOptional(p, 'linearleveling', false); % Use pre-stim data to linearly fix slope.
+
+% Sanity checking 
+addOptional(p, 'checkoptopulses', false); % Only used for sanity checking that 
+                                          % the opto pulses are triggered correctly
 
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -44,11 +53,34 @@ for i = 1 : n_series
     % Load photometry things
     loaded = load(fullfile(loadingcell{i,1}, loadingcell{i,6}));
     
-    % Load data
-    if p.nozscore
+    % Pre-loading data (unfiltered) and trigger it
+    % Skip this if we are just checking opto
+    if p.useunfiltered && ~p.checkoptopulses
+        
+        if isempty(p.refilter)
+            % Without refiltering
+            data_tmp = loaded.data2use_unfilt;
+        else
+            % Refiltering
+            data_tmp = filter(p.refilter, loaded.data2use_unfilt);
+        end
+        
+        % Initialize a triggered matrix
+        trigmat = zeros(loaded.l, size(loaded.inds,1));
+        for j = 1 : size(loaded.inds, 1)
+            trigmat(:,j) = data_tmp(loaded.inds(j,1) : loaded.inds(j,2));
+        end
+        
+        % Put it in the loaded structure
+        loaded.trigmat = trigmat;
+    end
+    
+    % Load data 
+    % (Skip the whole thing if we are just checking opto)
+    if p.nozscore && ~p.checkoptopulses
         % Load triggered data
         datastruct(i).photometry_trig = loaded.trigmat;
-    else
+    elseif ~p.checkoptopulses
         % Mean and std
         mu = nanmean(loaded.data2use(p.zscore_firstpt:end));
         if isempty(p.externalsigma)
@@ -59,6 +91,15 @@ for i = 1 : n_series
         
         % Apply zscore
         datastruct(i).photometry_trig = (loaded.trigmat - mu) / gamma;
+    end
+    
+    % Checking opto
+    if p.checkoptopulses
+        % Initialize a triggered matrix
+        datastruct(i).photometry_trig = zeros(loaded.l, size(loaded.inds,1));
+        for j = 1 : size(loaded.inds,1)
+            datastruct(i).photometry_trig(:,j) = loaded.opto(loaded.inds(j,1) : loaded.inds(j,2));
+        end
     end
     
     % Remove bad trials
@@ -106,9 +147,6 @@ for i = 1 : n_series
     
     % Calculate average
     datastruct(i).photometry_trigavg = mean(datastruct(i).photometry_trig, 2);
-    
-    % Opto trigger
-    datastruct(i).opto = loaded.trigmat_avg;
     
     % Order
     datastruct(i).order = 1 : size(datastruct(i).photometry_trig, 2);

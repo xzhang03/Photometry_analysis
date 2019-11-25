@@ -71,7 +71,7 @@ for i = 1 : n_series
     % Load opto
     if isfield('loaded', 'opto')
         % Load opto the straight-foward way
-        opto = loaded.opto(:, 2);
+        opto = loaded.opto;
     else
         % Load opto the other way (sigh)
         opto = load(fullfile(loadingcell{i,1}, loadingcell{i,4}), 'opto_pulse_table');

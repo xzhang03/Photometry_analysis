@@ -1,7 +1,7 @@
-function [ch1_flattened, ch2_flattened] = tcpUIflatten(ch1_input, ch2_input)
+function [ch1_flattened, ch2_flattened, ch1_expfit_out, ch2_expfit_out] = tcpUIflatten(ch1_input, ch2_input)
 % tcpUIflatten uses a flatten to let user to choose how to perform the
 % trace flattening
-% [ch1_flattened, ch2_flattened] = tcpUIflatten(ch1_input, ch2_input)
+% [ch1_flattened, ch2_flattened, ch1_expfit_out, ch2_expfit_out] = tcpUIflatten(ch1_input, ch2_input)
 
 % Calculate the number of points
 n_points = length(ch1_input);
@@ -38,9 +38,13 @@ end
 [~, ch1_expfit] = tcpFlatten(ch1_to_flatten);
 [~, ch2_expfit] = tcpFlatten(ch2_to_flatten);
 
+% Exponential fits
+ch1_expfit_out = ch1_expfit(1 : n_points);
+ch2_expfit_out = ch2_expfit(1 : n_points);
+
 % Flatten
-ch1_flattened = ch1_input - ch1_expfit(1 : n_points);
-ch2_flattened = ch2_input - ch2_expfit(1 : n_points);
+ch1_flattened = ch1_input - ch1_expfit_out;
+ch2_flattened = ch2_input - ch2_expfit_out;
 
 close(100);
 
