@@ -1,5 +1,6 @@
 function dataout = viewoptostruct(optostruct, varargin);
 % View opto structures
+% Dataout is a x-by-3 matrix of [mean SEM N].
 
 % Parse input
 p  = inputParser;
@@ -159,8 +160,9 @@ ylabel('-F/F (z)')
 
 %% Output data
 if p.outputdata
-    dataout = datamat;
-else
-    dataout = [];
+    N_plotted = size(datamat,2);
+    dataout = nanmean(datamat,2);
+    dataout(:,2) = nanstd(datamat,[],2) / sqrt(N_plotted);
+    dataout(:,3) = ones(size(datamat,1),1) * N_plotted;
 end
 end

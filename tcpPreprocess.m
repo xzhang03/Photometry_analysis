@@ -33,7 +33,7 @@ if  OPTO_MODE
     ch2_pulse_thresh = 0.5;
     
     % Filter out stim artifact
-    filt_stim = true;
+    filt_stim = false;
     stim_filt_range = [9 11]; % Notch filter to remove stim artifacts (in Hz)
 else
     % Where to grab data
@@ -56,8 +56,13 @@ fnotch_60 = [59 61];
 blackout_window = 9; % Ignore the first X points within each pulse due to capacitated currents
 
 % Channel and frequency data
-data_ind = 1; % Where to grab fluorescence info
 freq = 50; % Sampling rate after downsampling (i.e., pulse rate of each channel in Hz)
+
+% Shoulder size for subtraction
+% The number of points before the onset of each pulse that can be averaged
+% and subtracted off as ambient background. Set to 0 to skip this step
+Ambientpts = 0;
+
 
 %% IO
 
@@ -133,8 +138,47 @@ for i = 1 : n_points
     
     % Wavelength 2
     ini_ind = ch2_data_table(i,1) + blackout_window;
-    end_ind = ch2_data_table(i,1) + ch1_data_table(i,3) - 1;
+    end_ind = ch2_data_table(i,1) + ch2_data_table(i,3) - 1;
     ch2_data_table(i,2) = median(data_notch(ini_ind:end_ind));
+end
+
+%% Ambient-light subtraction
+if Ambientpts > 0
+    % Initialize matrices
+    ch1_amb_table = nan(size(ch1_data_table));
+    ch2_amb_table = nan(size(ch2_data_table));
+    
+    % Get the indices
+    ch1_amb_table(:,1) = ch1_data_table(:,1) - Ambientpts;
+    ch1_amb_table(:,3) = Ambientpts;
+    
+    ch2_amb_table(:,1) = ch2_data_table(:,1) - Ambientpts;
+    ch2_amb_table(:,3) = Ambientpts;
+   
+    % Fix out-of-bount indices by taking the next point
+    if ch1_amb_table(1,1) < 1
+        ch1_amb_table(1,1) = ch1_amb_table(2,1);
+    end
+    if ch2_amb_table(1,1) < 1
+        ch2_amb_table(1,1) = ch2_amb_table(2,1);
+    end
+    
+    % Loop through and take median
+    for i = 1 : n_points
+        % Wavelength 1
+        ini_ind = ch1_amb_table(i,1);
+        end_ind = ch1_amb_table(i,1) + ch1_amb_table(i,3) - 1;
+        ch1_amb_table(i,2) = median(data_notch(ini_ind:end_ind));
+
+        % Wavelength 2
+        ini_ind = ch2_amb_table(i,1);
+        end_ind = ch2_amb_table(i,1) + ch2_amb_table(i,3) - 1;
+        ch2_amb_table(i,2) = median(data_notch(ini_ind:end_ind));
+    end
+    
+    % Subtract
+    ch1_data_table(:,2) = ch1_data_table(:,2) - ch1_amb_table(:,2);
+    ch2_data_table(:,2) = ch2_data_table(:,2) - ch2_amb_table(:,2);
 end
 
 %% Grab opto pulses

@@ -20,7 +20,8 @@ addOptional(p, 'badtrials', []); % Bad trials to remove (X by 2 matrix of [Sessi
 % Baseline and slope
 addOptional(p, 'zero_baseline', false); % Add a Y-offset to zero the pre-stim baselines
 addOptional(p, 'zero_baseline_per_session', true); % Zero baseline once per session (Using median
-                                                   % from the first sweep)
+                                                   % from the first or later sweep)
+addOptional(p, 'trialtozero', 1); % If only zeroing baseline once per sessoin, which sweep to use?
 addOptional(p, 'linearleveling', false); % Use pre-stim data to linearly fix slope.
 
 % Sanity checking 
@@ -44,12 +45,15 @@ loadingcell = mkloadingcell(inputloadingcell, p.defaultpath);
 n_series = size(loadingcell, 1);
 
 % Initialize
-datastruct = struct('photometry_trig', 0, 'photometry_trigavg', 0, 'opto', 0,... 
+datastruct = struct('photometry_trig', 0, 'photometry_trigavg', 0, 'mouse', '',... 
     'order', 0, 'rorder', 0, 'Fs', 0, 'nstims', 0, 'window_info', [0 0 0]);
 datastruct = repmat(datastruct, [size(loadingcell,1), 1]);
 
 % Load data
 for i = 1 : n_series
+    % Fill mouse name
+    datastruct(i).mouse = inputloadingcell{i,1};
+    
     % Load photometry things
     loaded = load(fullfile(loadingcell{i,1}, loadingcell{i,6}));
     
@@ -121,7 +125,7 @@ for i = 1 : n_series
             ones(loaded.l, 1) * baselinevec;
     elseif p.zero_baseline_per_session % Once per session
         % Baseline value
-        baselineval = nanmedian(datastruct(i).photometry_trig(1 : loaded.prew_f, 1));
+        baselineval = nanmedian(datastruct(i).photometry_trig(1 : loaded.prew_f, p.trialtozero));
         
         % Triggered photometry data
         datastruct(i).photometry_trig = datastruct(i).photometry_trig -...

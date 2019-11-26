@@ -64,7 +64,7 @@ opto = tcpDatasnapper(data(TrigCfg.opto_channel,:), data(TrigCfg.ch1_pulse_ind,:
 opto = opto(1:n_points, 2);
 
 % Grab opto onsets
-opto_ons = chainfinder(opto(:,2));
+opto_ons = chainfinder(opto > 0.5);
 
 % Grab opto inter-stim interval
 opto_isi = diff(opto_ons(:,1));
@@ -94,12 +94,12 @@ data2use = Ch1_filtered;
 
 % Flatten if needed
 if TrigCfg.flatten_data
-    [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, opto(:,2));
+    [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, opto);
     data2use_unfilt = ch1_data_table(:, 2) - exp_fit;
 else
     data2use_unfilt = ch1_data_table(:, 2);
 end
-plot([data2use, opto(:,2)])
+plot([data2use, opto])
 
 %% Grab the point indices
 % Indices
