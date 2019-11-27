@@ -24,6 +24,14 @@ addOptional(p, 'zero_baseline_per_session', true); % Zero baseline once per sess
 addOptional(p, 'trialtozero', 1); % If only zeroing baseline once per sessoin, which sweep to use?
 addOptional(p, 'linearleveling', false); % Use pre-stim data to linearly fix slope.
 
+% Extra triggers
+addOptional(p, 'pretrigwindow', []);    % Add data that are triggered before the onset of the stimulations
+                                        % (input as [-Seconds_before_stim_1 -Seconds_before_stim_2])
+                                        % The window is only applied to the start of each trigger
+addOptional(p, 'posttrigwindow', []);   % Add data that are triggered after the last stimulation
+                                        % (intput as [Seconds_after_stim_1 Seconds_after_stim_2])
+                                        % The window is only applied to the start of each trigger
+
 % Sanity checking 
 addOptional(p, 'checkoptopulses', false); % Only used for sanity checking that 
                                           % the opto pulses are triggered correctly
@@ -65,7 +73,7 @@ for i = 1 : n_series
             % Without refiltering
             data_tmp = loaded.data2use_unfilt;
         else
-            % Refiltering
+            % Refiltering (also used for pre/post triggering below)
             data_tmp = filter(p.refilter, loaded.data2use_unfilt);
         end
         
@@ -155,6 +163,99 @@ for i = 1 : n_series
         datastruct(i).sloperemoved = fitinfo.p1;
     end
     
+    % Pre-trigger window
+    % (Skip this if we are checking opto)
+    if ~isempty(p.pretrigwindow) && ~p.checkoptopulses        
+        
+        % Get periodicity of indices
+        inds_per = round(mean(diff(loaded.inds(:,1),1)));
+        
+        % Pre-trigger
+        inds_pretrig = (p.pretrigwindow(1) * loaded.freq + loaded.inds(1,1) :...
+            inds_per : p.pretrigwindow(2) * loaded.freq + loaded.inds(1,1))';
+        inds_pretrig(:,2) = inds_pretrig(:,1) + loaded.l - 1;
+        
+        % Make sure nothing is out of bounds
+        inds_pretrig = inds_pretrig(inds_pretrig(:,1) > 0, :);
+        
+        % Pre-triggered data
+        pretrigmat = zeros(loaded.l, size(inds_pretrig,1));
+        for j = 1 : size(inds_pretrig,1)
+            if p.useunfiltered
+                pretrigmat(:,j) = data_tmp(inds_pretrig(j,1) : inds_pretrig(j,2));
+            else
+                pretrigmat(:,j) = loaded.data2use(inds_pretrig(j,1) : inds_pretrig(j,2));
+            end
+        end
+        
+        % zscore
+        if ~p.nozscore
+            pretrigmat = (pretrigmat - mu) / gamma;
+        end
+        
+        % Zero baseline
+        if p.zero_baseline % Zero baseline per sweep
+            % Baseline vector
+            baselinevec_pretrig = nanmean(pretrigmat(1 : loaded.prew_f, :), 1);
+            
+            % Triggered photometry data
+            pretrigmat = pretrigmat -...
+                ones(loaded.l, 1) * baselinevec_pretrig;
+        elseif p.zero_baseline_per_session % Once per session
+            pretrigmat = pretrigmat - baselineval;
+        end
+        
+        % Put the pre-triggered data in the structure
+        datastruct(i).photometry_pretrig = pretrigmat;
+    end
+    
+    % Post-trigger window
+    % (Skip this if we are checking opto)
+    if ~isempty(p.posttrigwindow) && ~p.checkoptopulses        
+        
+        % Get periodicity of indices
+        inds_per = round(mean(diff(loaded.inds(:,1),1)));
+        
+        % Post-trigger
+        inds_posttrig = (p.posttrigwindow(1) * loaded.freq + loaded.inds(end,2) :...
+            inds_per : p.posttrigwindow(2) * loaded.freq + loaded.inds(end,2))';
+        inds_posttrig(:,2) = inds_posttrig(:,1) + loaded.l - 1;
+        
+        % Make sure nothing is out of bounds
+        maxind = length(loaded.data2use);
+        inds_posttrig = inds_posttrig(inds_posttrig(:,2) <= maxind, :);
+        
+        % Post-triggered data
+        posttrigmat = zeros(loaded.l, size(inds_posttrig,1));
+        for j = 1 : size(inds_posttrig,1)
+            if p.useunfiltered
+                posttrigmat(:,j) = data_tmp(inds_posttrig(j,1) : inds_posttrig(j,2));
+            else
+                posttrigmat(:,j) = loaded.data2use(inds_posttrig(j,1) : inds_posttrig(j,2));
+            end
+        end
+        
+        % zscore
+        if ~p.nozscore
+            posttrigmat = (posttrigmat - mu) / gamma;
+        end
+        
+        % Zero baseline
+        if p.zero_baseline % Zero baseline per sweep
+            % Baseline vector
+            baselinevec_posttrig = nanmean(posttrigmat(1 : loaded.prew_f, :), 1);
+            
+            % Triggered photometry data
+            posttrigmat = posttrigmat -...
+                ones(loaded.l, 1) * baselinevec_posttrig;
+        elseif p.zero_baseline_per_session % Once per session
+            posttrigmat = posttrigmat - baselineval;
+        end
+        
+        % Put the post-triggered data in the structure
+        datastruct(i).photometry_posttrig = posttrigmat;
+    end
+    
     % Calculate average
     datastruct(i).photometry_trigavg = mean(datastruct(i).photometry_trig, 2);
     
@@ -169,7 +270,6 @@ for i = 1 : n_series
     
     % Load window info
     datastruct(i).window_info = [loaded.prew_f, loaded.postw_f, loaded.l];
-    
     
 end
 

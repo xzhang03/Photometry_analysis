@@ -19,12 +19,17 @@ addOptional(p, 'optolength', []); % Optolength (train)
 addOptional(p, 'usemedian', false); % Plot median instead of mean for the plot
 addOptional(p, 'yrange', []); % y range for plotting
 
+% Nans and other keep criteria
 addOptional(p, 'removenans', true); % Remove nans or not
 addOptional(p, 'nantolerance', 0); % Remove trials with more than this fraction of nan data
 addOptional(p, 'keepc', {'order',[]}); % Criteria for keeping data (just a 1 x 2 cell)
 
+% Output settings
 addOptional(p, 'outputdata', false); % Output data
 addOptional(p, 'outputfs', 50); % Output Fs
+
+% Show pre/post triggered data instead
+addOptional(p, 'datatype', 'trig'); % Can specific 'pretrig' or 'posttrig'
                                                              
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -36,10 +41,25 @@ parse(p, varargin{:});
 p = p.Results;
 
 %% Grab a data matrix
-if isempty(p.datasets)
-    datamat = cell2mat({optostruct(:).photometry_trig});
-else
-    datamat = cell2mat({optostruct(p.datasets).photometry_trig});
+switch p.datatype
+    case 'trig'
+        if isempty(p.datasets)
+            datamat = cell2mat({optostruct(:).photometry_trig});
+        else
+            datamat = cell2mat({optostruct(p.datasets).photometry_trig});
+        end
+    case 'pretrig'
+        if isempty(p.datasets)
+            datamat = cell2mat({optostruct(:).photometry_pretrig});
+        else
+            datamat = cell2mat({optostruct(p.datasets).photometry_pretrig});
+        end
+    case 'posttrig'
+        if isempty(p.datasets)
+            datamat = cell2mat({optostruct(:).photometry_posttrig});
+        else
+            datamat = cell2mat({optostruct(p.datasets).photometry_posttrig});
+        end
 end
 
 % Flip if needed
@@ -51,7 +71,8 @@ end
 ntrials = size(datamat, 2);
     
 % Keep data as criteria
-if ~isempty(p.keepc{1,2})
+% (Skip this if we are plotting pre/post-triggered data)
+if ~isempty(p.keepc{1,2}) && strcmp(p.datatype, 'trig')
     % Calculate which datasets to keep
     keepvec = ones(ntrials, 1);
     nkeepc = size(p.keepc, 1);
