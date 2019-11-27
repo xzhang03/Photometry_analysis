@@ -52,23 +52,32 @@ ntrials = size(datamat, 2);
     
 % Keep data as criteria
 if ~isempty(p.keepc{1,2})
-    if isempty(p.datasets)
-        % vector for keeping stuff
-        keepvec_curr = cell2mat({optostruct(:).(p.keepc{1,1})})';
-    else
-        keepvec_curr = cell2mat({optostruct(p.datasets).(p.keepc{1,1})})';
+    % Calculate which datasets to keep
+    keepvec = ones(ntrials, 1);
+    nkeepc = size(p.keepc, 1);
+    
+    for i = 1 : nkeepc
+        if isempty(p.datasets)
+            % vector for keeping stuff
+            keepvec_curr = cell2mat({optostruct(:).(p.keepc{i,1})})';
+        else
+            keepvec_curr = cell2mat({optostruct(p.datasets).(p.keepc{i,1})})';
+        end
+
+        % Grab the critia
+        cri = p.keepc{i,2};
+
+        % Do the comparison
+        keepvec_curr = keepvec_curr * ones(1, length(cri)) ==...
+            ones(ntrials, 1) * cri;
+        keepvec_curr = sum(keepvec_curr, 2) > 0;
+        
+        % Update keep vector
+        keepvec = keepvec .* keepvec_curr;
     end
     
-    % Grab the critia
-    cri = p.keepc{1,2};
-    
-    % Do the comparison
-    keepvec_curr = keepvec_curr * ones(1, length(cri)) ==...
-        ones(ntrials, 1) * cri;
-    keepvec_curr = sum(keepvec_curr, 2) > 0;
-    
     % Update data
-    datamat = datamat(:, keepvec_curr);
+    datamat = datamat(:, keepvec > 0);
     
     % Update Number of trials
     ntrials = size(datamat, 2);

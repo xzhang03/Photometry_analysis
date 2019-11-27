@@ -113,6 +113,12 @@ for i = 1 : n_series
         
         % Remove
         datastruct(i).photometry_trig(:,currentbt) = [];
+        
+        % Number of stims
+        datastruct(i).nstims = loaded.n_optostims - length(currentbt);
+    else
+        % Number of stims
+        datastruct(i).nstims = loaded.n_optostims;
     end
     
     % Zero baseline
@@ -164,8 +170,7 @@ for i = 1 : n_series
     % Load window info
     datastruct(i).window_info = [loaded.prew_f, loaded.postw_f, loaded.l];
     
-    % Number of stims
-    datastruct(i).nstims = loaded.n_optostims;
+    
 end
 
 %% Additional stuff
