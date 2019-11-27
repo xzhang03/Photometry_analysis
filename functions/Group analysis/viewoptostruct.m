@@ -1,4 +1,4 @@
-function dataout = viewoptostruct(optostruct, varargin);
+function dataout = viewoptostruct(optostruct, varargin)
 % View opto structures
 % Dataout is a x-by-3 matrix of [mean SEM N].
 
@@ -24,6 +24,7 @@ addOptional(p, 'nantolerance', 0); % Remove trials with more than this fraction 
 addOptional(p, 'keepc', {'order',[]}); % Criteria for keeping data (just a 1 x 2 cell)
 
 addOptional(p, 'outputdata', false); % Output data
+addOptional(p, 'outputfs', 50); % Output Fs
                                                              
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -101,7 +102,6 @@ else
 end
 
 
-
 %% Plot
 % Plot
 figure('position',[200 50 600 600]);
@@ -160,9 +160,23 @@ ylabel('-F/F (z)')
 
 %% Output data
 if p.outputdata
+    % Sampling frequency (may move up later)
+    Fs = optostruct(1).Fs;
+    
+    % number of sweeps
     N_plotted = size(datamat,2);
     dataout = nanmean(datamat,2);
-    dataout(:,2) = nanstd(datamat,[],2) / sqrt(N_plotted);
+    dataout(:,2) = nanstd(datamat,[],2);
     dataout(:,3) = ones(size(datamat,1),1) * N_plotted;
+    
+    % Adjust output sampling rate if needed
+    if Fs ~= p.outputfs
+        dataout2 = tcpBin(dataout(:,1), Fs, p.outputfs, 'median');
+        dataout2(:,2) = tcpBin(dataout(:,2), Fs, p.outputfs, 'median');
+        dataout2(:,3) = tcpBin(dataout(:,3), Fs, p.outputfs, 'median');
+        
+        % Put the variable back
+        dataout = dataout2;
+    end
 end
 end
