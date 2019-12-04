@@ -184,9 +184,12 @@ switch AlignCfg.datasource
         end
 end
 
+% Deal with the nans
+ch_nans = isnan(ch1_to_fix) | isnan(ch2_to_fix);
+
 % Calculate pre-fitting error
-prefiterr = sqrt(mean((ch1_to_fix(~isnan(ch1_to_fix))...
-    - ch2_to_fix(~isnan(ch2_to_fix))).^2));
+prefiterr = sqrt(mean((ch1_to_fix(~ch_nans)...
+    - ch2_to_fix(~ch_nans)).^2));
 if ~QuietMode    
     disp(['Pre-fitting error (RMS): ', num2str(prefiterr)]);
 end
