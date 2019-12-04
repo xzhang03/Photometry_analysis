@@ -45,7 +45,7 @@ AlignCfg.lockin_Ch2 = 3;
 % final trace.
 AlignCfg.useprefilter = true; % On?
 AlignCfg.prefilterFreq = 8; % Pre-filter frequency?
-AlignCft.prefilterArtifactRange = 1 : 50;   % Number of points to remove if
+AlignCfg.prefilterArtifactRange = 1 : 50;   % Number of points to remove if
                                             % using prefiltering
                                             % (because artifacts)
 
@@ -236,8 +236,8 @@ if AlignCfg.useprefilter
         AlignCfg.prefilterFreq, freq, 1);
     
     % Remove the artifact range
-    ch1_for_fitting(AlignCft.prefilterArtifactRange) = NaN;
-    ch2_for_fitting(AlignCft.prefilterArtifactRange) = NaN;
+    ch1_for_fitting(AlignCfg.prefilterArtifactRange) = NaN;
+    ch2_for_fitting(AlignCfg.prefilterArtifactRange) = NaN;
 end
 
 % Pre-smooth if so chosen
