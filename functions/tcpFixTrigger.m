@@ -49,7 +49,7 @@ for i = 1 : n_series
     if p.add_opto
         if ~isfield(loaded_trig,'opto') || p.force_add_opto
             % Get opto
-            opto = loaded_prep.opto_pulse_table(:,2); %#ok<NASGU>
+            opto = loaded_prep.opto_pulse_table(:,2);
             
             % Add field
             loaded_trig.opto = opto;
