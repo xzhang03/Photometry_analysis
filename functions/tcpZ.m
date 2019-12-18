@@ -131,7 +131,7 @@ for mouseind = 1 : nmice
     end
     
     % Broadcast
-    fprintf('Z-value has been saved to the %s file of %s\n',...
+    fprintf('Z-value has been saved to the %s files of %s\n',...
             p.outputfiletype, mice_cell{mouseind});
 end
 end

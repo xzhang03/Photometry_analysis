@@ -12,9 +12,13 @@ addOptional(p, 'useunfiltered', false); % Use unfiltered data (and retrigger)
 addOptional(p, 'refilter', []); % Pass a filter to refilter data (only usable on unfiltered data)
 
 % zscore
+% The order of priorities is:
+% No sigma (if true) > External sigma (if provided as a scalar) > internal sigma (needs to be
+% found in the trig file) > freshly calculated trial-by-trial sigma
 addOptional(p, 'nozscore', false); % No zscore of data
 addOptional(p, 'zscore_firstpt', 50); % First point for zscore
 addOptional(p, 'externalsigma', []); % Feed a sigma for zscoring
+addOptional(p, 'useinternalsigma', false); % Use internal sigma (which is calculated through tcpZ)
 addOptional(p, 'badtrials', []); % Bad trials to remove (X by 2 matrix of [Session# Sweep#])
 
 % Baseline and slope
@@ -95,10 +99,16 @@ for i = 1 : n_series
     elseif ~p.checkoptopulses
         % Mean and std
         mu = nanmean(loaded.data2use(p.zscore_firstpt:end));
-        if isempty(p.externalsigma)
-            gamma = nanstd(loaded.data2use(p.zscore_firstpt:end));
+        
+        if ~isempty(p.externalsigma)
+            % Use the external sigma, which is a provided scalar value
+            gamma = p.externalsigma; 
+        elseif p.useinternalsigma
+            % Use the internal sigma, which is stored in the .mat file by
+            % tcpZ
+            gamma = loaded.Z(1);
         else
-            gamma = p.externalsigma;
+            gamma = nanstd(loaded.data2use(p.zscore_firstpt:end));
         end
         
         % Apply zscore
