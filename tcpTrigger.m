@@ -30,6 +30,11 @@ TrigCfg.postw = 28;
 % train
 TrigCfg.trainlength_threshold = 5;
 
+% Debugging variable (do not change)
+TrigCfg.DebugMode = false;
+if TrigCfg.DebugMode
+    TrigCfg.opto_on_offset = 1; % In seconds
+end
 %% IO
 % Work out outputpath
 [filename, filepath] = uigetfile(fullfile(defaultpath , '*_preprocessed.mat'));
@@ -80,6 +85,11 @@ ITI = opto_ons(train_ons(3)) - opto_ons(train_ons(2));
 % Determine the actual onsets of trains
 opto_ons = opto_ons(opto_isi > TrigCfg.trainlength_threshold * freq);
 
+% Apply offset in debugging mode
+if TrigCfg.DebugMode
+    opto_ons = opto_ons + TrigCfg.opto_on_offset * freq;
+end
+
 % See if any of the pulses is too close to the beginning or the end of the
 % session
 badstims = ((opto_ons - prew_f) <= 0) + ((opto_ons + postw_f) > n_points);
@@ -117,6 +127,7 @@ end
 trigmat_avg = mean(trigmat,2);
 
 %% Plot
+figure
 hold on
 plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg)
 plot([0 tl]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
