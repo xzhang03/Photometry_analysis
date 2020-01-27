@@ -36,8 +36,19 @@ while CollectMore
     % Get time text
     timetext = data{3};
     
-    % Remove left and right spaces and tabs
-    timetext = strtrim(timetext);
+    % If multiple rows, linearize them
+    if size(timetext,1) > 1
+        % Linearize (also remove left and right spaces and tabs)
+        timetexttemp = timetext;
+        timetext = strtrim(timetexttemp(1,:));
+        
+        for i = 2 : size(timetexttemp,1)
+            timetext = horzcat(timetext, sprintf('\t'), timetexttemp(i,:)); %#ok<AGROW>
+        end
+    else
+        % Remove left and right spaces and tabs
+        timetext = strtrim(timetext);
+    end
     
     % If empty, discard the entry
     if isempty(timetext)

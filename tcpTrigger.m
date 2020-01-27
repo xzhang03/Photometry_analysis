@@ -126,11 +126,53 @@ end
 % Calculate the average triggered results
 trigmat_avg = mean(trigmat,2);
 
+%% Deal with motion
+% Check if the running file is there
+runningfn = sprintf('%srunning.mat', filename(1:end-22));
+runningfn_full = fullfile(filepath, runningfn);
+
+if exist(runningfn_full, 'file')
+    % Load running data
+    running = load(runningfn_full, 'speed');
+    
+    % Upsample running data
+    speed_upsampled = TDresamp(running.speed', 'resample',...
+        n_points/length(running.speed));
+    
+    % Fix the number of points if needed
+    if length(speed_upsampled) > n_points
+        speed_upsampled = speed_upsampled(1:n_points);
+    elseif length(speed_upsampled) < n_points
+        speed_upsampled(end:end + n_points - length(speed_upsampled)) = 0;
+    end
+    
+    % Initialize a triggered speed matrix
+    speedmat = zeros(l, n_optostims);
+    for i = 1 : n_optostims
+        speedmat(:,i) = speed_upsampled(inds(i,1) : inds(i,2));
+    end
+
+    % Calculate the average triggered results
+    speedmat_avg = mean(speedmat,2);
+else
+    % Store empty speed matrices
+    speedmat = [];
+    speedmat_avg = [];
+end
+
 %% Plot
 figure
 hold on
 plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg)
 plot([0 tl]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
+
+% Plot running
+if exist(runningfn_full, 'file')
+    ylims = get(gca, 'YLim');
+    plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
+        speedmat_avg / max(speedmat_avg) * ylims(2));
+end
+
 hold off
 xlabel('time (s)')
 ylabel('Fluorescence')
@@ -138,4 +180,5 @@ ylabel('Fluorescence')
 %% Save  results
 save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
     'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
-    'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', 'exp_fit');
+    'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', 'exp_fit',...
+    'speedmat', 'speedmat_avg');

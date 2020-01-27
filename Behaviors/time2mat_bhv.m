@@ -18,6 +18,10 @@ if nargin < 5
             if nargin < 2
                 % Mouse
                 mouse = input('Mouse: ', 's');
+                
+                if nargin < 1
+                    A = exceltime;
+                end
             end
         end
     end
