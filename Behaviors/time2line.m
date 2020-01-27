@@ -37,7 +37,7 @@ minimallinelength = 0;
 % Line width
 Linewidth = 9;
 %% Make plot
-close(101)
+
 figure(101)
 hold on
 for i =1 : size(A,1)
