@@ -8,7 +8,7 @@ if nargin < 2
 end
 
 % Initialize loading cell
-loadingcell = cell(size(inputcell, 1), 6);
+loadingcell = cell(size(inputcell, 1), 7);
 
 for i = 1 : size(inputcell,1)
     % Mouse
@@ -59,6 +59,10 @@ for i = 1 : size(inputcell,1)
     % Preprocessed data name
     loadingcell{i,6} =...
         sprintf('%s-%s-%s-nidaq_preprocessed_trig.mat', mouse, date, runind);
+    
+    % running data name
+    loadingcell{i,7} =...
+        sprintf('%s-%s-%s-running.mat', mouse, date, runind);
 end
 
 end

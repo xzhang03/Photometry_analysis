@@ -11,9 +11,14 @@ addOptional(p, 'flatten_unfiltered', false); % Use the same exponential fit to f
 addOptional(p, 'add_opto', false); % Add opto pulses from the pre-processed data
 addOptional(p, 'force_add_opto', false); % Force add/redo the opto field
 
+addOptional(p, 'add_running', false); % Add running data
+addOptional(p, 'force_add_running', false); % For ce add/redo the running fields
+
 addOptional(p, 'reduce_opto', false); % Turn opto pulses from m-by-3 to m-by-1 arrays
 
-addOptional(p, 'checkfield', ''); % Add a field to check
+addOptional(p, 'checkfield', ''); % Add a field to check if missing
+
+
 
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -57,6 +62,63 @@ for i = 1 : n_series
             % Append and display
             save(Trig_fn, 'opto', '-append');
             fprintf('%s: added opto\n', loadingcell{i,6});
+        end
+    end
+    
+    % Add runnning
+    if p.add_running
+        if ~isfield(loaded_trig,'speedmat') || p.force_add_running
+            % See if running file exists
+            if exist(fullfile(loadingcell{i,1}, loadingcell{i,7}), 'file')
+                % Load running data
+                running = load(fullfile(loadingcell{i,1}, loadingcell{i,7}), 'speed');
+                
+                % Load number of points
+                n_points = load(fullfile(loadingcell{i,1}, loadingcell{i,4}), 'n_points');
+                n_points = n_points.n_points;
+                
+                % Load triggered_tmp
+                l = loaded_trig.l;
+                n_optostims = loaded_trig.n_optostims;
+                inds = loaded_trig.inds;
+                
+                % Upsample running data
+                speed_upsampled = TDresamp(running.speed', 'resample',...
+                    n_points/length(running.speed));
+
+                % Fix the number of points if needed
+                if length(speed_upsampled) > n_points
+                    speed_upsampled = speed_upsampled(1:n_points);
+                elseif length(speed_upsampled) < n_points
+                    speed_upsampled(end:end + n_points - length(speed_upsampled)) = 0;
+                end
+
+                % Initialize a triggered speed matrix
+                speedmat = zeros(l, n_optostims);
+                for j = 1 : n_optostims
+                    speedmat(:,j) = speed_upsampled(inds(j,1) : inds(j,2));
+                end
+
+                % Calculate the average triggered results
+                speedmat_avg = mean(speedmat,2);
+                
+                % Append and display
+                save(Trig_fn, 'speedmat', 'speedmat_avg', '-append');
+                fprintf('%s: added running\n', loadingcell{i,6});
+            else
+                speedmat = [];
+                speedmat_avg = [];
+                
+                % Append and display
+                save(Trig_fn, 'speedmat', 'speedmat_avg', '-append');
+                fprintf('%s: added empty running matricies\n', loadingcell{i,6});
+            end
+            
+            % Add field
+            loaded_trig.speedmat = speedmat;
+            loaded_trig.speedmata_avg = speedmat_avg;
+            
+            
         end
     end
     

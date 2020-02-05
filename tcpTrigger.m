@@ -167,7 +167,7 @@ plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg)
 plot([0 tl]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
 
 % Plot running
-if exist(runningfn_full, 'file')
+if ~isempty(speedmat_avg)
     ylims = get(gca, 'YLim');
     plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
         speedmat_avg / max(speedmat_avg) * ylims(2));
