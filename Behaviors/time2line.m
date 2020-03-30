@@ -6,7 +6,7 @@ defaultpath = '\\anastasia\data\behavior';
 
 %% IO
 % Which data files to look at {mouse, date, run}
-inputloadingcell = {'SZ04', 181225, 2};
+inputloadingcell = {'SZ313', 200218, 1};
 
 % Make actual loading cell
 loadingcell = mkloadingcell(inputloadingcell,defaultpath);
@@ -15,7 +15,8 @@ loadingcell = mkloadingcell(inputloadingcell,defaultpath);
 A = load (fullfile(loadingcell{1,1}, loadingcell{1,3}), 'A');
 A = A.A;
 
-
+% Time limit
+xlims = [0 5];
 %% Plot parameters
 % Row look up table
 rowLUT = [  0, 1; 0.5, NaN;...
@@ -63,7 +64,7 @@ for i =1 : size(A,1)
 end
 
 hold off
-xlim([0 30])
+xlim(xlims)
 ylim([0 7])
 
 xlabel('Time (min)','FontSize',14)

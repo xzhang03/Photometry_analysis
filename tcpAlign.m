@@ -62,7 +62,7 @@ AlignCfg.presmoothwindow = 10; % Window size for smoothing
 % the two channels. If used either before or after, the flattened results
 % will be used in the final trace. If you are only using parts of the trace
 % to align, you should set this to either 'post_flatten' or 'none';
-AlignCfg.flatten_mode = 'post_flatten';
+AlignCfg.flatten_mode = 'none';
 
 % =============================== Fit mode ================================
 %
@@ -78,7 +78,7 @@ AlignCfg.fit_mode = 'linear';
 % ============================ Post-filter info ===========================
 %
 % This filter will be used to filter the two channels
-AlignCfg.usepostfilter = true; % On?
+AlignCfg.usepostfilter = false; % On?
 AlignCfg.postfilterFreq = 8; % Post-filter frequency?
 
 %% IO

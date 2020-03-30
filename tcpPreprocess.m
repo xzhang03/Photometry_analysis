@@ -13,7 +13,7 @@ end
 
 
 % Opto genetic experiments (used to be called SINGLE_CHANNEL_MODE)
-OPTO_MODE = false;
+OPTO_MODE = true;
 
 % No pulse info (and no pulses are used during photometry)
 PULSE_SIM_MODE = false;
@@ -53,7 +53,7 @@ use_fnotch_60 = true;
 fnotch_60 = [59 61];
 
 % [ Black out points ] This will change the values that come out of your analysis!
-blackout_window = 9; % Ignore the first X points within each pulse due to capacitated currents
+blackout_window = 9; % Ignore the first X points within each pulse due to capacitated currents (9 for 2500 Hz)
 
 % Channel and frequency data
 freq = 50; % Sampling rate after downsampling (i.e., pulse rate of each channel in Hz)

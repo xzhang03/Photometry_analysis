@@ -81,7 +81,7 @@ else
     end
 
     A = reshape(A, 3, [])';
-    A = A(A(:,2) > 0, :);
+    A = A(A(:,3) > 0, :);
     
     if ~exist(fullfile(filepath_output, filename_output), 'file')
         % Save

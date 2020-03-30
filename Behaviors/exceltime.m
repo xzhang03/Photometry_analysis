@@ -84,6 +84,12 @@ while CollectMore
         % Locate string markers
         colonind = strfind(timetext, ':');
         tabind = regexp(timetext, '\t');
+        
+        % If no tab detected, check for space
+        if isempty(tabind)
+            tabind = regexp(timetext, ' ');
+        end
+        
         l = length(timetext);
         n = length(colonind);
         
