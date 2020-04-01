@@ -17,6 +17,8 @@ addOptional(p, 'zscore_firstpt', 50); % First point to calculate Z score
 
 addOptional(p, 'nchannels', 1); % Can be one or two channels
 
+addOptional(p, 'flattenbeforez', false); % Use single-exponential flattening before calculating z
+
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
     varargin = varargin{:};
@@ -64,12 +66,22 @@ for mouseind = 1 : nmice
                     'Ch1_filtered', 'Ch2_filtered');
                 
                 % Put data in cell (mean-subtracted)
-                datacell{ind, 1} = loaded.Ch1_filtered(p.zscore_firstpt : end)...
-                    - nanmean(loaded.Ch1_filtered(p.zscore_firstpt : end));
+                if p.flattenbeforez
+                    flattened = tcpFlatten(loaded.Ch1_filtered(p.zscore_firstpt : end));
+                    datacell{ind, 1} = flattened - nanmean(flattened);
+                else
+                    datacell{ind, 1} = loaded.Ch1_filtered(p.zscore_firstpt : end)...
+                        - nanmean(loaded.Ch1_filtered(p.zscore_firstpt : end));
+                end
                 
                 if p.nchannels == 2
-                    datacell{ind, 2} = loaded.Ch2_filtered(p.zscore_firstpt : end)...
-                        - nanmean(loaded.Ch2_filtered(p.zscore_firstpt : end));
+                    if p.flattenbeforez
+                        flattened = tcpFlatten(loaded.Ch2_filtered(p.zscore_firstpt : end));
+                        datacell{ind, 2} = flattened - nanmean(flattened);
+                    else
+                        datacell{ind, 2} = loaded.Ch2_filtered(p.zscore_firstpt : end)...
+                            - nanmean(loaded.Ch2_filtered(p.zscore_firstpt : end));
+                    end
                 end
                 
             case 'raw'
@@ -79,14 +91,24 @@ for mouseind = 1 : nmice
                     'ch1_data_table', 'ch2_data_table');
                 
                 % Put data in cell (mean-subtracted)
-                datacell{ind, 1} = ...
-                    loaded.ch1_data_table(p.zscore_firstpt : end,2)...
-                    - nanmean(loaded.ch1_data_table(p.zscore_firstpt : end,2));
+                if p.flattenbeforez
+                    flattened = tcpFlatten(loaded.ch1_data_table(p.zscore_firstpt : end,2));
+                    datacell{ind, 1} = flattened - nanmean(flattened);
+                else
+                    datacell{ind, 1} = ...
+                        loaded.ch1_data_table(p.zscore_firstpt : end,2)...
+                        - nanmean(loaded.ch1_data_table(p.zscore_firstpt : end,2));
+                end
                 
                 if p.nchannels > 1
-                    datacell{ind, 2} = ...
-                        loaded.ch2_data_table(p.zscore_firstpt : end,2)...
-                        - nanmean(loaded.ch2_data_table(p.zscore_firstpt : end,2));
+                    if p.flattenbeforez
+                        flattened = tcpFlatten(loaded.ch2_data_table(p.zscore_firstpt : end,2));
+                        datacell{ind, 2} = flattened - nanmean(flattened);
+                    else
+                        datacell{ind, 2} = ...
+                            loaded.ch2_data_table(p.zscore_firstpt : end,2)...
+                            - nanmean(loaded.ch2_data_table(p.zscore_firstpt : end,2));
+                    end
                 end
         end
     end

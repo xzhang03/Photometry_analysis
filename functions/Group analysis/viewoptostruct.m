@@ -124,8 +124,12 @@ if isempty(p.showX)
 elseif isscalar(p.showX)
     % If specifying the number of trials
     % Grab X number of trials
-    showind = randperm(ntrials, p.showX);
-    datamat2show = datamat(:, showind);
+    if p.showX < ntrials
+        showind = randperm(ntrials, p.showX);
+        datamat2show = datamat(:, showind);
+    else
+        datamat2show = datamat;
+    end
 else
     % If specifying the exact trial indices
     datamat2show = datamat(:, p.showX);
@@ -186,7 +190,11 @@ if ~isempty(p.optolength)
         'Color', [1 0 0], 'LineWidth', 2);
 end
 hold off
-ylabel('-F/F (z)')
+if p.flip_signal
+    ylabel('-F/F (z)')
+else
+    ylabel('F/F (z)')
+end
 
 %% Output data
 if p.outputdata

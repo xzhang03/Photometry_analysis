@@ -6,7 +6,7 @@ defaultpath = '\\anastasia\data\behavior';
 
 %% IO
 % Which data files to look at {mouse, date, run}
-inputloadingcell = {'SZ313', 200218, 1};
+inputloadingcell = {'SZ365', 200315, 1};
 
 % Make actual loading cell
 loadingcell = mkloadingcell(inputloadingcell,defaultpath);
@@ -16,7 +16,7 @@ A = load (fullfile(loadingcell{1,1}, loadingcell{1,3}), 'A');
 A = A.A;
 
 % Time limit
-xlims = [0 5];
+xlims = [0 15];
 %% Plot parameters
 % Row look up table
 rowLUT = [  0, 1; 0.5, NaN;...
