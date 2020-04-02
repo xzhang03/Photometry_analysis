@@ -29,7 +29,7 @@ tcpFixTrigger(inputloadingcell_MPOAdLightShamSatiated, 'defaultpath', defaultpat
 %}
 
 %% Get Zs
-%
+%{
 tcpZ([inputloadingcell_MPOAdLightNaive;inputloadingcell_MPOAdLightSatiated;...
     inputloadingcell_MPOAdLightShamSatiated], 'flattenbeforez', true,...
     'defaultpath', defaultpath);
@@ -50,10 +50,13 @@ Hd = design(d,'equiripple');
 
 %% View data struct experimental
 % 
+showind = [21,79,111,43,38,88,30,3,104,40,54,32,112,89,178,95,36,171,110,...
+    27,172,128,93,85,175,122,167,62,123,64,155,75,42,120,58,33,44,96,105,126,...
+    66,80,72,147,103,180,119,48,121,170];
 sets = [1 2 3 4 5 7 8 10 11 12 13 14 15 17 18 20 21 23 24];
 varargin_viewopto = {'datasets', sets, 'flip_signal', false, 'yrange', [],...
-    'heatmaprange', [-4 4], 'showX', [], 'optolength', 50, 'usemedian', false,...
-    'keepc', {'mouseid', 5; 'order', [1:10]}, 'outputdata', true, 'outputfs', 50, 'datatype', 'trig'};
+    'heatmaprange', [-4 4], 'showX', [showind], 'optolength', 50, 'usemedian', false,...
+    'keepc', {'order', [1:10]}, 'outputdata', true, 'outputfs', 50, 'datatype', 'trig'};
 out = viewoptostruct(datastruct_MPOAdLightNaive, varargin_viewopto);
 
 %% Make satiated data struct
