@@ -26,10 +26,12 @@ for i = 1 : 88
     Xs(i) = round(x);
 end
 %}
+
+
 %%
 clear
-load('D:\Dropbox\Andermann research\Matlab_files\Photometry bhvstructs\MPOA social full.mat')
-
+% load('D:\Dropbox\Andermann research\Matlab_files\Photometry bhvstructs\MPOA social full.mat')
+load('D:\Personal Dropbox\StephenZhangLab\Dropbox\Dropbox Server\Matlab_files\Photometry bhvstructs\MPOA social full.mat')
 
 
 %% Add a nan head
