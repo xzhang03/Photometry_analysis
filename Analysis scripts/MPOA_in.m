@@ -26,7 +26,7 @@ tcpCheck(inputloadingcell_paper);
 % Inputs
 varargin_pp = {'Fs_ds', 10, 'smooth_window', 0, 'zscore_badframes', 1 : 10,...
     'First_point', 1, 'BlankTime', 60, 'combinedzscore', false,...
-    'usedff', false, 'dffwindow', 40};
+    'usedff', true, 'dffwindow', 32};
 datastruct_paper_pp = ppdatastruct(datastruct_paper, varargin_pp);
 
 %% Make a sniffing construct

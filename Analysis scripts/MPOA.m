@@ -34,6 +34,9 @@ clear
 load('D:\Personal Dropbox\StephenZhangLab\Dropbox\Dropbox Server\Matlab_files\Photometry bhvstructs\MPOA social full.mat')
 
 
+%% Use sliding-window normalized version
+datastruct_social = datastruct_social_n;
+
 %% Add a nan head
 %
 for i = 1 : 88
