@@ -48,7 +48,7 @@ else
     % Clean up run
     if runnum < 10
         runstr = sprintf('00%i', runnum);
-    elseif runum < 100
+    elseif runnum < 100
         runstr = sprintf('0%i', runnum);
     else
         runstr = num2str(runnum);
