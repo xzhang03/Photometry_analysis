@@ -31,6 +31,36 @@ inputloadingcell_MPOAcaddisSCH = {'SZ226', 191215, 1; 'SZ226', 191216, 1;...
     'SZ246', 191215, 1; 'SZ246', 191216, 1;};
 tcpCheck(inputloadingcell_MPOAcaddisSCH, 'twocolor', false, 'headfixed', true);
 
+%% Check fits
+% index
+% ind = 16, 18, 19;
+ind = 19;
+
+% Loading cell
+if ~exist('loadingcell', 'var')
+    loadingcell = mkloadingcell(inputloadingcell_MPOAcaddisExpt, defaultpath);
+end
+
+% Load
+loaded = load(fullfile(loadingcell{ind,1}, loadingcell{ind,6}));
+
+% Stims
+nstims = length(loaded.opto_ons);
+stimpt = loaded.opto_ons(1);
+stimvec = zeros(length(loaded.exp_fit),1);
+for i = 1 : min(nstims, 40)
+    stimvec(stimpt:stimpt+245) = 1;
+    stimpt = stimpt + 1500;
+end
+
+% Plot
+data2plot = [(1:length(loaded.exp_fit))'/loaded.freq/60,...
+    loaded.data2use+loaded.exp_fit, loaded.exp_fit,stimvec];
+data2plot = downsample(data2plot,50);
+plot(data2plot(40:end,1),data2plot(40:end,2:end));
+
+loaded.Z
+
 %% Fix stuff
 %
 tcpFixTrigger(inputloadingcell_MPOAcaddisCont, 'defaultpath', defaultpath,...

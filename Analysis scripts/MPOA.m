@@ -74,7 +74,7 @@ Approachstruct = mkbhvstruct(datastruct_social_pp, varargin_Approach);
 %}
 %
 [bhvmat, eventlabel] = extbhvstruct(CloseExamstruct,...
-    {'useLN', false, 'pretrim', 10, 'posttrim', 10});
+    {'useLN', false, 'pretrim', 10, 'posttrim', 10, 'nantolerance', 1});
 %}
 %% Visualize sniff-trggered data
 % showvec = [2 4 5 6 7 8 9 13 15 16 19 20 23 28 31 33 34 35 38 39 40 41 42 56 58 63 64 65 72 73 75 76 77 78 79 80 84 85 86 88];

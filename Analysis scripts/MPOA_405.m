@@ -1,5 +1,5 @@
 %% Initialize
-
+clear
 % common path
 defaultpath = '\\anastasia\data\photometry';
 
@@ -18,14 +18,14 @@ tcpCheck(inputloadingcell_social, 'checkAmat', true);
 
 %% Make data struct
 % Social
-varargin_datastruct = {'loadisosbetic', false, 'defaultpath', defaultpath};
+varargin_datastruct = {'loadisosbestic', false, 'defaultpath', defaultpath};
 [datastruct_social_405, n_series_social_405] = mkdatastruct(inputloadingcell_social, varargin_datastruct);
 
 %% Postprocess photometry data
 % Inputs
-varargin_pp = {'Fs_ds', 10, 'smooth_window', 0, 'zscore_badframes', 1 : 10,...
+varargin_pp = {'Fs_ds', 50, 'smooth_window', 0, 'zscore_badframes', 1 : 10,...
     'First_point', 1, 'BlankTime', [], 'nozscore', false, 'externalsigma', [],...
-    'usedff', false};
+    'usedff', true};
 datastruct_social_405_pp = ppdatastruct(datastruct_social_405, varargin_pp);
 
 % 0.0481
@@ -37,8 +37,9 @@ varargin_CloseExamstruct = {'datafield','photometry','bhvfield', 'CloseExam',...
 CloseExamstruct_405 = mkbhvstruct(datastruct_social_405_pp, varargin_CloseExamstruct);
 
 %% Extract data
-%{
-[bhvmat, eventlabel] = extbhvstruct(CloseExamstruct_405, {'useLN', true});
+%
+[bhvmat, eventlabel] = extbhvstruct(CloseExamstruct_405,{'useLN', false,...
+    'pretrim', 10, 'posttrim', 10, 'nantolerance', 1});
 %}
 %% Visualize sniff-trggered data
 showvec = [51:60, 71:80, 81:90];

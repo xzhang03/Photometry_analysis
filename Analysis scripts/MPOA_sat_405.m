@@ -19,7 +19,7 @@ tcpCheck(inputloadingcell_social);
 % Inputs
 varargin_pp = {'Fs_ds', 10, 'smooth_window', 0, 'zscore_badframes', 1 : 10,...
     'First_point', 1, 'BlankTime', 60, 'combinedzscore', false,...
-    'usedff', false, 'nozscore', false, 'externalsigma', 0.0481};
+    'usedff', false, 'nozscore', false, 'externalsigma', []};
 datastruct_social_405_pp = ppdatastruct(datastruct_social_405, varargin_pp);
 % 0.0481
 %% Make a sniffing construct

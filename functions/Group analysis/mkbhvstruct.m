@@ -15,6 +15,7 @@ addOptional(p, 'pre_space', 5); % Length of time to include before the
 addOptional(p, 'post_space', 5);    % Length of time to include after the 
                                     % offset of behaviors.
 addOptional(p, 'BinMethod', 'mean'); % Method for binning
+addOptional(p, 'logstarttime', false); % Log when an action starts
 addOptional(p, 'trim_data', false); % Add a field that trims all the data
                                     % to the shortest length (so they are
                                     % readily concatenatable). The
@@ -114,6 +115,11 @@ for i = 1 : size(datastruct, 1)
         
         % Fill reverse order
         bhvstruct(ind).rorder = datastruct(i).(['n', p.bhvfield]) - j + 1;
+        
+        % Fill event start time
+        if p.logstarttime
+            bhvstruct(ind).eventtime = bhv_tab_temp(j, 1);
+        end
         
         % Fill data
         ind_start = bhv_tab_temp(j, 1) - Fs * p.pre_space;
