@@ -63,15 +63,16 @@ loaded.Z
 f = fit(data2plot(3:300,1),data2plot(3:300,2),'exp1');
 plot(f,data2plot(:,1),data2plot(:,2))
 %% Fix stuff
-%
+%{
 tcpFixTrigger(inputloadingcell_MPOAcaddisCont, 'defaultpath', defaultpath,...
     'flatten_unfiltered', true, 'add_opto', true, 'checkfield', '', 'reduce_opto', true);
 %}
 
 %% Get Zs
+%{
 tcpZ([inputloadingcell_MPOAcaddisExpt; inputloadingcell_MPOAcaddisCont;...
     inputloadingcell_MPOAcaddisSCH], 'defaultpath', defaultpath);
-
+%}
 %% Low-pass filter
 % Get a better filter
 d = fdesign.lowpass('Fp,Fst,Ap,Ast',7,9,0.5,40, 50);
@@ -92,7 +93,7 @@ Hd = design(d,'equiripple');
     mkoptostruct(inputloadingcell_MPOAcaddisCont, 'defaultpath', defaultpath,...
     'externalsigma', 0.15, 'zero_baseline', true, 'zero_baseline_per_session', true,...
     'badtrials', [11 1], 'linearleveling', false, 'useunfiltered', true, 'refilter', Hd,...
-    'pretrigwindow', [-240 -180]);
+    'pretrigwindow', [-240 -180], 'shuffledata', false);
 % 0.15
 
 %% Make SCH23390 data struct
@@ -102,7 +103,7 @@ Hd = design(d,'equiripple');
     'externalsigma', 0.06, 'zero_baseline', true, 'zero_baseline_per_session', true,...
     'badtrials', [6 7; 6 8], 'linearleveling', false, 'useunfiltered', true,...
     'refilter', Hd, 'checkoptopulses', false, 'pretrigwindow', [-240 -180],...
-    'posttrigwindow', [300 420], 'useinternalsigma', true);
+    'useinternalsigma', true);
 % 0.06
 %% View data struct experimental
 sets = [1 3 4 7 8 9 11 12 13 14 15 16 18 19 20 21 22 23 24 25 26 28 29 31 32 33 34 35 36 37 38];
@@ -118,7 +119,7 @@ viewoptostruct(datastruct_MPOAcaddisExpt, varargin_viewopto);
 varargin_viewopto = {'datasets', [7 8 9 10 11], 'flip_signal', true, 'yrange', [],...
     'heatmaprange', [-1 1], 'showX', [], 'optolength', 248, 'usemedian', false,...
     'keepc', {'order', []}, 'outputdata', true, 'outputfs', 10,...
-    'datatype', 'trig'};
+    'datatype', 'shuffletrig'};
 viewoptostruct(datastruct_MPOAcaddisCont, varargin_viewopto);
 
 %% View data struct SCH23390
@@ -128,15 +129,4 @@ varargin_viewopto = {'datasets', [], 'flip_signal', true, 'yrange', [],...
     'datatype', 'trig'};
 viewoptostruct(datastruct_MPOAcaddisSCH, varargin_viewopto);
 
-%% Overall data
-% Obsolete
-varargin_optotraces = {'defaultpath', defaultpath, 'externalsigma', [], 'zscore_firstpt', 500,...
-    'prestimfitinfo', true, 'prestimslope_firstpt', 1200, 'Fs', 50, 'usedff', false};
-[optotraces_MPOAcaddisExpt, ~] = mkoptotraces(inputloadingcell_MPOAcaddisExpt, varargin_optotraces);
 
-%% View overall data
-% Obsolete
-% 4 5 6 9 12 13 16
-varargin_viewoptotraces = {'datasets', [4 5 6 9 12 13 16], 'flip_signal', true, 'usemedian', false,...
-    'yrange', [-4 1]};
-viewoptotraces(optotraces_MPOAcaddisExpt, varargin_viewoptotraces);

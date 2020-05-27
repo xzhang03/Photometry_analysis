@@ -29,7 +29,7 @@ addOptional(p, 'outputdata', false); % Output data
 addOptional(p, 'outputfs', 50); % Output Fs
 
 % Show pre/post triggered data instead
-addOptional(p, 'datatype', 'trig'); % Can specific 'pretrig' or 'posttrig'
+addOptional(p, 'datatype', 'trig'); % Can specify 'pretrig' or 'posttrig' or 'shuffletrig'
                                                              
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -59,6 +59,12 @@ switch p.datatype
             datamat = cell2mat({optostruct(:).photometry_posttrig});
         else
             datamat = cell2mat({optostruct(p.datasets).photometry_posttrig});
+        end
+    case 'shuffletrig'
+        if isempty(p.datasets)
+            datamat = cell2mat({optostruct(:).photometry_shuffletrig});
+        else
+            datamat = cell2mat({optostruct(p.datasets).photometry_shuffletrig});
         end
 end
 

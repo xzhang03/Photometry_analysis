@@ -26,7 +26,7 @@ addOptional(p, 'zero_baseline', false); % Add a Y-offset to zero the pre-stim ba
 addOptional(p, 'zero_baseline_per_session', true); % Zero baseline once per session (Using median
                                                    % from the first or later sweep)
 addOptional(p, 'trialtozero', 1); % If only zeroing baseline once per sessoin, which sweep to use?
-addOptional(p, 'linearleveling', false); % Use pre-stim data to linearly fix slope.
+addOptional(p, 'linearleveling', false); % Use pre-stim data to linearly fix slope. Use with caution.
 
 % Extra triggers
 addOptional(p, 'pretrigwindow', []);    % Add data that are triggered before the onset of the stimulations
@@ -36,6 +36,10 @@ addOptional(p, 'posttrigwindow', []);   % Add data that are triggered after the 
                                         % (intput as [Seconds_after_stim_1 Seconds_after_stim_2])
                                         % The window is only applied to the start of each trigger
 
+% Shuffle for stats
+addOptional(p, 'shuffledata', false); % Add a field of shuffled photometry data for stats.
+addOptional(p, 'shuffle_n', []); % Number of trials in shuffle; leave empty to match the n of triggered sessions
+                                        
 % Sanity checking 
 addOptional(p, 'checkoptopulses', false); % Only used for sanity checking that 
                                           % the opto pulses are triggered correctly
@@ -264,6 +268,52 @@ for i = 1 : n_series
         
         % Put the post-triggered data in the structure
         datastruct(i).photometry_posttrig = posttrigmat;
+    end
+    
+    % Shuffle
+    if p.shuffledata && ~p.checkoptopulses
+        % Min and max inds
+        maxind = length(loaded.data2use) - loaded.postw_f;
+        minind = loaded.prew_f + 1;
+        
+        % N
+        if isempty(p.shuffle_n)
+            p.shuffle_n = size(trigmat,2);
+        end
+        
+        % Shuffle inds
+        shuffleinds = randi(maxind, [p.shuffle_n, 1]);
+        shuffleinds = [shuffleinds - loaded.prew_f, shuffleinds + loaded.postw_f];
+        
+        % Post-triggered data
+        shuffletrigmat = zeros(loaded.l, p.shuffle_n);
+        for j = 1 : p.shuffle_n
+            if p.useunfiltered
+                shuffletrigmat(:,j) = data_tmp(shuffleinds(j,1) : shuffleinds(j,2));
+            else
+                shuffletrigmat(:,j) = loaded.data2use(shuffleinds(j,1) : shuffleinds(j,2));
+            end
+        end
+        
+        % zscore
+        if ~p.nozscore
+            shuffletrigmat = (shuffletrigmat - mu) / gamma;
+        end
+        
+        % Zero baseline
+        if p.zero_baseline % Zero baseline per sweep
+            % Baseline vector
+            baselinevec_shuffletrig = nanmean(shuffletrigmat(1 : loaded.prew_f, :), 1);
+            
+            % Triggered photometry data
+            shuffletrigmat = shuffletrigmat -...
+                ones(loaded.l, 1) * baselinevec_shuffletrig;
+        elseif p.zero_baseline_per_session % Once per session
+            shuffletrigmat = shuffletrigmat - baselineval;
+        end
+        
+        % Put the post-triggered data in the structure
+        datastruct(i).photometry_shuffletrig = shuffletrigmat;
     end
     
     % Calculate average
