@@ -34,7 +34,7 @@ tcpCheck(inputloadingcell_MPOAcaddisSCH, 'twocolor', false, 'headfixed', true);
 %% Check fits
 % index
 % ind = 16, 18, 19;
-ind = 19;
+ind = 21;
 
 % Loading cell
 if ~exist('loadingcell', 'var')
@@ -49,18 +49,19 @@ nstims = length(loaded.opto_ons);
 stimpt = loaded.opto_ons(1);
 stimvec = zeros(length(loaded.exp_fit),1);
 for i = 1 : min(nstims, 40)
-    stimvec(stimpt:stimpt+245) = 1;
+    stimvec(stimpt:stimpt+200) = 1;
     stimpt = stimpt + 1500;
 end
 
 % Plot
-data2plot = [(1:length(loaded.exp_fit))'/loaded.freq/60,...
-    loaded.data2use+loaded.exp_fit, loaded.exp_fit,stimvec];
-data2plot = downsample(data2plot,50);
-plot(data2plot(40:end,1),data2plot(40:end,2:end));
+% data2plot = [(1:length(loaded.exp_fit))'/loaded.freq/60,...
+%     loaded.data2use+loaded.exp_fit, loaded.exp_fit,stimvec];
+% data2plot = downsample(data2plot,50);
+% plot(data2plot(40:end,1),data2plot(40:end,2:end));
 
 loaded.Z
-
+f = fit(data2plot(3:300,1),data2plot(3:300,2),'exp1');
+plot(f,data2plot(:,1),data2plot(:,2))
 %% Fix stuff
 %
 tcpFixTrigger(inputloadingcell_MPOAcaddisCont, 'defaultpath', defaultpath,...
