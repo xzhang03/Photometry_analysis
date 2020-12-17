@@ -13,7 +13,7 @@ end
 
 
 % Opto genetic experiments (used to be called SINGLE_CHANNEL_MODE)
-OPTO_MODE = true;
+OPTO_MODE = false;
 
 % No pulse info (and no pulses are used during photometry)
 PULSE_SIM_MODE = false;
@@ -41,7 +41,7 @@ else
 
     % Channel info
     ch1_pulse_ind = 2; % Where to grab wavelength 1's pulse info
-    ch2_pulse_ind = 5; % Where to grab wavelength 2's pulse info
+    ch2_pulse_ind = 6; % Where to grab wavelength 2's pulse info
 
     % Channel thresholds (mostly depends on whether digital or analog)
     ch1_pulse_thresh = 2;
