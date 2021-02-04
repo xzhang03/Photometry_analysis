@@ -1,4 +1,4 @@
-function data_out = datasplitter(data_in, ind_matrix, dim)
+function data_out = datasplitter_multi(data_in, ind_matrix, dim)
 % datasplitter take out data based on the (m-by-2) index matrix of
 % [start_index, end_index].
 % data_out = datasplitter(data_in, ind_matrix, dim)

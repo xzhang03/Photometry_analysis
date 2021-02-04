@@ -1,4 +1,4 @@
-function outputmat = exceltime()
+function outputmat = exceltime(varargin)
 % exceltime converts excel time to decimal times in units of minutes.
 % Output is a m x 3 matrix, in which the colums are [Code, Start_time,
 % End_time].
@@ -6,14 +6,38 @@ function outputmat = exceltime()
 % Stephen Zhang 2020/01/27
 
 %% Settings
-% Assume time input is min:sec (can be changed to hour:min)
-timeformat = 'min:sec';
+if nargin < 1
+    % Assume time input is min:sec (can be changed to hour:min)
+    timeformat = 'min:sec';
 
-% Default values
-Defaultt0 = '0:03';
-DefaultCode = '0';
-DefaultPaste = '';
+    % Default values
+    Defaultt0 = '0:03';
+    DefaultCode = '0';
+    DefaultPaste = '';
+else
+    % Parse inputs
+    p = inputParser;
+    
+    addOptional(p, 'timeformat', 'min:sec');
+    addOptional(p, 'Defaultt0', '0:03');
+    addOptional(p, 'DefaultCode', '0');
+    addOptional(p, 'DefaultPaste', '');
+    
+    % Unpack if needed
+    if iscell(varargin) && size(varargin,1) * size(varargin,2) == 1
+        varargin = varargin{:};
+    end
 
+    parse(p, varargin{:});
+    p = p.Results;
+    
+    % Get settings
+    timeformat = p.timeformat;
+    Defaultt0 = p.Defaultt0;
+    DefaultCode = p.DefaultCode;
+    DefaultPaste = p.DefaultPaste;
+    
+end
 %% Initialize
 % Flag variables
 CollectMore = true;
@@ -76,7 +100,7 @@ while CollectMore
         switch timeformat
             case 'min:sec'
                 t0 = min0 + sec0 / 60;
-            case 'house:sec'
+            case 'hour:min'
                 t0 = min0 * 60 + sec0;
         end
         

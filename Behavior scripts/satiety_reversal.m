@@ -7,8 +7,8 @@ defaultpath = '\\anastasia\data\behavior';
 %% 0 day no stim
 % Which data files to look at {mouse, date, run}
 % 0 day baseline (should update in the future)
-baselineloadingcell = {'SZ05', 181225, 2; 'SZ05', 181225, 3; 'SZ04', 190131, 2;...
-    'SZ06', 190106, 2; 'SZ07', 190119, 2};
+baselineloadingcell = {'SZ438', 200623, 2; 'SZ439', 200623, 2; 'SZ440', 200623, 2;...
+    'SZ448', 200623, 2; 'SZ439', 200623, 2; 'SZ441', 200625, 2};
 
 i = 5;
 

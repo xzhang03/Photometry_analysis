@@ -21,6 +21,11 @@ tcpCheck(inputloadingcell_social, 'checkAmat', true);
 varargin_datastruct = {'loadisosbestic', false, 'defaultpath', defaultpath};
 [datastruct_social, n_series_social] = mkdatastruct(inputloadingcell_social, varargin_datastruct);
 
+%% Time to line
+index = 11;
+varargin_time2line = {'bhvfield', 'CloseExam', 'minlength', 0.2};
+time2line_photometry(datastruct_social, index, varargin_time2line);
+
 %% Postprocess photometry data
 % Inputs
 varargin_pp = {'Fs_ds', 50, 'smooth_window', 0, 'zscore_badframes', 1 : 10,...

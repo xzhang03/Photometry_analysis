@@ -44,6 +44,6 @@ CloseExamstruct_sat = mkbhvstruct(datastruct_sat_pp, varargin_bhvstruct);
 % Match
 VecNaive = [CloseExamstruct_naive(:).eventtime]';
 VecSat = [CloseExamstruct_sat(:).eventtime]';
-[Naive_matchtime, Sat_matchtime] = matchbhvonsets(VecNaive, test, 50 * 2);
+[Naive_matchtime, Sat_matchtime] = matchbhvonsets(VecNaive, VecSat, 50 * 2);
 
 scatter(VecNaive(Naive_matchtime(Naive_matchtime > 0)),test(Sat_matchtime));

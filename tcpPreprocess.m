@@ -2,13 +2,16 @@
 % Stephen Zhang 2019/07/30
 
 % Use previous path if exists
-if ~exist('filepath', 'var')
+if exist('filepath', 'var')
+    defaultpath = filepath;
+    keep defaultpath
+elseif exist('filepath2', 'var')
+    defaultpath = filepath2;
+    keep defaultpath
+else
     clear
     % common path
     defaultpath = '\\anastasia\data\photometry';
-else
-    defaultpath = filepath;
-    keep defaultpath
 end
 
 
@@ -22,7 +25,7 @@ if  OPTO_MODE
     % Single channel recording
     % Where to grab data
     data_channel = 3;
-    opto_channel = 5;
+    opto_channel = 6;
     
     % Channel info
     ch1_pulse_ind = 2; % Where to grab wavelength 1's pulse info

@@ -1,5 +1,6 @@
 function time2mat(A, filepath)
-% time2mat convert scoring data to behavioral matrix
+% time2mat convert scoring data to behavioral matrix and save to photometry
+% data
 % time2mat(A, filepath)
 
 %% Initialization

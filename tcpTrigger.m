@@ -18,7 +18,7 @@ TrigCfg.flatten_data = true;
 TrigCfg.ch1_pulse_ind = 2; 
 
 % Opto pulses
-TrigCfg.opto_channel = 5;
+TrigCfg.opto_channel = 6;
 TrigCfg.minpulsewidth = 5; % Minimal number of data points (in NIDAQ sample rate)
                            % to be considered a real opto pulse (preventing falsely binarized opto data);
 
