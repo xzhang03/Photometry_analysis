@@ -78,7 +78,9 @@ if ~p.useLN
         bhvmat(:, i) = [bhvstruct(i).data(ind1:ind2); nan(taill, 1)];
         
         % Event label
-        eventlabel(ind1:ind2, i) = 1;
+        eventlabel(p.pretrim * Fs + 1 : ...
+            min(bhvstruct(i).bhvind(2),l)...
+            - bhvstruct(i).bhvind(1) + p.pretrim * Fs + 1, i) = 1;
     end
 end
 
