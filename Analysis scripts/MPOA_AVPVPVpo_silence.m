@@ -21,7 +21,7 @@ inputloadingcell_c21 =...
 tcpCheck(inputloadingcell_c21, 'checkAmat', true);
 %% Make data struct
 % Social
-varargin_datastruct = {'loadisosbestic', false, 'defaultpath', defaultpath};
+varargin_datastruct = {'loadisosbestic', true, 'defaultpath', defaultpath};
 [datastruct_ctrl, n_series_ctrl] = mkdatastruct(inputloadingcell_ctrl, varargin_datastruct);
 [datastruct_c21, n_series_c21] = mkdatastruct(inputloadingcell_c21, varargin_datastruct);
 %% Time to line
@@ -33,7 +33,7 @@ time2line_photometry(datastruct_c21, index, varargin_time2line);
 % Inputs
 varargin_pp = {'Fs_ds', 50, 'smooth_window', 0, 'zscore_badframes', 1 : 10,...
     'First_point', 1, 'BlankTime', [], 'nozscore', false, 'externalsigma', [],...
-    'usedff', false, 'combinedzscore', false};
+    'usedff', true, 'combinedzscore', false};
 datastruct_ctrl_pp = ppdatastruct(datastruct_ctrl, varargin_pp);
 datastruct_c21_pp = ppdatastruct(datastruct_c21, varargin_pp);
 
@@ -46,7 +46,7 @@ CloseExamstruct_ctrl = mkbhvstruct(datastruct_ctrl_pp, varargin_CloseExamstruct)
 CloseExamstruct_c21 = mkbhvstruct(datastruct_c21_pp, varargin_CloseExamstruct);
 %% Extract data
 [bhvmat, eventlabel] = extbhvstruct(CloseExamstruct_c21, ...
-    {'useLN', false, 'pretrim', 15, 'posttrim', 15});
+    {'useLN', false, 'pretrim', 10, 'posttrim', 10});
 
 %% Visualize sniff-trggered data control
 % Input
