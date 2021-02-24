@@ -2,13 +2,24 @@ function loadingcell = mkloadingcell(inputcell, genpath)
 % mkloadingcell makes a loading cell for pathing. Inputcell should be in
 % the format of {mouse, date, run}.
 % loadingcell = mkloadingcell(inputcell, genpath)
+% Columnes are:
+% 1. Path
+% 2. Fixed photometry (aligned)
+% 3. A mat
+% 4. Preprocessed photometry (before alignment)
+% 5. Raw photometry
+% 6. Triggered photometry
+% 7. Running
+% 8. DLC
+
+
 
 if nargin < 2
     genpath = '\\anastasia\data\photometry';
 end
 
 % Initialize loading cell
-loadingcell = cell(size(inputcell, 1), 7);
+loadingcell = cell(size(inputcell, 1), 8);
 
 for i = 1 : size(inputcell,1)
     % Mouse
@@ -63,6 +74,10 @@ for i = 1 : size(inputcell,1)
     % running data name
     loadingcell{i,7} =...
         sprintf('%s-%s-%s-running.mat', mouse, date, runind);
+    
+    % DLC data name
+    loadingcell{i,8} =...
+        sprintf('%s-%s-%s-nidaq_DLC.mat', mouse, date, runind);
 end
 
 end

@@ -10,6 +10,7 @@ addOptional(p, 'headfixed', false); % Head fix mode (no A mat and with triggers)
 
 % A mat check and fixing
 addOptional(p, 'checkAmat', false); % Open and check A mats (will take longer)
+addOptional(p, 'checkDLC', false); % Check DLC files exist
 addOptional(p, 'RangeRatioThresh', 1.3); % When the warn that the ratios are off
 addOptional(p, 'AskToFixAmat', true);
 
@@ -31,7 +32,8 @@ n_expts = size(inputloadingcell, 1);
 % Flag (0 - good, 1 - no experiment, 2 - no preprocess, 3 - no align)S
 % Second column for behavior file: 1 - exist
 % Third column for opto (triggered): 1 - exist
-Flags = nan(n_expts, 3);
+% Fourth column for DLC: 1 - exist
+Flags = nan(n_expts, 4);
 
 % Start
 fprintf('========== Checking %i experiments ==========\n', n_expts);
@@ -59,6 +61,9 @@ for i = 1 : n_expts
     
     % Check triggered opto file
     Flags(i, 3) = exist(fullfile(loadingcell{i, 1}, loadingcell{i, 6}), 'file');
+    
+    % DLC
+    Flags(i, 4) = exist(fullfile(loadingcell{i, 1}, loadingcell{i, 8}), 'file');
     
     % Grab name
     experiment_name = loadingcell{i,2};
@@ -132,6 +137,14 @@ for i = 1 : n_expts
         % No opto trig flie
         if Flags(i, 3) == 0
             fprintf('%s: missing triggered opto file\n', experiment_name);
+        end
+    end
+    
+    % DLC
+    if p.checkDLC
+        % No opto trig flie
+        if Flags(i, 4) == 0
+            fprintf('%s: missing DLC file\n', experiment_name);
         end
     end
 end

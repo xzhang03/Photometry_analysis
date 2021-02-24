@@ -104,6 +104,8 @@ for i = 1 : nseries
             binneddata(:,i) = mean(binneddata_tensor(:,:,i), 1)';
         case 'median'
             binneddata(:,i) = median(binneddata_tensor(:,:,i), 1)';
+        case 'nanmedian'
+            binneddata(:,i) = median(binneddata_tensor(:,:,i), 1, 'omitnan')';
         case 'downsample'
             binneddata(:,i) = binneddata_tensor(ds_ind,:,i)';
         case 'max'

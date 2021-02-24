@@ -14,7 +14,8 @@ tcpCheck(inputloadingcell_social, 'checkAmat', true);
 
 %% Make data struct
 % Social
-varargin_datastruct = {'loadisosbestic', false, 'defaultpath', defaultpath};
+varargin_datastruct = {'sourcetype', 'table', 'defaultpath', defaultpath,...
+    ''};
 [datastruct_social, n_series_social] = mkdatastruct(inputloadingcell_social, varargin_datastruct);
 
 %% Time to line
