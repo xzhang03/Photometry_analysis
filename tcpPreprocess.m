@@ -16,7 +16,7 @@ end
 
 
 % Opto genetic experiments (used to be called SINGLE_CHANNEL_MODE)
-OPTO_MODE = false;
+OPTO_MODE = true;
 
 % No pulse info (and no pulses are used during photometry)
 PULSE_SIM_MODE = false;
@@ -188,7 +188,7 @@ end
 if OPTO_MODE
     % Grab the pulses
     opto_pulse_table = tcpDatasnapper(data(opto_channel,:),...
-        data(data_channel,:), 'max', 'pulsetopulse');
+        data(ch1_pulse_ind,:), 'max', 'pulsetopulse');
     
     % Sync the number of pulses
     opto_pulse_table = opto_pulse_table(1 : n_points, :);
