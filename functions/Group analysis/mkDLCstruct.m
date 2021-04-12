@@ -9,9 +9,9 @@ addOptional(p, 'defaultpath', '\\anastasia\data\photometry'); % Defaul where to 
 
 % Loading parameters
 addOptional(p, 'sourcetype', 'table'); % Source type: table or mat
-addOptional(p, 'poscolumn', 1); % Positional column
+addOptional(p, 'speedcolumn', 5); % Positional column
 addOptional(p, 'distcolumn', 3); % Which column to read for disntace
-addOptional(p, 'confcolumn', 4); % Which column is the DLC confidence column
+addOptional(p, 'confcolumn', 8); % Which column is the DLC confidence column
 addOptional(p, 'fps', 30); % I think this is manual for now
 
 % Unpack if needed
@@ -31,7 +31,7 @@ loadingcell = mkloadingcell(inputloadingcell, p.defaultpath);
 n_series = size(loadingcell, 1);
 
 % Initialize
-DLCstruct = struct('dist', 0, 'pos', 0, 'speed', 0, 'conf', 0, 'fps', p.fps, 'behavior', 0,...
+DLCstruct = struct('dist', 0, 'speed', 0, 'conf', 0, 'fps', p.fps, 'behavior', 0,...
     'FemInvest', 0, 'CloseExam', 0, 'Mount', 0, 'Introm', 0, 'Transfer', 0,...
     'Escape', 0, 'Dig', 0, 'Feed', 0, 'LBgroom', 0, 'UBgroom', 0,...
     'nFemInvest', 0, 'nCloseExam', 0, 'nMount', 0, 'nIntrom', 0,...
@@ -53,7 +53,7 @@ for i = 1 : n_series
     
     % Save
     DLCstruct(i).dist = DLC(:,p.distcolumn);
-    DLCstruct(i).pos = DLC(:,p.poscolumn);
+    DLCstruct(i).speed = DLC(:,p.speedcolumn);
     DLCstruct(i).conf = DLC(:,p.confcolumn);
     
     % Load behavior things

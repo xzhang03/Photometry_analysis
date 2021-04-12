@@ -31,30 +31,26 @@ for i = 1 : n
     % Apply confidence threshold
     dist = DLCstruct(i).dist;
     dist(DLCstruct(i).conf < p.conf_thresh) = nan;
-    pos = DLCstruct(i).pos;
-    pos(DLCstruct(i).conf < p.conf_thresh) = nan;
+    speed = DLCstruct(i).speed;
+    speed(DLCstruct(i).conf < p.conf_thresh) = nan;
     conf = DLCstruct(i).conf;
     conf(DLCstruct(i).conf < p.conf_thresh) = nan;
         
     % Bin
     dist = tcpBin(dist, DLCstruct(i).fps, p.Fs_ds, p.dsmethod, 1, true);
-    pos = tcpBin(pos, DLCstruct(i).fps, p.Fs_ds, p.dsmethod, 1, true);
+    speed = tcpBin(speed, DLCstruct(i).fps, p.Fs_ds, p.dsmethod, 1, true);
     conf = tcpBin(conf, DLCstruct(i).fps, p.Fs_ds, p.dsmethod, 1, true);
     
     % Smooth if asked
     if p.smooth_window > 1
         dist = smooth(dist, p.smooth_window);
-        pos = smooth(pos, p.smooth_window);
+        speed = smooth(speed, p.smooth_window);
         conf = smooth(conf, p.smooth_window);
     end
     
-    % Get speed
-    speed = abs(diff(pos));
-    speed(end+1) = nan;
-    
     % Save
     DLCstruct_pp(i).dist = dist;
-    DLCstruct_pp(i).pos = pos;
+    DLCstruct_pp(i).pos = speed;
     DLCstruct_pp(i).conf = conf;
     DLCstruct_pp(i).speed = speed;
     DLCstruct_pp(i).fps = p.Fs_ds;

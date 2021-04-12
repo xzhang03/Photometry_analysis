@@ -112,7 +112,7 @@ linfit = fit(datamat(:,1), datamat(:,2), 'poly1');
 
 % Plot
 figure
-plot(linfit, datamat(:,1), datamat(:,2), 'o');
+plot(linfit, datamat(:,1), datamat(:,2), '.');
 xlabel('Photometry data');
 ylabel('DLC data');
 title(sprintf('Correlation = %1.3f', R));
