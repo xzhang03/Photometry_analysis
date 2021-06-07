@@ -24,3 +24,5 @@ $RECYCLE.BIN/
 
 # My ignores
 Legacy_no_git/
+Analysis scripts/
+Behavior scripts/

@@ -44,7 +44,7 @@ else
 
     % Channel info
     ch1_pulse_ind = 2; % Where to grab wavelength 1's pulse info
-    ch2_pulse_ind = 6; % Where to grab wavelength 2's pulse info
+    ch2_pulse_ind = 6; % Where to grab wavelength 2's pulse info. Usually 6 or 9
 
     % Channel thresholds (mostly depends on whether digital or analog)
     ch1_pulse_thresh = 2;
@@ -119,7 +119,7 @@ else
     data_notch = data(data_channel,:);
 end
 
-% Apply another filter to filter out stim artifacts if neded
+% Apply another filter to filter out stim artifacts if needed
 if OPTO_MODE
     if filt_stim
         d_notch_stim = designfilt('bandstopiir','FilterOrder',2, 'HalfPowerFrequency1',...

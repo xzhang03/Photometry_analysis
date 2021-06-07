@@ -54,6 +54,12 @@ switch method
                 min(input_vec(pulse_table(i,1) :...
                 (pulse_table(i,1) + pulse_table(i,3) - 1)));
         end
+    case 'sum' % sum method
+        for i = 1 : n_points
+            pulse_table(i,2) = ...
+                sum(input_vec(pulse_table(i,1) :...
+                (pulse_table(i,1) + pulse_table(i,3) - 1)));
+        end
 end
 
 

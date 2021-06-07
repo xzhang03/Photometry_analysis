@@ -4,7 +4,8 @@ function binneddata = tcpBin(inputdata, inputFs, outputFs, method, dim, QuietMod
 % the form of a fraction. tcpBin can also be used to upsample data;
 % binneddata = tcpBin(inputdata, inputFs, outputFs, method, dim, QuietMode)
 % intputdata: 1 or 2 dimensional data
-% method: a string that can be 'mean', 'median', 'downsample', 'max', 'min'
+% method: a string that can be 'mean', 'median', 'downsample', 'max',
+% 'min', 'sum'
 % dim: the dimension along which the binning happens
 
 
@@ -102,6 +103,8 @@ for i = 1 : nseries
     switch method
         case 'mean'
             binneddata(:,i) = mean(binneddata_tensor(:,:,i), 1)';
+        case 'sum'
+            binneddata(:,i) = sum(binneddata_tensor(:,:,i), 1)';
         case 'median'
             binneddata(:,i) = median(binneddata_tensor(:,:,i), 1)';
         case 'nanmedian'
