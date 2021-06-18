@@ -16,7 +16,7 @@ end
 
 
 % Opto genetic experiments (used to be called SINGLE_CHANNEL_MODE)
-OPTO_MODE = true;
+OPTO_MODE = false;
 
 % No pulse info (and no pulses are used during photometry)
 PULSE_SIM_MODE = false;
