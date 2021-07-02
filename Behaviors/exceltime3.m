@@ -1,4 +1,4 @@
-function outputmat = exceltime3(varargin)
+function outputmat = exceltime3()
 % exceltime
 % Output is a m x 3 matrix, in which the colums are [Code, Start_time,
 % End_time].
