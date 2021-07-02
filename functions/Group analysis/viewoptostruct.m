@@ -30,6 +30,9 @@ addOptional(p, 'outputfs', 50); % Output Fs
 
 % Show pre/post triggered data instead
 addOptional(p, 'datatype', 'trig'); % Can specify 'pretrig' or 'posttrig' or 'shuffletrig'
+
+% Title
+addOptional(p, 'title', '');
                                                              
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -200,6 +203,11 @@ if p.flip_signal
     ylabel('-F/F (z)')
 else
     ylabel('F/F (z)')
+end
+
+% Title
+if ~isempty(p.title)
+    title(p.title);
 end
 
 %% Output data
