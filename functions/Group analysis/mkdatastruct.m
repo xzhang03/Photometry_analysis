@@ -7,6 +7,7 @@ p = inputParser;
 
 addOptional(p, 'defaultpath', '\\anastasia\data\photometry'); % Defaul where to find data
 addOptional(p, 'loadisosbestic', false); % Load the 405 channel data instead of the signal
+addOptional(p, 'loadinternalz', false); % Load internal zscore
 
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -25,12 +26,14 @@ loadingcell = mkloadingcell(inputloadingcell, p.defaultpath);
 n_series = size(loadingcell, 1);
 
 % Initialize
-datastruct = struct('photometry', 0, 'behavior', 0, 'Fs', 0,...
+datastruct = struct('mouse', '', 'mouseid',[], 'photometry', 0, 'behavior', 0, 'Fs', 0,...
     'FemInvest', 0, 'CloseExam', 0, 'Mount', 0, 'Introm', 0, 'Transfer', 0,...
     'Escape', 0, 'Dig', 0, 'Feed', 0, 'LBgroom', 0, 'UBgroom', 0,...
     'nFemInvest', 0, 'nCloseExam', 0, 'nMount', 0, 'nIntrom', 0,...
     'nTransfer', 0, 'nEscape', 0, 'nDig', 0, 'nFeed', 0, 'nLBgroom', 0,...
     'nUBgroom', 0);
+if p.loadinternalz, datastruct.Z = []; end
+
 datastruct = repmat(datastruct, [size(loadingcell,1), 1]);
 
 % Load data
@@ -50,6 +53,12 @@ for i = 1 : n_series
     % Load behavior things
     loaded = load (fullfile(loadingcell{i,1}, loadingcell{i,3}), 'B');
     datastruct(i).behavior = unique(loaded.B,'rows'); % Remove duplicate rows
+    
+    % zscore
+    if p.loadinternalz
+        loaded = load (fullfile(loadingcell{i,1}, loadingcell{i,2}), 'Z');
+        datastruct(i).Z = loaded.Z(1);
+    end
 end
 
 %% Parse behavior codes
@@ -67,6 +76,7 @@ for i = 1 : n_series
     datastruct(i).Feed          = zeros(npts, 1);
     datastruct(i).LBgroom       = zeros(npts, 1);
     datastruct(i).UBgroom       = zeros(npts, 1);
+    datastruct(i).mouse = inputloadingcell{i,1};
     
     % Loop through the main behavior matrix
     for j = 1 : size(datastruct(i).behavior, 1)
@@ -121,5 +131,17 @@ for i = 1 : n_series
                 
         end
     end
+end
+
+%% Additional stuff
+% A cell of the mice
+mice_cell = unique({datastruct(:).mouse});
+
+for i = 1 : n_series
+    % Mouse id
+    mouseid = find(strcmp(mice_cell, datastruct(i).mouse));
+    
+    % Fill mouse id
+    datastruct(i).mouseid = mouseid;
 end
 end

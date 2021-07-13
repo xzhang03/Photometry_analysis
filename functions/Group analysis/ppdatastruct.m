@@ -24,6 +24,7 @@ addOptional(p, 'externalsigma', []);     % An external value for zscoring
 addOptional(p, 'zscore_badframes', 1:10);   % Frames to throw away when 
                                             % calculating z-scores
 addOptional(p, 'combinedzscore', false); % Combine the data together before z-scoring.
+addOptional(p, 'useinternalsigma', false); % Use internal sigma (which is calculated through tcpZ)
 
 % Sliding window dff parameters
 addOptional(p, 'usedff', false); % Use a sliding window df/f
@@ -49,7 +50,7 @@ end
 
 %% Initialize
 % Initialize
-datastruct_pp = struct('photometry', 0, 'Fs', 0,...
+datastruct_pp = struct('mouse', '', 'mouseid',[], 'photometry', 0, 'Fs', 0,...
     'FemInvest', 0, 'CloseExam', 0, 'Mount', 0, 'Introm', 0, 'Transfer', 0,...
     'Escape', 0, 'Dig', 0, 'Feed', 0, 'LBgroom', 0, 'UBgroom', 0);
 datastruct_pp = repmat(datastruct_pp, [size(datastruct,1), 1]);
@@ -71,7 +72,10 @@ end
 
 % loop through and parse
 for i = 1 : size(datastruct,1)
-        
+    % Names
+    datastruct_pp(i).mouse = datastruct(i).mouse;
+    datastruct_pp(i).mouseid = datastruct(i).mouseid;
+    
     % Photometry
     % Binning
     datastruct_pp(i).photometry =...
@@ -106,6 +110,9 @@ for i = 1 : size(datastruct,1)
     if ~p.nozscore && ~p.combinedzscore
         datastruct_pp(i).photometry =...
             tcpZscore(datastruct_pp(i).photometry, zscore_badframes, p.externalsigma);
+    elseif ~p.nozscore && p.useinternalsigma % Use internal zscore (ignore combinedzscore since it's already combined_
+        datastruct_pp(i).photometry =...
+            tcpZscore(datastruct_pp(i).photometry, zscore_badframes, datastruct_pp(i).Z);
     end
     
     % Store data for combined zscore if needed

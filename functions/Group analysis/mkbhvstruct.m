@@ -65,9 +65,9 @@ parse(p, varargin{:});
 p = p.Results;
 
 % Initialize
-bhvstruct = struct('session', 0, 'data', 0, 'ln_data', 0, 'bhvind', [], ...
-    'lnbhvind', [], 'length', 0, 'order', 0, 'rorder', 0, 'Fs', 0, 'ln_Fs',...
-    0);
+bhvstruct = struct('mouse', '', 'mouseid', [], 'session', 0, 'data', 0, ...
+    'ln_data', 0, 'bhvind', [], 'lnbhvind', [], 'length', 0, 'order', 0,...
+    'rorder', 0, 'Fs', 0, 'ln_Fs', 0);
 nevents = sum([datastruct(:).(['n', p.bhvfield])]);
 bhvstruct = repmat(bhvstruct, [nevents, 1]);
 
@@ -101,6 +101,10 @@ for i = 1 : size(datastruct, 1)
         ind = ind + 1;
         
         % Fill name
+        bhvstruct(ind).mouse = datastruct(i).mouse;
+        bhvstruct(ind).mouseid = datastruct(i).mouseid;
+        
+        % Fill session
         bhvstruct(ind).session = i;
         
         % Fill Fs
