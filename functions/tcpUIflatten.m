@@ -7,7 +7,7 @@ function [ch1_flattened, ch2_flattened, ch1_expfit_out, ch2_expfit_out] = tcpUIf
 n_points = length(ch1_input);
 
 % Make a plot
-figure(100)
+figure(101)
 plot([ch1_input, ch2_input]);
 
 % choose points
@@ -46,7 +46,7 @@ ch2_expfit_out = ch2_expfit(1 : n_points);
 ch1_flattened = ch1_input - ch1_expfit_out;
 ch2_flattened = ch2_input - ch2_expfit_out;
 
-close(100);
+close(101);
 
 
 end
