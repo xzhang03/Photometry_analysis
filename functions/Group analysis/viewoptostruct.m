@@ -24,6 +24,12 @@ addOptional(p, 'removenans', true); % Remove nans or not
 addOptional(p, 'nantolerance', 0); % Remove trials with more than this fraction of nan data
 addOptional(p, 'keepc', {'order',[]}); % Criteria for keeping data (just a 1 x 2 cell)
 
+% Show motion
+addOptional(p, 'showmotion', false);
+addOptional(p, 'subtractmotion', false); % Linearly regress out motion trial by trial
+addOptional(p, 'subtractdirection', 1); % Direction of subtraction: 1 (positive) or -1 (negative)
+addOptional(p, 'motiondelay', 0); % Debug variable. Don't change
+
 % Output settings
 addOptional(p, 'outputdata', false); % Output data
 addOptional(p, 'outputfs', 50); % Output Fs
@@ -78,7 +84,25 @@ end
 
 % Number of trials
 ntrials = size(datamat, 2);
+
+% Motion mat (only using regulat trig mat)
+p.showmotion = p.showmotion & strcmpi(p.datatype, 'trig');
+p.subtractmotion = p.subtractmotion & strcmpi(p.datatype, 'trig');
+if p.showmotion || p.subtractmotion
+    motionmat = cell2mat({optostruct(:).locomotion});
     
+    % Apply delay (Debug. This is only an estimate)
+    if p.motiondelay > 0
+        motionmat =...
+            vertcat(motionmat(end - (p.motiondelay-1) : end, :), motionmat(1 : end-p.motiondelay, :));
+    end
+    
+    if p.motiondelay < 0
+        motionmat =...
+            vertcat(motionmat(-p.motiondelay+1 : end, :), motionmat(1 : -p.motiondelay, :));
+    end
+end
+
 % Keep data as criteria
 % (Skip this if we are plotting pre/post-triggered data)
 if ~isempty(p.keepc{1,2}) && strcmp(p.datatype, 'trig')
@@ -109,6 +133,11 @@ if ~isempty(p.keepc{1,2}) && strcmp(p.datatype, 'trig')
     % Update data
     datamat = datamat(:, keepvec > 0);
     
+    % Update locomotion data
+    if p.showmotion || p.subtractmotion
+        motionmat = motionmat(:, keepvec > 0);
+    end
+    
     % Update Number of trials
     ntrials = size(datamat, 2);
    
@@ -124,26 +153,56 @@ if p.removenans
     goodtrials = mean(isnan(datamat),1) >= p.nantolerance;
     datamat = datamat(:, goodtrials);
     
+    % Update locomotion data
+    if p.showmotion || p.subtractmotion
+        motionmat = motionmat(:, goodtrials);
+    end
+    
     % *need to update showX*
 end
 
 % Datamat to show
 if isempty(p.showX)
     datamat2show = datamat;
+    if p.showmotion || p.subtractmotion
+        motionmat2show = motionmat;
+    end
 elseif isscalar(p.showX)
     % If specifying the number of trials
     % Grab X number of trials
     if p.showX < ntrials
         showind = randperm(ntrials, p.showX);
         datamat2show = datamat(:, showind);
+        if p.showmotion || p.subtractmotion
+            motionmat2show = motionmat(:, showind);
+        end
     else
         datamat2show = datamat;
     end
 else
     % If specifying the exact trial indices
     datamat2show = datamat(:, p.showX);
+    if p.showmotion || p.subtractmotion
+        motionmat2show = motionmat;
+    end
 end
 
+%% Regress out motion
+if p.subtractmotion
+    for i = 1 : size(datamat2show,2)
+        % Fit
+        if range(motionmat2show(:,i)) > 0
+            vd = datamat2show(:,i);
+            vm = tcpZscore(motionmat2show(:,i) * p.subtractdirection);
+            fitinfo = polyfit(vm(vm >0), vd(vm >0), 1);
+        else
+            fitinfo = [0 0];
+        end
+        
+        % Subtract
+        datamat2show(:,i) = vd - (vm * fitinfo(1) + fitinfo(2));
+    end
+end
 
 %% Plot
 % Plot
@@ -172,9 +231,9 @@ subplot(p.subplotrows, 1, 1);
 
 % Plot average data
 if p.usemedian
-    trace2plot = nanmedian(datamat,2);
+    trace2plot = nanmedian(datamat2show,2);
 else
-    trace2plot = nanmean(datamat,2);
+    trace2plot = nanmean(datamat2show,2);
 end
 
 plot(trace2plot);
@@ -191,13 +250,26 @@ else
     ylim(p.yrange);
 end
 
-% Add an y = 0 line
+% Add an y = 0 line and motion
 hold on
 plot(xrange, [0 0], 'Color', [0 0 0]);
 if ~isempty(p.optolength)
     plot([prew_f prew_f + p.optolength], [ymax ymax],...
         'Color', [1 0 0], 'LineWidth', 2);
 end
+
+% Add motion
+if p.showmotion || p.subtractmotion
+    % Calculate
+    motionvec = nanmean(motionmat2show,2);
+    
+    % Normalize
+    motionvec = mat2gray(motionvec) * (ymax - ymin) + ymin;
+    
+    % Plot
+    plot(motionvec, 'Color', [0.8 0.8 0.8], 'LineWidth', 1)
+end
+
 hold off
 if p.flip_signal
     ylabel('-F/F (z)')

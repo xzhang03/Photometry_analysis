@@ -36,6 +36,9 @@ addOptional(p, 'posttrigwindow', []);   % Add data that are triggered after the 
                                         % (intput as [Seconds_after_stim_1 Seconds_after_stim_2])
                                         % The window is only applied to the start of each trigger
 
+% Show motion
+addOptional(p, 'showmotion', false); % locomotion data
+                                        
 % Shuffle for stats
 addOptional(p, 'shuffledata', false); % Add a field of shuffled photometry data for stats.
 addOptional(p, 'shuffle_n', []); % Number of trials in shuffle; leave empty to match the n of triggered sessions
@@ -268,6 +271,16 @@ for i = 1 : n_series
         
         % Put the post-triggered data in the structure
         datastruct(i).photometry_posttrig = posttrigmat;
+    end
+    
+    % Locomotion
+    if p.showmotion
+        if isfield(loaded, 'speedmat')
+            datastruct(i).locomotion = loaded.speedmat;
+        else
+            disp('No locomotion data found');
+            p.showmotion = false;
+        end
     end
     
     % Shuffle
