@@ -13,8 +13,7 @@ if nargin < 4
 end
 
 % Design filter
-d = fdesign.lowpass('Fp,Fst,Ap,Ast', LP_freq,...
-            LP_freq + 2, 0.5, 40, Fs);
+d = fdesign.lowpass('Fp,Fst,Ap,Ast', LP_freq, LP_freq + 2, 0.5, 40, Fs);
 Hd = design(d,'equiripple');
 
 % Initialize

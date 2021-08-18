@@ -124,6 +124,7 @@ for i = 1 : n_optostims
 end
 
 % Calculate the average triggered results
+% trigmat_avg = mean(trigmat(:,end-10:end),2);
 trigmat_avg = mean(trigmat,2);
 
 %% Deal with motion
