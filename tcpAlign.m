@@ -62,7 +62,7 @@ AlignCfg.presmoothwindow = 10; % Window size for smoothing
 % the two channels. If used either before or after, the flattened results
 % will be used in the final trace. If you are only using parts of the trace
 % to align, you should set this to either 'post_flatten' or 'none';
-AlignCfg.flatten_mode = 'none';
+AlignCfg.flatten_mode = 'pre_flatten';
 
 % =============================== Fit mode ================================
 %
@@ -73,6 +73,7 @@ AlignCfg.flatten_mode = 'none';
 % 4. 'linear': Linearly fit Ch2 to Ch1 (Ch2_new = Ch2_old * a + b)
 % 5. 'linear_shift_ch1': Linearly fit Ch1 to Ch2 (Ch1_new = Ch1_old * a + b)
 % 6. 'ratiometric': No fitting, just Ch1 ./ Ch2
+% 7. 'no_fitting': No fitting, just substract mean
 AlignCfg.fit_mode = 'linear'; 
 
 % ============================ Post-filter info ===========================
@@ -412,6 +413,12 @@ for i = 1 : size(intactpoints,1)
                 ch1_to_fix(ind1:ind2) = ch1_to_fix(ind1:ind2)...
                     * fitinfo(1) + fitinfo(2);
             end
+            
+        case 'no_fitting'
+            % Just adjust means
+            ch1_to_fix = ch1_to_fix - nanmean(ch1_to_fix);
+            ch2_to_fix = ch2_to_fix * 0;
+            fitinfo = [0 0];
     end
     
 end

@@ -57,6 +57,6 @@ else
     B(:,2:3) = A(:,2:3) * cam_save_fps / cam_pulse_fps + delay/60;
     
     % Save
-    save(fullfile(filepath, filename_output), 'A', 'B', 'cam_pulse_fps');
+    save(fullfile(filepath, filename_output), 'A', 'B', 'cam_pulse_fps', 'delay');
 end
 end
