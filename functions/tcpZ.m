@@ -19,6 +19,8 @@ addOptional(p, 'nchannels', 1); % Can be one or two channels
 
 addOptional(p, 'flattenbeforez', false); % Use single-exponential flattening before calculating z
 
+addOptional(p, 'externalZ', []); % Allow to copy Zs
+
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
     varargin = varargin{:};
@@ -50,87 +52,97 @@ for mouseind = 1 : nmice
     curr_inds = find(strcmp(inputloadingcell(:,1), mice_cell{mouseind}));
     n_curr_inds = length(curr_inds);
     
-    % Initialize a cell to contain data
-    datacell = cell(n_curr_inds, p.nchannels);
-    
-    for exptind = 1 : n_curr_inds
-        % Grab the actual global ind
-        ind = curr_inds(exptind);
-        
-        % Load
-        switch p.inputdatatype
-            case 'filtered'
-                % Load photometry data
-                loaded = ...
-                    load(fullfile(loadingcell{ind,1}, loadingcell{ind,4}),...
-                    'Ch1_filtered', 'Ch2_filtered');
-                
-                % Put data in cell (mean-subtracted)
-                if p.flattenbeforez
-                    flattened = tcpFlatten(loaded.Ch1_filtered(p.zscore_firstpt : end));
-                    datacell{ind, 1} = flattened - nanmean(flattened);
-                else
-                    datacell{ind, 1} = loaded.Ch1_filtered(p.zscore_firstpt : end)...
-                        - nanmean(loaded.Ch1_filtered(p.zscore_firstpt : end));
-                end
-                
-                if p.nchannels == 2
+    if isempty(p.externalZ)
+        % Initialize a cell to contain data
+        datacell = cell(n_curr_inds, p.nchannels);
+
+        for exptind = 1 : n_curr_inds
+            % Grab the actual global ind
+            ind = curr_inds(exptind);
+
+            % Load
+            switch p.inputdatatype
+                case 'filtered'
+                    % Load photometry data
+                    loaded = ...
+                        load(fullfile(loadingcell{ind,1}, loadingcell{ind,4}),...
+                        'Ch1_filtered', 'Ch2_filtered');
+
+                    % Put data in cell (mean-subtracted)
                     if p.flattenbeforez
-                        flattened = tcpFlatten(loaded.Ch2_filtered(p.zscore_firstpt : end));
-                        datacell{ind, 2} = flattened - nanmean(flattened);
+                        flattened = tcpFlatten(loaded.Ch1_filtered(p.zscore_firstpt : end));
+                        datacell{ind, 1} = flattened - nanmean(flattened);
                     else
-                        datacell{ind, 2} = loaded.Ch2_filtered(p.zscore_firstpt : end)...
-                            - nanmean(loaded.Ch2_filtered(p.zscore_firstpt : end));
+                        datacell{ind, 1} = loaded.Ch1_filtered(p.zscore_firstpt : end)...
+                            - nanmean(loaded.Ch1_filtered(p.zscore_firstpt : end));
                     end
-                end
-                
-            case 'raw'
-                % Load photometry data
-                loaded = ...
-                    load(fullfile(loadingcell{ind,1}, loadingcell{ind,4}),...
-                    'ch1_data_table', 'ch2_data_table');
-                
-                % Put data in cell (mean-subtracted)
-                if p.flattenbeforez
-                    flattened = tcpFlatten(loaded.ch1_data_table(p.zscore_firstpt : end,2));
-                    datacell{ind, 1} = flattened - nanmean(flattened);
-                else
-                    datacell{ind, 1} = ...
-                        loaded.ch1_data_table(p.zscore_firstpt : end,2)...
-                        - nanmean(loaded.ch1_data_table(p.zscore_firstpt : end,2));
-                end
-                
-                if p.nchannels > 1
+
+                    if p.nchannels == 2
+                        if p.flattenbeforez
+                            flattened = tcpFlatten(loaded.Ch2_filtered(p.zscore_firstpt : end));
+                            datacell{ind, 2} = flattened - nanmean(flattened);
+                        else
+                            datacell{ind, 2} = loaded.Ch2_filtered(p.zscore_firstpt : end)...
+                                - nanmean(loaded.Ch2_filtered(p.zscore_firstpt : end));
+                        end
+                    end
+
+                case 'raw'
+                    % Load photometry data
+                    loaded = ...
+                        load(fullfile(loadingcell{ind,1}, loadingcell{ind,4}),...
+                        'ch1_data_table', 'ch2_data_table');
+
+                    % Put data in cell (mean-subtracted)
                     if p.flattenbeforez
-                        flattened = tcpFlatten(loaded.ch2_data_table(p.zscore_firstpt : end,2));
-                        datacell{ind, 2} = flattened - nanmean(flattened);
+                        flattened = tcpFlatten(loaded.ch1_data_table(p.zscore_firstpt : end,2));
+                        datacell{ind, 1} = flattened - nanmean(flattened);
                     else
-                        datacell{ind, 2} = ...
-                            loaded.ch2_data_table(p.zscore_firstpt : end,2)...
-                            - nanmean(loaded.ch2_data_table(p.zscore_firstpt : end,2));
+                        datacell{ind, 1} = ...
+                            loaded.ch1_data_table(p.zscore_firstpt : end,2)...
+                            - nanmean(loaded.ch1_data_table(p.zscore_firstpt : end,2));
                     end
-                end
+
+                    if p.nchannels > 1
+                        if p.flattenbeforez
+                            flattened = tcpFlatten(loaded.ch2_data_table(p.zscore_firstpt : end,2));
+                            datacell{ind, 2} = flattened - nanmean(flattened);
+                        else
+                            datacell{ind, 2} = ...
+                                loaded.ch2_data_table(p.zscore_firstpt : end,2)...
+                                - nanmean(loaded.ch2_data_table(p.zscore_firstpt : end,2));
+                        end
+                    end
+            end
         end
-    end
-    
-    % Concatenate data
-    datavec1 = cell2mat(datacell(:,1));
-    
-    % Get Z
-    Z = nanstd(datavec1);
-    fprintf('%s has a z-value of %3.3f in Channel 1\n', mice_cell{mouseind}, Z);
-    
-    % Second channel if needed
-    if p.nchannels > 1
+
         % Concatenate data
-        datavec2 = cell2mat(datacell(:,2));
-        
+        datavec1 = cell2mat(datacell(:,1));
+
         % Get Z
-        Z(2) = nanstd(datavec2);
-        
-        % Second channel
-        fprintf('%s has a z-value of %3.3f in Channel 2\n',...
-            mice_cell{mouseind}, Z(2));
+        Z = nanstd(datavec1);
+        fprintf('%s has a z-value of %3.3f in Channel 1\n', mice_cell{mouseind}, Z);
+
+        % Second channel if needed
+        if p.nchannels > 1
+            % Concatenate data
+            datavec2 = cell2mat(datacell(:,2));
+
+            % Get Z
+            Z(2) = nanstd(datavec2);
+
+            % Second channel
+            fprintf('%s has a z-value of %3.3f in Channel 2\n',...
+                mice_cell{mouseind}, Z(2));
+        end
+    else
+        Z = p.externalZ;
+        fprintf('%s has a z-value of %3.3f in Channel 1 (external)\n', mice_cell{mouseind}, Z(1));
+        if p.nchannels > 1
+            % Second channel
+            fprintf('%s has a z-value of %3.3f in Channel 2 (external)\n',...
+                mice_cell{mouseind}, Z(2));
+        end
     end
     
     % Save Z
