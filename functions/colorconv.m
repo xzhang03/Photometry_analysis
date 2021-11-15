@@ -1,7 +1,11 @@
 function [ outputvec ] = colorconv( inputstring, alpha )
 %colorconv converts a string of hex triplet (e.g. ed2224) to a 1x3 vector 
 %of the color.
-%   [ outputvec ] = colorconv( inputstring )
+%   [ outputvec ] = colorconv( inputstring, alpha )
+
+if nargin < 2
+    alpha = 1;
+end
 
 outputvec = zeros(1,3);
 
