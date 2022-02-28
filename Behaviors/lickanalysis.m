@@ -17,7 +17,7 @@ addOptional(p, 'traingap', 5); % in seconds
 
 % Plot
 addOptional(p, 'prew', 5); % pre window in seconds
-addOptional(p, 'postw', 30); % post window in seconds
+addOptional(p, 'postw', 15); % post window in seconds
 addOptional(p, 'downsamplefs', 50); % Downsample fs
 
 % Unpack if needed
