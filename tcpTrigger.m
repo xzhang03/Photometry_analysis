@@ -18,13 +18,17 @@ TrigCfg.flatten_data = true;
 TrigCfg.ch1_pulse_ind = 2; 
 
 % Opto pulses
-TrigCfg.opto_channel = 6;
+TrigCfg.opto_channel = 7; %6
 TrigCfg.minpulsewidth = 5; % Minimal number of data points (in NIDAQ sample rate)
                            % to be considered a real opto pulse (preventing falsely binarized opto data);
 
 % Window info (seconds before and after pulse onsets)
 TrigCfg.prew = 8;
 TrigCfg.postw = 28;
+
+% Regress out artifacts (problem with small NIDAQs)
+TrigCfg.Remove_artifacts = true;
+TrigCfg.artifact_ch = [4, 8];
 
 % The minimal number of seconds between pulses that are still in the same
 % train
@@ -41,6 +45,60 @@ end
 filename_output_triggered = [filename(1:end-4), '_trig.mat'];
 load(fullfile(filepath, filename), 'data', 'freq', 'ch1_data_table',...
     'Ch1_filtered', 'n_points');
+
+%% Remove channel artifacts
+% Issue with small NIDAQ 
+traingap = 50;
+if isfield(TrigCfg, 'Remove_artifacts')
+    if TrigCfg.Remove_artifacts
+        % Number of artifacts
+        nartifacts = length(TrigCfg.artifact_ch);
+
+        for i = 1 : nartifacts
+            artifactch = TrigCfg.artifact_ch(i);
+            tempartifact = tcpDatasnapper(data(artifactch,:),data(2,:));
+            
+            if i == 1
+                artifactvecs = tempartifact(:,2);
+            else
+                artifactvecs(:,i) = tempartifact(:,2);
+            end
+        end
+        
+        artifactvec = sum(artifactvecs,2);
+        
+        % Points to remove
+        pts2remove = chainfinder(abs(artifactvec)>0.1);
+        pts2remove(:,2) = pts2remove(:,1) + pts2remove(:,2) - 1;
+        
+        % In train mode
+        if traingap > 0
+            % Get the inter-pulse interval and remove the ones that are shorter
+            % than the gap
+            trigpulses_keep = diff(pts2remove(:,1)) >= traingap;
+
+            % A vector of the first pulses of each train
+            trigpulses_first = [true; trigpulses_keep];
+
+            % A vector of the last pulses of each train
+            trigpulses_last = [trigpulses_keep; true];
+
+            % Get the onsets and offsets of each train
+            pts2remove = [pts2remove(trigpulses_first, 1), pts2remove(trigpulses_last, 2)];
+        end
+
+        datavec_artifactremoved = ch1_data_table(:,2);
+        
+        for j = 1 : size(pts2remove,1)
+            ini_ind = pts2remove(j,1) - 50;
+            end_ind = pts2remove(j,2) + 20;
+            datavec_artifactremoved(ini_ind:end_ind) = mean(datavec_artifactremoved([ini_ind - 1, end_ind + 1]));
+        end
+        
+    end
+else
+    TrigCfg.Remove_artifacts = false;
+end
 
 %% Window info
 % Window info
@@ -69,7 +127,7 @@ opto = tcpDatasnapper(data(TrigCfg.opto_channel,:), data(TrigCfg.ch1_pulse_ind,:
 opto = opto(1:n_points, 2);
 
 % Grab opto onsets
-opto_ons = chainfinder(opto > 0.5);
+opto_ons = chainfinder(opto > 1);
 
 % Grab opto inter-stim interval
 opto_isi = diff(opto_ons(:,1));
@@ -104,10 +162,19 @@ data2use = Ch1_filtered;
 
 % Flatten if needed
 if TrigCfg.flatten_data
-    [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, opto);
-    data2use_unfilt = ch1_data_table(:, 2) - exp_fit;
+    if TrigCfg.Remove_artifacts
+        [data2use, ~, exp_fit, ~] = tcpUIflatten(datavec_artifactremoved, opto);
+        data2use_unfilt = datavec_artifactremoved - exp_fit;
+    else
+        [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, opto);
+        data2use_unfilt = ch1_data_table(:, 2) - exp_fit;
+    end
 else
-    data2use_unfilt = ch1_data_table(:, 2);
+    if TrigCfg.Remove_artifacts
+        data2use_unfilt = datavec_artifactremoved;
+    else
+        data2use_unfilt = ch1_data_table(:, 2);
+    end
 end
 plot([data2use, opto])
 
@@ -125,7 +192,7 @@ end
 
 % Calculate the average triggered results
 % trigmat_avg = mean(trigmat(:,end-10:end),2);
-trigmat_avg = mean(trigmat,2);
+trigmat_avg = nanmean(trigmat,2);
 
 %% Deal with motion
 % Check if the running file is there
@@ -178,7 +245,7 @@ hold off
 xlabel('time (s)')
 ylabel('Fluorescence')
 
-%% Save  results
+%% Save results
 if TrigCfg.flatten_data
     save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
         'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...

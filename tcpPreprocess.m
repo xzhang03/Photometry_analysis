@@ -24,8 +24,8 @@ PULSE_SIM_MODE = false;
 if  OPTO_MODE
     % Single channel recording
     % Where to grab data
-    data_channel = 3;
-    opto_channel = 6;
+    data_channel = 1; % 3
+    opto_channel = 7; % 6
     
     % Channel info
     ch1_pulse_ind = 2; % Where to grab wavelength 1's pulse info
