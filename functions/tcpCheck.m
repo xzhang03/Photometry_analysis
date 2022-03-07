@@ -8,6 +8,10 @@ addOptional(p, 'defaultpath', '\\anastasia\data\photometry');
 addOptional(p, 'twocolor', true); % Check for alignment
 addOptional(p, 'headfixed', false); % Head fix mode (no A mat and with triggers)
 
+% Checking stuff
+addOptional(p, 'checkpreprocess', true); % Check preprocessing, generally true
+addOptional(p, 'checktrigger', true); % Check trigger, generally true for headfixed
+
 % A mat check and fixing
 addOptional(p, 'checkAmat', false); % Open and check A mats (will take longer)
 addOptional(p, 'checkDLC', false); % Check DLC files exist
@@ -79,7 +83,9 @@ for i = 1 : n_expts
         case 1
             fprintf('%s: missing data\n', experiment_name);
         case 2
-            fprintf('%s: missing preprocessing\n', experiment_name);
+            if p.checkpreprocess
+                fprintf('%s: missing preprocessing\n', experiment_name);
+            end
         case 3
             if p.twocolor
                 fprintf('%s: missing alignment\n', experiment_name);
@@ -135,7 +141,7 @@ for i = 1 : n_expts
     % Head fixed (triggering)
     if p.headfixed
         % No opto trig flie
-        if Flags(i, 3) == 0
+        if Flags(i, 3) == 0 && p.checktrigger
             fprintf('%s: missing triggered opto file\n', experiment_name);
         end
     end

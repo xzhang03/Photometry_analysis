@@ -1,4 +1,4 @@
-function lickanalysis(varargin)
+function out = lickanalysis(varargin)
 %% Parse inputs
 if nargin < 1
     varargin = {};
@@ -16,9 +16,14 @@ addOptional(p, 'threshold', 1); % in voltage
 addOptional(p, 'traingap', 5); % in seconds
 
 % Plot
+addOptional(p, 'makeplot', true); % Make plot
 addOptional(p, 'prew', 5); % pre window in seconds
-addOptional(p, 'postw', 30); % post window in seconds
+addOptional(p, 'postw', 15); % post window in seconds
 addOptional(p, 'downsamplefs', 50); % Downsample fs
+
+% Windows for output
+addOptional(p, 'trigwindow', 1); % in seconds
+addOptional(p, 'consumewindow', 5); % in seconds
 
 % Unpack if needed
 if iscell(varargin) && size(varargin,1) * size(varargin,2) == 1
@@ -145,45 +150,74 @@ maxlick = max(lick);
 maxensure = max(ensure);
 
 % Normalize and reverse order (First trial on top)
+buzzmatn = zeros(ntrials, prew + postw + 1);
+lickmatn = zeros(ntrials, prew + postw + 1);
+ensurematn = zeros(ntrials, prew + postw + 1);
 for i = 1 : ntrials
-    buzzmat(i,:) = buzzmat(i,:) / maxbuzz * ht + (ntrials - i) * inc;
-    lickmat(i,:) = lickmat(i,:) / maxlick * ht + (ntrials - i) * inc;
-    ensuremat(i,:) = ensuremat(i,:) / maxensure * ht + (ntrials - i) * inc;
+    buzzmatn(i,:) = buzzmat(i,:) / maxbuzz * ht + (ntrials - i) * inc;
+    lickmatn(i,:) = lickmat(i,:) / maxlick * ht + (ntrials - i) * inc;
+    ensurematn(i,:) = ensuremat(i,:) / maxensure * ht + (ntrials - i) * inc;
 end
 
 %% Plot
-% Reverse order so first trial stay on top
-buzzmat = buzzmat(ntrials: -1 : 1, :);
-lickmat = lickmat(ntrials: -1 : 1, :);
-ensuremat = ensuremat(ntrials: -1 : 1, :);
+if p.makeplot
+    % Reverse order so first trial stay on top
+    buzzmatn = buzzmatn(ntrials: -1 : 1, :);
+    lickmatn = lickmatn(ntrials: -1 : 1, :);
+    ensurematn = ensurematn(ntrials: -1 : 1, :);
 
-% Make figure
-figure
-subplot(6,1,1);
-plot(x, smooth(lickvec,20), 'Color', [0.8 0.8 0.8]);
-hold on
-plot(x, buzzvec, 'Color', [0.1 0.4 0.6])
-hold off
-yticklabels({})
-xticklabels({})
-title(fname);
+    % Make figure
+    figure
+    subplot(6,1,1);
+    plot(x, smooth(lickvec,20), 'Color', [0.8 0.8 0.8]);
+    hold on
+    plot(x, buzzvec, 'Color', [0.1 0.4 0.6])
+    hold off
+    yticklabels({})
+    xticklabels({})
+    title(fname);
 
-subplot(6,1,2:6);
-plot(x, lickmat, 'Color', [0.8 0.8 0.8]);
-hold on
-plot(x, buzzmat, 'Color', [0.1 0.4 0.6]);
-plot(x, ensuremat, 'Color', [0.6 0.2 0.1]);
-hold off
-xlabel('Time (s)')
+    subplot(6,1,2:6);
+    plot(x, lickmatn, 'Color', [0.8 0.8 0.8]);
+    hold on
+    plot(x, buzzmatn, 'Color', [0.1 0.4 0.6]);
+    plot(x, ensurematn, 'Color', [0.6 0.2 0.1]);
+    hold off
+    xlabel('Time (s)')
 
-for i = 1 : ntrials
-    text(-p.prew - 2, 0.5* ht + (ntrials - i) * inc, num2str(i))
+    for i = 1 : ntrials
+        text(-p.prew - 2, 0.5* ht + (ntrials - i) * inc, num2str(i))
+    end
+
+    yticklabels({})
+    xlim([-p.prew p.postw])
+
+
+    fnout = sprintf('%s_lick.png', fname);
+    saveas(gcf, fullfile(fpath, fnout));
 end
 
-yticklabels({})
-xlim([-p.prew p.postw])
+%% Output
+% output parameters
+triglick = zeros(ntrials, 1);
+consumelick = zeros(ntrials, 1);
+success = zeros(ntrials, 1);
 
+for i = 1 : ntrials
+    trigwinstart = find(buzzmat(i,:) > 2, 1, 'first');
+    trigwinend = trigwinstart + p.trigwindow * p.nidaqFs - 1;
+    consumewinstart = find(ensuremat(i,:) > 2, 1, 'first');
+    consumewinend = consumewinstart + p.consumewindow * p.nidaqFs - 1;
+    
+    triglick(i) = sum(lickmat(i, trigwinstart:trigwinend));
+    if ~isempty(consumewinstart)
+        success(i) = 1;
+        consumelick(i) = sum(lickmat(i, consumewinstart:consumewinend));
+    else
+        success(i) = 0;
+        consumelick(i) = 0;
+    end
+end
+out = struct('triglick', triglick, 'consumelick', consumelick, 'success', success);
 
-fnout = sprintf('%s_lick.png', fname);
-saveas(gcf, fullfile(fpath, fnout));
 end
