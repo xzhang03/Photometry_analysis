@@ -27,6 +27,7 @@ addOptional(p, 'consumewindow', 5); % in seconds
 
 % Same-color Opto RNG analysis
 addOptional(p, 'SCoptoRNG', false);
+addOptional(p, 'RNGhistorywin', [-5 0]); % Default [-5 0] means 5 previous till current
 
 % Unpack if needed
 if iscell(varargin) && size(varargin,1) * size(varargin,2) == 1
@@ -180,11 +181,35 @@ end
 
 %% Parse RNG
 RNGvec = ones(ntrials, 1);
+RNGhist = nan(ntrials, p.RNGhistorywin(2) - p.RNGhistorywin(1) + 1);
+
 if p.SCoptoRNG
     for i = 1 : ntrials
         stimwin = chainfinder(ch2inmat(i,:) > 1);
         stimwin(2) = stimwin(1) + stimwin(2);
         RNGvec(i) = median(ch1inmat(i,stimwin(1):stimwin(2))) > 1;
+    end
+    
+    for i = 1 : ntrials
+        % Parse the previous trials
+        if i > -p.RNGhistorywin(1)
+            hskip1 = 0;
+            hstart = i + p.RNGhistorywin(1);
+        else
+            hskip1 = 1-(i + p.RNGhistorywin(1));
+            hstart = 1;
+        end
+        
+        % Parse the subsequent trials
+        if (i + p.RNGhistorywin(2)) > ntrials
+            hskip2 = i + p.RNGhistorywin(2) - ntrials;
+            hstop = ntrials;
+        else
+            hskip2 = 0;
+            hstop = i + p.RNGhistorywin(2);
+        end
+        
+        RNGhist(i, (1+hskip1):(end-hskip2)) = RNGvec(hstart:hstop);
     end
 end
 
@@ -257,6 +282,7 @@ for i = 1 : ntrials
         consumelick(i) = 0;
     end
 end
-out = struct('triglick', triglick, 'consumelick', consumelick, 'success', success, 'RNGvec', RNGvec);
+out = struct('triglick', triglick, 'consumelick', consumelick, 'success', success, ...
+    'RNGvec', RNGvec, 'RNGhist', RNGhist);
 
 end
