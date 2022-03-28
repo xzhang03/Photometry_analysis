@@ -25,6 +25,9 @@ addOptional(p, 'downsamplefs', 50); % Downsample fs
 addOptional(p, 'trigwindow', 1); % in seconds
 addOptional(p, 'consumewindow', 5); % in seconds
 
+% Same-color Opto RNG analysis
+addOptional(p, 'SCoptoRNG', false);
+
 % Unpack if needed
 if iscell(varargin) && size(varargin,1) * size(varargin,2) == 1
     varargin = varargin{:};
@@ -33,13 +36,16 @@ end
 parse(p, varargin{:});
 p = p.Results;
 
+% Debug
+% p.SCoptoRNG = true;
+
 %% IO
 if isempty(p.fpath)
     [fn, fpath] = uigetfile(fullfile(p.defaultpath, p.defaultext));
     p.fpath = fullfile(fpath, fn);
     [~, fname, ~] = fileparts(fn);
 else
-    [fpath, fname, ext] = fileparts(p.fpath);
+    [fpath, fname, ~] = fileparts(p.fpath);
 end
 
 % Load
@@ -77,10 +83,19 @@ if p.downsamplefs ~= nidaqdata.Fs
     buzz = tcpBin(nidaqdata.data(p.channels.Buzz, :), nidaqdata.Fs, p.downsamplefs, 'max', 2);
     lick = tcpBin(nidaqdata.data(p.channels.lick, :), nidaqdata.Fs, p.downsamplefs, 'mean', 2);
     ensure = tcpBin(nidaqdata.data(p.channels.ensure, :), nidaqdata.Fs, p.downsamplefs, 'max', 2);
+    
+    if p.SCoptoRNG
+        ch1in = tcpBin(nidaqdata.data(p.channels.Ch1in, :), nidaqdata.Fs, p.downsamplefs, 'max', 2);
+        ch2in = tcpBin(nidaqdata.data(p.channels.Ch2in, :), nidaqdata.Fs, p.downsamplefs, 'max', 2);
+    end
 else
     buzz = nidaqdata.data(p.channels.Buzz, :)';
     lick = nidaqdata.data(p.channels.lick, :)';
     ensure = nidaqdata.data(p.channels.ensure, :)';
+    if p.SCoptoRNG
+        ch1in = nidaqdata.data(p.channels.Ch1in, :)';
+        ch2in = nidaqdata.data(p.channels.Ch2in, :)';
+    end
 end
 
 % Length
@@ -136,6 +151,10 @@ x = (-prew : postw) / p.nidaqFs;
 buzzmat = buzz(indmat);
 lickmat = lick(indmat);
 ensuremat = ensure(indmat);
+if p.SCoptoRNG
+    ch1inmat = ch1in(indmat);
+    ch2inmat = ch2in(indmat);
+end
 
 % Vectors
 buzzvec = mean(buzzmat, 1);
@@ -157,6 +176,16 @@ for i = 1 : ntrials
     buzzmatn(i,:) = buzzmat(i,:) / maxbuzz * ht + (ntrials - i) * inc;
     lickmatn(i,:) = lickmat(i,:) / maxlick * ht + (ntrials - i) * inc;
     ensurematn(i,:) = ensuremat(i,:) / maxensure * ht + (ntrials - i) * inc;
+end
+
+%% Parse RNG
+RNGvec = ones(ntrials, 1);
+if p.SCoptoRNG
+    for i = 1 : ntrials
+        stimwin = chainfinder(ch2inmat(i,:) > 1);
+        stimwin(2) = stimwin(1) + stimwin(2);
+        RNGvec(i) = median(ch1inmat(i,stimwin(1):stimwin(2))) > 1;
+    end
 end
 
 %% Plot
@@ -188,7 +217,15 @@ if p.makeplot
     for i = 1 : ntrials
         text(-p.prew - 2, 0.5* ht + (ntrials - i) * inc, num2str(i))
     end
-
+    
+    if p.SCoptoRNG
+        RNGvecY = find(RNGvec > 0);
+        nRNGvecY = length(RNGvecY);
+        hold on
+        plot(ones(nRNGvecY,1) * -2, RNGvecY * inc - inc/2, '.');
+        hold off
+    end
+    
     yticklabels({})
     xlim([-p.prew p.postw])
 
@@ -209,15 +246,17 @@ for i = 1 : ntrials
     consumewinstart = find(ensuremat(i,:) > 2, 1, 'first');
     consumewinend = consumewinstart + p.consumewindow * p.nidaqFs - 1;
     
-    triglick(i) = sum(lickmat(i, trigwinstart:trigwinend));
+    lickchain = chainfinder(lickmat(i, trigwinstart:trigwinend) > 2);
+    triglick(i) = size(lickchain,1) / p.trigwindow;
     if ~isempty(consumewinstart)
         success(i) = 1;
-        consumelick(i) = sum(lickmat(i, consumewinstart:consumewinend));
+        lickchain = chainfinder(lickmat(i, consumewinstart:consumewinend) > 2);
+        consumelick(i) = size(lickchain,1) / p.consumewindow;
     else
         success(i) = 0;
         consumelick(i) = 0;
     end
 end
-out = struct('triglick', triglick, 'consumelick', consumelick, 'success', success);
+out = struct('triglick', triglick, 'consumelick', consumelick, 'success', success, 'RNGvec', RNGvec);
 
 end
