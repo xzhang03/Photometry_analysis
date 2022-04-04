@@ -19,6 +19,14 @@ addOptional(p, 'pos', [150 550 800 300]);
 addOptional(p, 'subselpass', []); % make sure the trial numbers match
 addOptional(p, 'subselfail', []);
 
+% RNGX analysis (n of stims in the last X trials, regardless of order)
+addOptional(p, 'RNGXwin', [2 10]); % [step max]
+
+% Show delta (e.g., lick rate change compared to X trials ago)
+addOptional(p, 'showdelta', false);
+addOptional(p, 'deltawin', []); % X
+
+
 % Unpack if needed
 if iscell(varargin) && size(varargin,1) * size(varargin,2) == 1
     varargin = varargin{:};
@@ -45,6 +53,11 @@ if isempty(p.trimwin)
     p.trimwin = mode(lvec);
 end
 
+% Delta window
+if p.showdelta && isempty(p.deltawin)
+    p.deltawin = sum(~isnan(p.subselpass));
+end
+
 %% Consolidate data
 % Initialize
 trigcellpass = cell(nset, 1);
@@ -54,7 +67,9 @@ consumecellfail = cell(nset, 1);
 succcellpass = cell(nset, 1);
 succcellfail = cell(nset, 1);
 passcell = cell(nset, 1);
+failcell = cell(nset, 1);
 lcell = cell(nset,1);
+RNGXcell = cell(nset,4);
 
 for ii = 1 : nset
     % Initialize matrix
@@ -67,6 +82,12 @@ for ii = 1 : nset
     succmatfail = nan(p.trimwin, l);
     passmat = nan(p.trimwin, l);
     failmat = nan(p.trimwin, l);
+    
+    % Initialize RNGX related matrices
+    RNGX = zeros(p.trimwin, l);
+    RNGX_trig = zeros(ceil(p.RNGXwin(2)/p.RNGXwin(1)), l);
+    RNGX_consume = zeros(ceil(p.RNGXwin(2)/p.RNGXwin(1)), l);
+    RNGX_sucess = zeros(ceil(p.RNGXwin(2)/p.RNGXwin(1)), l);
     
     for i = 1 : l
         % Get n
@@ -96,19 +117,63 @@ for ii = 1 : nset
             end
         end
         
+        % RNGX
+        if ~isempty(p.RNGXwin)
+            % Get RNGX groups
+            for iRNGX = 1 : n
+                g = floor(datacell{ii}(i).RNGX(iRNGX) / p.RNGXwin(1)) + 1;
+                if ~isnan(g)
+                    RNGX(iRNGX, i) = g;
+                end
+            end
+            
+            % Apply RNGX groups
+            for gRNGX = 1 : ceil(p.RNGXwin(2)/p.RNGXwin(1))
+                % Room for adding delta support
+                RNGXinds = RNGX(1:n,i) == gRNGX;
+                RNGX_trig(gRNGX, i) = mean(datacell{ii}(i).triglick(RNGXinds));
+                RNGX_consume(gRNGX, i) = mean(datacell{ii}(i).consumelick(RNGXinds));
+                RNGX_sucess(gRNGX, i) = mean(datacell{ii}(i).success(RNGXinds));
+            end
+        end
+        
         % Load
         trigmatpass(1:n, i) = datacell{ii}(i).triglick(1:n);
+        if p.showdelta
+            trigmatpass(1:n, i) = trigmatpass(1:n, i) - vertcat(nan(p.deltawin,1), trigmatpass(1:n-p.deltawin, i));
+        end
         trigmatpass(~passvec,i) = nan;
+        
         trigmatfail(1:n, i) = datacell{ii}(i).triglick(1:n);
+        if p.showdelta
+            trigmatfail(1:n, i) = trigmatfail(1:n, i) - vertcat(nan(p.deltawin,1), trigmatfail(1:n-p.deltawin, i));
+        end
         trigmatfail(~failvec,i) = nan;
+        
         consumematpass(1:n, i) = datacell{ii}(i).consumelick(1:n);
+        if p.showdelta
+            consumematpass(1:n, i) = consumematpass(1:n, i) - vertcat(nan(p.deltawin,1), consumematpass(1:n-p.deltawin, i));
+        end
         consumematpass(~passvec,i) = nan;
+        
         consumematfail(1:n, i) = datacell{ii}(i).consumelick(1:n);
+        if p.showdelta
+            consumematfail(1:n, i) = consumematfail(1:n, i) - vertcat(nan(p.deltawin,1), consumematfail(1:n-p.deltawin, i));
+        end
         consumematfail(~failvec,i) = nan;
+        
         succmatpass(1:n, i) = datacell{ii}(i).success(1:n);
+        if p.showdelta
+            succmatpass(1:n, i) = succmatpass(1:n, i) - vertcat(nan(p.deltawin,1), succmatpass(1:n-p.deltawin, i));
+        end
         succmatpass(~passvec,i) = nan;
+        
         succmatfail(1:n, i) = datacell{ii}(i).success(1:n);
+        if p.showdelta
+            succmatfail(1:n, i) = succmatfail(1:n, i) - vertcat(nan(p.deltawin,1), succmatfail(1:n-p.deltawin, i));
+        end
         succmatfail(~failvec,i) = nan;
+        
         passmat(1:n, i) = passvec(1:n);
         failmat(1:n, i) = failvec(1:n);
     end
@@ -120,14 +185,19 @@ for ii = 1 : nset
     succcellpass{ii} = succmatpass;
     succcellfail{ii} = succmatfail;
     passcell{ii} = passmat;
+    failcell{ii} = failmat;
     lcell{ii} = l;
+    RNGXcell{ii, 1} = RNGX;
+    RNGXcell{ii, 2} = RNGX_trig;
+    RNGXcell{ii, 3} = RNGX_consume;
+    RNGXcell{ii, 4} = RNGX_sucess;
 end
 
 %% Make output
 % Initialize
 outputstruct = struct('label', '', 'trigmeanspass', [], 'trigmeansfail', [],...
     'consumemeanspass', [], 'consumemeansfail', [], 'succmeanspass', [], 'succmeansfail', [],...
-    'pass', [], 'npass', [], 'nfail', [], 'l', []);
+    'pass', [], 'npass', [], 'fail', [], 'nfail', [], 'l', []);
 outputstruct = repmat(outputstruct, [nset 1]);
 
 for ii = 1 : nset
@@ -148,11 +218,17 @@ for ii = 1 : nset
     
     % pass
     outputstruct(ii).pass = passcell{ii};
-    outputstruct(ii).npass = nansum(outputstruct(ii).pass);
-    outputstruct(ii).nfail = nansum(~outputstruct(ii).pass);
+    outputstruct(ii).npass = nansum(outputstruct(ii).pass > 0);
+    outputstruct(ii).fail = failcell{ii};
+    outputstruct(ii).nfail = nansum(outputstruct(ii).fail > 0);
     
     % l
     outputstruct(ii).l = lcell{ii};
+    
+    % RNGX
+    outputstruct(ii).trigmeansRNGX = RNGXcell{ii, 2};
+    outputstruct(ii).consumemeansRNGX = RNGXcell{ii, 3};
+    outputstruct(ii).successmeansRNGX = RNGXcell{ii, 4};
 end
 
 %% Make plot
@@ -189,7 +265,7 @@ for i = 1 : nset
                 field = 'consumemeansfail';
         end
         plot(ones(outputstruct(i).l,1) * ii, outputstruct(i).(field), '.');
-        line([ii-0.3 ii+0.3], mean(outputstruct(i).(field)) * [1 1], 'LineWidth', 3);
+        line([ii-0.3 ii+0.3], nanmean(outputstruct(i).(field)) * [1 1], 'LineWidth', 3);
     end
     hold off
     set(gca, 'XTick', 1 : 2);
@@ -197,7 +273,7 @@ for i = 1 : nset
     ylabel('Licks/s')
     title('Consumption window')
     
-    % 6. Trig lick bar
+    % 3. Trig lick bar
     subplot(1,3,3)
     hold on
     for ii = 1 : 2
@@ -208,7 +284,7 @@ for i = 1 : nset
                 field = 'succmeansfail';
         end
         plot(ones(outputstruct(i).l,1) * ii, outputstruct(i).(field), '.');
-        line([ii-0.3 ii+0.3], mean(outputstruct(i).(field)) * [1 1], 'LineWidth', 3);
+        line([ii-0.3 ii+0.3], nanmean(outputstruct(i).(field)) * [1 1], 'LineWidth', 3);
     end
     hold off
     set(gca, 'XTick', 1 : 2);

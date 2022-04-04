@@ -28,6 +28,8 @@ addOptional(p, 'consumewindow', 5); % in seconds
 % Same-color Opto RNG analysis
 addOptional(p, 'SCoptoRNG', false);
 addOptional(p, 'RNGhistorywin', [-5 0]); % Default [-5 0] means 5 previous till current
+addOptional(p, 'RNGhistoryX', 10); % Shows the number of stims in the last X trials (regardless of order)
+
 
 % Unpack if needed
 if iscell(varargin) && size(varargin,1) * size(varargin,2) == 1
@@ -180,8 +182,10 @@ for i = 1 : ntrials
 end
 
 %% Parse RNG
+% Initialize
 RNGvec = ones(ntrials, 1);
 RNGhist = nan(ntrials, p.RNGhistorywin(2) - p.RNGhistorywin(1) + 1);
+RNGX = nan(ntrials, 1);
 
 if p.SCoptoRNG
     for i = 1 : ntrials
@@ -190,6 +194,7 @@ if p.SCoptoRNG
         RNGvec(i) = median(ch1inmat(i,stimwin(1):stimwin(2))) > 1;
     end
     
+    % RNG history window
     for i = 1 : ntrials
         % Parse the previous trials
         if i > -p.RNGhistorywin(1)
@@ -210,6 +215,13 @@ if p.SCoptoRNG
         end
         
         RNGhist(i, (1+hskip1):(end-hskip2)) = RNGvec(hstart:hstop);
+    end
+    
+    % RNG history X (orderless)
+    for i = 1 : ntrials
+        if i >= p.RNGhistoryX
+            RNGX(i) = sum(RNGvec(i-p.RNGhistoryX+1 : i));
+        end
     end
 end
 
@@ -274,15 +286,16 @@ for i = 1 : ntrials
     lickchain = chainfinder(lickmat(i, trigwinstart:trigwinend) > 2);
     triglick(i) = size(lickchain,1) / p.trigwindow;
     if ~isempty(consumewinstart)
-        success(i) = 1;
         lickchain = chainfinder(lickmat(i, consumewinstart:consumewinend) > 2);
         consumelick(i) = size(lickchain,1) / p.consumewindow;
     else
-        success(i) = 0;
         consumelick(i) = 0;
     end
+    
+    success(i) = triglick(i) > 0;
 end
+
 out = struct('triglick', triglick, 'consumelick', consumelick, 'success', success, ...
-    'RNGvec', RNGvec, 'RNGhist', RNGhist);
+    'RNGvec', RNGvec, 'RNGhist', RNGhist, 'RNGX', RNGX);
 
 end
