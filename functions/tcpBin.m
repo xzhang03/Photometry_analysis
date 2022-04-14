@@ -103,6 +103,8 @@ for i = 1 : nseries
     switch method
         case 'mean'
             binneddata(:,i) = mean(binneddata_tensor(:,:,i), 1)';
+        case 'nanmean'
+            binneddata(:,i) = nanmean(binneddata_tensor(:,:,i), 1)';
         case 'sum'
             binneddata(:,i) = sum(binneddata_tensor(:,:,i), 1)';
         case 'median'

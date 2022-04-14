@@ -24,10 +24,10 @@ TrigCfg.minpulsewidth = 5; % Minimal number of data points (in NIDAQ sample rate
 
 % Window info (seconds before and after pulse onsets)
 TrigCfg.prew = 8;
-TrigCfg.postw = 28;
+TrigCfg.postw = 58;
 
 % Regress out artifacts (problem with small NIDAQs)
-TrigCfg.Remove_artifacts = true;
+TrigCfg.Remove_artifacts = false;
 TrigCfg.artifact_ch = [4, 8];
 
 % The minimal number of seconds between pulses that are still in the same
@@ -127,7 +127,7 @@ opto = tcpDatasnapper(data(TrigCfg.opto_channel,:), data(TrigCfg.ch1_pulse_ind,:
 opto = opto(1:n_points, 2);
 
 % Grab opto onsets
-opto_ons = chainfinder(opto > 1);
+opto_ons = chainfinder(opto > 2);
 
 % Grab opto inter-stim interval
 opto_isi = diff(opto_ons(:,1));
