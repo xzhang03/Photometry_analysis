@@ -21,6 +21,8 @@ addOptional(p, 'flattenbeforez', false); % Use single-exponential flattening bef
 
 addOptional(p, 'externalZ', []); % Allow to copy Zs
 
+addOptional(p, 'trigsuffix', '');
+
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
     varargin = varargin{:};
@@ -36,7 +38,7 @@ if p.nchannels > 2
 end
 
 %% Make actual loading cell
-loadingcell = mkloadingcell(inputloadingcell, p.defaultpath);
+loadingcell = mkloadingcell(inputloadingcell, p.defaultpath, p.trigsuffix);
 
 %% Process each mouse
 % A cell of unique mice

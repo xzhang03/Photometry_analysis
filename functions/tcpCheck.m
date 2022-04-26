@@ -12,6 +12,9 @@ addOptional(p, 'headfixed', false); % Head fix mode (no A mat and with triggers)
 addOptional(p, 'checkpreprocess', true); % Check preprocessing, generally true
 addOptional(p, 'checktrigger', true); % Check trigger, generally true for headfixed
 
+% Trigger suffix
+addOptional(p, 'trigsuffix', '');
+
 % A mat check and fixing
 addOptional(p, 'checkAmat', false); % Open and check A mats (will take longer)
 addOptional(p, 'checkDLC', false); % Check DLC files exist
@@ -28,7 +31,7 @@ p = p.Results;
 
 
 % Make actual loading cell
-loadingcell = mkloadingcell(inputloadingcell, p.defaultpath);
+loadingcell = mkloadingcell(inputloadingcell, p.defaultpath, p.trigsuffix);
 
 % Grabbing basic data
 n_expts = size(inputloadingcell, 1);

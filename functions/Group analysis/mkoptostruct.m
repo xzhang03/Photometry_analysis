@@ -6,6 +6,7 @@ function [datastruct, n_series] = mkoptostruct(inputloadingcell, varargin)
 p  = inputParser;
 
 addOptional(p, 'defaultpath', '\\anastasia\data\photometry'); % Default photometry path
+addOptional(p, 'trigsuffix', '');
 
 % Data type
 addOptional(p, 'useunfiltered', false); % Use unfiltered data (and retrigger)
@@ -38,6 +39,9 @@ addOptional(p, 'posttrigwindow', []);   % Add data that are triggered after the 
 
 % Show motion
 addOptional(p, 'showmotion', false); % locomotion data
+
+% Show licking
+addOptional(p, 'showlicking', false);
                                         
 % Shuffle for stats
 addOptional(p, 'shuffledata', false); % Add a field of shuffled photometry data for stats.
@@ -58,7 +62,7 @@ p = p.Results;
 
 
 %% Make actual loading cell
-loadingcell = mkloadingcell(inputloadingcell, p.defaultpath);
+loadingcell = mkloadingcell(inputloadingcell, p.defaultpath, p.trigsuffix);
 
 % data samples
 n_series = size(loadingcell, 1);
@@ -280,6 +284,16 @@ for i = 1 : n_series
         else
             disp('No locomotion data found');
             p.showmotion = false;
+        end
+    end
+    
+    % Licking
+    if p.showlicking
+        if isfield(loaded, 'lickmat')
+            datastruct(i).lick = loaded.lickmat;
+        else
+            disp('No licking data found');
+            p.showlicking = false;
         end
     end
     

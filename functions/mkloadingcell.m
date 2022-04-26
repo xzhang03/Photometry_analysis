@@ -1,4 +1,4 @@
-function loadingcell = mkloadingcell(inputcell, genpath)
+function loadingcell = mkloadingcell(inputcell, genpath, triggersuffix)
 % mkloadingcell makes a loading cell for pathing. Inputcell should be in
 % the format of {mouse, date, run}.
 % loadingcell = mkloadingcell(inputcell, genpath)
@@ -13,9 +13,11 @@ function loadingcell = mkloadingcell(inputcell, genpath)
 % 8. DLC
 
 
-
-if nargin < 2
-    genpath = '\\anastasia\data\photometry';
+if nargin < 3
+    triggersuffix = '';
+    if nargin < 2
+        genpath = '\\anastasia\data\photometry';
+    end
 end
 
 % Initialize loading cell
@@ -68,8 +70,13 @@ for i = 1 : size(inputcell,1)
     
     % triggered data name
     % Preprocessed data name
-    loadingcell{i,6} =...
-        sprintf('%s-%s-%s-nidaq_preprocessed_trig.mat', mouse, date, runind);
+    if isempty(triggersuffix)
+        loadingcell{i,6} =...
+            sprintf('%s-%s-%s-nidaq_preprocessed_trig.mat', mouse, date, runind);
+    else
+        loadingcell{i,6} =...
+            sprintf('%s-%s-%s-nidaq_preprocessed_trig_%s.mat', mouse, date, runind, triggersuffix);
+    end
     
     % running data name
     loadingcell{i,7} =...
