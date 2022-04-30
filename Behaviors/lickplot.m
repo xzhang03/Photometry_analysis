@@ -1,4 +1,4 @@
-function lickplot (varargin)
+function out = lickplot (varargin)
 %% Parse inputs
 if nargin < 1
     varargin = {};
@@ -18,6 +18,9 @@ addOptional(p, 'threshold', 1); % in voltage
 addOptional(p, 'makeplot', true); % Make plot
 addOptional(p, 'smoothwin', 5); % In seconds
 addOptional(p, 'downsamplefs', 50); % Downsample fs
+
+% Output
+addOptional(p, 'outputfs', 1); % Downsample output.
 
 % Unpack if needed
 if iscell(varargin) && size(varargin,1) * size(varargin,2) == 1
@@ -120,4 +123,19 @@ if p.makeplot
     saveas(gcf, fullfile(fpath, fnout));
 end
 
+%% Output
+% Output matrix
+out = zeros(l,2);
+for i = 1 : nlicks
+    out(lickmat(i,1),2) = 1;
+end
+out(:,2) = cumsum(out(:,2));
+out(:,1) = x;
+
+% downsample
+if p.outputfs ~= nidaqdata.Fs
+    out2 = tcpBin(out(:,1), p.nidaqFs, p.outputfs, 'mean', 1);
+    out2(:,2) = tcpBin(out(:,2), p.nidaqFs, p.outputfs, 'mean', 1);
+    out = out2;
+end
 end
