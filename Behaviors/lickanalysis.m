@@ -20,6 +20,9 @@ addOptional(p, 'makeplot', true); % Make plot
 addOptional(p, 'prew', 5); % pre window in seconds
 addOptional(p, 'postw', 15); % post window in seconds
 addOptional(p, 'downsamplefs', 50); % Downsample fs
+addOptional(p, 'showcue', true);
+addOptional(p, 'showensure', true);
+addOptional(p, 'ensurealpha', 0.5);
 
 % Windows for output
 addOptional(p, 'trigwindow', 1); % in seconds
@@ -41,6 +44,9 @@ p = p.Results;
 
 % Debug
 % p.SCoptoRNG = true;
+% p.prew = 10;
+% p.postw = 50;
+% p.showensure = false;
 
 %% IO
 if isempty(p.fpath)
@@ -162,7 +168,7 @@ end
 % Vectors
 buzzvec = mean(buzzmat, 1);
 lickvec = mean(lickmat, 1);
-% ensurevec = mean(ensuremat, 1);
+ensurevec = mean(ensuremat, 1);
 
 % Normalize matrices for visualization
 inc = 1 / ntrials;
@@ -238,16 +244,24 @@ if p.makeplot
     plot(x, smooth(lickvec,20), 'Color', [0.8 0.8 0.8]);
     hold on
     plot(x, buzzvec, 'Color', [0.1 0.4 0.6])
+    plot(x, ensurevec, 'Color', [0.6 0.2 0.1])
     hold off
     yticklabels({})
     xticklabels({})
     title(fname);
 
     subplot(6,1,2:6);
-    plot(x, lickmatn, 'Color', [0.8 0.8 0.8]);
+    plot(x, lickmatn, 'Color', [0.6 0.6 0.6]);
     hold on
-    plot(x, buzzmatn, 'Color', [0.1 0.4 0.6]);
-    plot(x, ensurematn, 'Color', [0.6 0.2 0.1]);
+    if p.showcue
+        plot(x, buzzmatn, 'Color', [0.1 0.4 0.6]);
+    end
+    if p.showensure
+        hensure = plot(x, ensurematn, 'Color', [0.6 0.2 0.1]);
+        for i = 1 : ntrials
+            hensure(i).Color(4) = p.ensurealpha;
+        end
+    end
     hold off
     xlabel('Time (s)')
 
@@ -268,6 +282,7 @@ if p.makeplot
 
 
     fnout = sprintf('%s_lick.png', fname);
+    set(gcf,'renderer','painters');
     saveas(gcf, fullfile(fpath, fnout));
 end
 

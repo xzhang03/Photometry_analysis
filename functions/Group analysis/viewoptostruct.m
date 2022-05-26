@@ -30,6 +30,9 @@ addOptional(p, 'subtractmotion', false); % Linearly regress out motion trial by 
 addOptional(p, 'subtractdirection', 1); % Direction of subtraction: 1 (positive) or -1 (negative)
 addOptional(p, 'motiondelay', 0); % Debug variable. Don't change
 
+% Show licking
+addOptional(p, 'showlick', false);
+
 % Output settings
 addOptional(p, 'outputdata', false); % Output data
 addOptional(p, 'outputfs', 50); % Output Fs
@@ -103,6 +106,11 @@ if p.showmotion || p.subtractmotion
     end
 end
 
+% Licking mat
+if p.showlick
+    lickmat = cell2mat({optostruct(:).lick});
+end
+
 % Keep data as criteria
 % (Skip this if we are plotting pre/post-triggered data)
 if ~isempty(p.keepc{1,2}) && strcmp(p.datatype, 'trig')
@@ -138,6 +146,11 @@ if ~isempty(p.keepc{1,2}) && strcmp(p.datatype, 'trig')
         motionmat = motionmat(:, keepvec > 0);
     end
     
+    % Update lick data
+    if p.showlick
+        lickmat = lickmat(:, keepvec > 0);
+    end
+    
     % Update Number of trials
     ntrials = size(datamat, 2);
    
@@ -158,6 +171,11 @@ if p.removenans
         motionmat = motionmat(:, goodtrials);
     end
     
+    % Update lick data
+    if p.showlick
+        lickmat = lickmat(:, goodtrials);
+    end
+    
     % *need to update showX*
 end
 
@@ -166,6 +184,9 @@ if isempty(p.showX)
     datamat2show = datamat;
     if p.showmotion || p.subtractmotion
         motionmat2show = motionmat;
+    end
+    if p.showlick
+        lickmat2show = lickmat;
     end
 elseif isscalar(p.showX)
     % If specifying the number of trials
@@ -176,6 +197,9 @@ elseif isscalar(p.showX)
         if p.showmotion || p.subtractmotion
             motionmat2show = motionmat(:, showind);
         end
+        if p.showlick
+            lickmat2show = lickmat(:, showind);
+        end
     else
         datamat2show = datamat;
     end
@@ -183,7 +207,10 @@ else
     % If specifying the exact trial indices
     datamat2show = datamat(:, p.showX);
     if p.showmotion || p.subtractmotion
-        motionmat2show = motionmat;
+        motionmat2show = motionmat(:, p.showX);
+    end
+    if p.showlick
+        lickmat2show = lickmat(:, p.showX);
     end
 end
 
@@ -217,7 +244,15 @@ colormap(b2r_arbitrary_input(p.heatmaprange(1), p.heatmaprange(2), [1 0 0], [0 0
 
 xrange = get(gca,'xlim');
 yrange = get(gca, 'ylim');
-xlabel('Time')
+xlabel('Time (s)')
+
+% X axis
+Fs = optostruct(1).Fs;
+xcell = get(gca, 'XTickLabel');
+for i = 1 : length(xcell)
+    xcell{i} = num2str(str2double(xcell{i}) / Fs);
+end
+set(gca, 'XTickLabel', xcell);
 
 % Add line for stim
 hold on
@@ -238,6 +273,7 @@ end
 
 plot(trace2plot);
 xlim(xrange)
+set(gca, 'XTickLabel', xcell);
 
 % Y max
 ymax = max(trace2plot);
@@ -248,6 +284,8 @@ if isempty(p.yrange)
     ylim([ymin - 0.03 ymax + 0.03])
 else
     ylim(p.yrange);
+    ymin = p.yrange(1) + 0.03;
+    ymax = p.yrange(2) - 0.03;
 end
 
 % Add an y = 0 line and motion
@@ -270,6 +308,21 @@ if p.showmotion || p.subtractmotion
     plot(motionvec, 'Color', [0.8 0.8 0.8], 'LineWidth', 1)
 end
 
+% Add licking
+if p.showlick
+    % Calculate
+    lickvec = nanmean(lickmat2show,2);
+    
+    % Normalize
+    lickvec = mat2gray(lickvec) * (ymax - ymin) + ymin;
+    
+    % Smoowth
+    lickvec = movmean(lickvec,50);
+    
+    % Plot
+    plot(lickvec, 'Color', [0.1 0.6 0.6], 'LineWidth', 1)
+end
+
 hold off
 if p.flip_signal
     ylabel('-F/F (z)')
@@ -285,7 +338,7 @@ end
 %% Output data
 if p.outputdata
     % Sampling frequency (may move up later)
-    Fs = optostruct(1).Fs;
+%     Fs = optostruct(1).Fs;
     
     % number of sweeps
     N_plotted = size(datamat,2);

@@ -31,7 +31,7 @@ parse(p, varargin{:});
 p = p.Results;
 
 % Debug
-p.fpath = '\\anastasia\data\photometry\SZ919\220426_SZ919\SZ919-220426-001-nidaq.mat';
+% p.fpath = '\\anastasia\data\photometry\SZ919\220426_SZ919\SZ919-220426-001-nidaq.mat';
 
 %% IO
 if isempty(p.fpath)
