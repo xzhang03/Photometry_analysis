@@ -115,8 +115,13 @@ l = length(buzz);
 trigpulses = chainfinder(buzz >= p.threshold);
 
 if isempty(trigpulses)
-    disp('No pulses found.')
-    return
+    switch2ensure = input('No pulses found. Use ensure (Yes = 1, No = 0)? ');
+    if switch2ensure == 1
+        buzz = ensure;
+        trigpulses = chainfinder(buzz >= p.threshold);
+    else
+        return
+    end
 end
 
 % Calculate onset and offets
