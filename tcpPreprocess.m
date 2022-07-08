@@ -24,8 +24,8 @@ PULSE_SIM_MODE = false;
 if  OPTO_MODE
     % Single channel recording
     % Where to grab data
-    data_channel = 1; % 3
-    opto_channel = 7; % 6
+    data_channel = 5; % 3 Opto cleopatra; 1 GCaMP new setup; 5 RCaMP new setup
+    opto_channel = 7; % 6 Opto cleopatra; 7 GCaMP new setup; 7 RCaMP new setup
     
     % Channel info
     ch1_pulse_ind = 2; % Where to grab wavelength 1's pulse info

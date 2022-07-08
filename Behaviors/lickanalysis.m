@@ -12,6 +12,7 @@ addOptional(p, 'defaultpath', '\\anastasia\data\photometry');
 addOptional(p, 'defaultext', '*.mat');
 
 % Trains
+addOptional(p, 'trialtrigger', 'buzz'); % Can be buzz or ensure
 addOptional(p, 'threshold', 1); % in voltage
 addOptional(p, 'traingap', 5); % in seconds
 
@@ -112,10 +113,15 @@ l = length(buzz);
 
 %% Find onsets
 % Get a list of the actual pulses of interest
-trigpulses = chainfinder(buzz >= p.threshold);
+switch p.trialtrigger
+    case 'buzz'
+        trigpulses = chainfinder(buzz >= p.threshold);
+    case 'ensure'
+        trigpulses = chainfinder(ensure >= p.threshold);
+end
 
-if isempty(trigpulses)
-    switch2ensure = input('No pulses found. Use ensure (Yes = 1, No = 0)? ');
+if isempty(trigpulses) && strcmpi(p.trialtrigger, 'buzz')
+    switch2ensure = input('No buzz found. Use ensure (Yes = 1, No = 0)? ');
     if switch2ensure == 1
         buzz = ensure;
         trigpulses = chainfinder(buzz >= p.threshold);
@@ -298,7 +304,12 @@ consumelick = zeros(ntrials, 1);
 success = zeros(ntrials, 1);
 
 for i = 1 : ntrials
-    trigwinstart = find(buzzmat(i,:) > 2, 1, 'first');
+    switch p.trialtrigger
+        case 'buzz'
+            trigwinstart = find(buzzmat(i,:) > 2, 1, 'first');
+        case 'ensure'
+            trigwinstart = find(ensuremat(i,:) > 2, 1, 'first');
+    end
     trigwinend = trigwinstart + p.trigwindow * p.nidaqFs - 1;
     consumewinstart = find(ensuremat(i,:) > 2, 1, 'first');
     consumewinend = consumewinstart + p.consumewindow * p.nidaqFs - 1;

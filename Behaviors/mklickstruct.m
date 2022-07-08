@@ -11,6 +11,7 @@ p = inputParser;
 addOptional(p, 'defaultpath', '\\anastasia\data\photometry');
 
 % Windows
+addOptional(p, 'trialtrigger', 'buzz'); % buzz or ensure
 addOptional(p, 'trigwindow', 1); % Duration of trigger window in sec
 addOptional(p, 'consumewindow', 5); % Duration of consumption window in sec
 
@@ -37,7 +38,7 @@ p = p.Results;
 
 %% Load
 loadingcell = mkloadingcell(inputloadingcell, p.defaultpath);
-n_loadingcell = length(loadingcell);
+n_loadingcell = size(loadingcell, 1);
 if isempty(p.lickstruct)
     % Initialize
     lickstruct = struct('mouse', [], 'ntrials', [], 'triglick', [], 'triglickmean', [],...
@@ -51,7 +52,8 @@ if isempty(p.lickstruct)
         fpath = fullfile(loadingcell{i,1}, loadingcell{i,5});
         out = lickanalysis('fpath', fpath, 'makeplot', false, 'trigwindow', ...
             p.trigwindow, 'consumewindow', p.consumewindow, 'SCoptoRNG', p.SCoptoRNG,...
-            'RNGhistorywin', p.RNGhistorywin, 'RNGhistoryX', p.RNGhistoryX);
+            'RNGhistorywin', p.RNGhistorywin, 'RNGhistoryX', p.RNGhistoryX, 'trialtrigger',...
+            p.trialtrigger);
         lickstruct(i).mouse = inputloadingcell{i,1};
         lickstruct(i).ntrials = length(out.triglick);
         lickstruct(i).triglick = out.triglick;

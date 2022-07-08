@@ -281,8 +281,12 @@ for i = 1 : n_series
     if p.showmotion
         if isfield(loaded, 'speedmat')
             datastruct(i).locomotion = loaded.speedmat;
+            if isempty(datastruct(i).locomotion) && i > 1
+                disp('Locomotion data zeroed.');
+                datastruct(i).locomotion = zeros(size(datastruct(i-1).locomotion));
+            end
         else
-            disp('No locomotion data found');
+            disp('No locomotion data found.');
             p.showmotion = false;
         end
     end

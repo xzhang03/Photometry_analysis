@@ -23,7 +23,7 @@ TrigCfg.dff_prc = 10; % Percentile
 TrigCfg.ch1_pulse_ind = 2; 
 
 % Opto pulses
-TrigCfg.opto_channel = 8; %6 - old; 7 - omni; 8 - omni audio
+TrigCfg.opto_channel = 7; %6 - old; 7 - omni; 8 - omni audio
 TrigCfg.minpulsewidth = []; % Minimal number of data points (in NIDAQ sample rate)
                            % to be considered a real opto pulse (preventing falsely binarized opto data);
                            % 5 for old box. [] for omni box
@@ -44,7 +44,7 @@ TrigCfg.GLM_ch = 6;
 TrigCfg.trainlength_threshold = 5;
 
 % Suffix (for making multiple trigger files)
-TrigCfg.suffix = 'tone';
+TrigCfg.suffix = '';
 
 % Camera channel
 TrigCfg.camch = 3;
