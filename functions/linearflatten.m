@@ -1,6 +1,6 @@
-function outvec = linearflatten(invec)
+function [outvec, subvec] = linearflatten(invec)
 % linearflatten flattens the input vector with a linear fit
-% outvec = linearflatten(invec)
+% [outvec, subvec] = linearflatten(invec)
 
 n_points = length(invec);
 
@@ -8,6 +8,8 @@ n_points = length(invec);
 x = (1 : n_points)';
 f1_lin = fit(x(~isnan(invec)), invec(~isnan(invec)), 'poly1');
 
+subvec  = f1_lin(x);
+
 % Subtract slope component
-outvec = invec - f1_lin(x);
+outvec = invec - subvec;
 end

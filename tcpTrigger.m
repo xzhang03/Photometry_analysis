@@ -11,52 +11,10 @@ else
     keep defaultpath
 end
 
-% Flatten data
-TrigCfg.flatten_data = false;
+% Use UI
+hfig = TrigCfg_UI(defaultpath);
+waitfor(hfig);
 
-% Dff data
-TrigCfg.dff_data = true;
-TrigCfg.dff_win = 60; % In seconds
-TrigCfg.dff_prc = 10; % Percentile
-
-% Where to grab wavelength 1's pulse info
-TrigCfg.ch1_pulse_ind = 2; 
-
-% Opto pulses
-TrigCfg.opto_channel = 7; %6 - old; 7 - omni; 8 - omni audio
-TrigCfg.minpulsewidth = []; % Minimal number of data points (in NIDAQ sample rate)
-                           % to be considered a real opto pulse (preventing falsely binarized opto data);
-                           % 5 for old box. [] for omni box
-% Window info (seconds before and after pulse onsets)
-TrigCfg.prew = 10;
-TrigCfg.postw = 50;
-
-% Interpolate out artifacts (problem with small NIDAQs)
-TrigCfg.Remove_artifacts = false;
-TrigCfg.artifact_ch = [4, 8];
-
-% GLM regress out artifacts
-TrigCfg.GLM_artifacts = true;
-TrigCfg.GLM_ch = 6;
-
-% The minimal number of seconds between pulses that are still in the same
-% train
-TrigCfg.trainlength_threshold = 5;
-
-% Suffix (for making multiple trigger files)
-TrigCfg.suffix = '';
-
-% Camera channel
-TrigCfg.camch = 3;
-
-% Lick channel
-TrigCfg.lickch = 6;
-
-% Debugging variable (do not change)
-TrigCfg.DebugMode = false;
-if TrigCfg.DebugMode
-    TrigCfg.opto_on_offset = 1; % In seconds
-end
 %% IO
 % Work out outputpath
 [filename, filepath] = uigetfile(fullfile(defaultpath , '*_preprocessed.mat'));

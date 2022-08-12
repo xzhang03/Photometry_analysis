@@ -14,57 +14,27 @@ else
     defaultpath = '\\anastasia\data\photometry';
 end
 
+% Use UI
+hfig = ppCfg_UI(defaultpath);
+waitfor(hfig);
 
-% Opto genetic experiments (used to be called SINGLE_CHANNEL_MODE)
-OPTO_MODE = true;
-
-% No pulse info (and no pulses are used during photometry)
-PULSE_SIM_MODE = false;
-
-if  OPTO_MODE
-    % Single channel recording
-    % Where to grab data
-    data_channel = 5; % 3 Opto cleopatra; 1 GCaMP new setup; 5 RCaMP new setup
-    opto_channel = 7; % 6 Opto cleopatra; 7 GCaMP new setup; 7 RCaMP new setup
-    
-    % Channel info
-    ch1_pulse_ind = 2; % Where to grab wavelength 1's pulse info
-    ch2_pulse_ind = 2; % Where to grab wavelength 2's pulse info
-
-    % Channel thresholds (mostly depends on whether digital or analog)
-    ch1_pulse_thresh = 1;
-    ch2_pulse_thresh = 0.5;
-    
-    % Filter out stim artifact
-    filt_stim = false;
-    stim_filt_range = [9 11]; % Notch filter to remove stim artifacts (in Hz)
-else
-    % Where to grab data
-    data_channel = 1;
-
-    % Channel info
-    ch1_pulse_ind = 2; % Where to grab wavelength 1's pulse info
-    ch2_pulse_ind = 6; % Where to grab wavelength 2's pulse info. Usually 6 or 9
-
-    % Channel thresholds (mostly depends on whether digital or analog)
-    ch1_pulse_thresh = 2;
-    ch2_pulse_thresh = 0.5;
-end
-
-% Use 60 Hz filter
-use_fnotch_60 = true;
-fnotch_60 = [59 61];
-
-% [ Black out points ] This will change the values that come out of your analysis!
-blackout_window = 9; % Ignore the first X points within each pulse due to capacitated currents (9 for 2500 Hz)
-
-% Channel and frequency data
-freq = 50; % Sampling rate after downsampling (i.e., pulse rate of each channel in Hz)
-
-% Shoulder size for subtraction
-% The number of points before the onset of each pulse that can be averaged
-% and subtracted off as ambient background. Set to 0 to skip this step
-Ambientpts = 0;
+% Parse outcome
+OPTO_MODE = ppCfg.OPTO_MODE;
+PULSE_SIM_MODE = ppCfg.PULSE_SIM_MODE;
+data_channel = ppCfg.data_channel;
+data_channel2 = ppCfg.data_channel2;
+opto_channel = ppCfg.opto_channel;
+ch1_pulse_ind = ppCfg.ch1_pulse_ind;
+ch2_pulse_ind = ppCfg.ch2_pulse_ind;
+ch1_pulse_thresh = ppCfg.ch1_pulse_thresh;
+ch2_pulse_thresh = ppCfg.ch2_pulse_thresh;
+filt_stim = ppCfg.filt_stim;
+stim_filt_range = ppCfg.stim_filt_range;
+use_fnotch_60 = ppCfg.use_fnotch_60;
+fnotch_60 = ppCfg.fnotch_60;
+blackout_window = ppCfg.blackout_window;
+freq = ppCfg.freq;
+Ambientpts = ppCfg.Ambientpts;
 
 
 %% IO
@@ -245,4 +215,4 @@ ylabel('Photodiod voltage (V)')
 %% Save
 save(fullfile(filepath, filename_output), 'ch1_data_table', 'ch2_data_table',...
     'data', 'freq', 'Fs', 'n_points', 'PULSE_SIM_MODE', 'OPTO_MODE',...
-    'timestamps', 'Ch1_filtered', 'Ch2_filtered', 'opto_pulse_table');
+    'timestamps', 'Ch1_filtered', 'Ch2_filtered', 'opto_pulse_table', 'ppCfg');
