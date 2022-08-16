@@ -27,7 +27,7 @@ else
     filename_output_triggered = sprintf('%s_trig_%s.mat', filename(1:end-4), TrigCfg.suffix);
 end
 load(fullfile(filepath, filename), 'data', 'freq', 'ch1_data_table',...
-    'Ch1_filtered', 'n_points');
+    'Ch1_filtered', 'n_points', 'opto_pulse_table');
 
 %% GLM remove channel artifacts
 % Issue with small NIDAQ 
@@ -70,7 +70,7 @@ l = prew_f + postw_f + 1;
 % Find bad pulses if needed
 if ~isempty(TrigCfg.minpulsewidth)
     % Get all pulses
-    pulseinfo = chainfinder(data(TrigCfg.opto_channel,:)>0.5);
+    pulseinfo = chainfinder(opto_pulse_table(:,2)>0.5);
     
     % Bad pulses
     badpulses = pulseinfo(pulseinfo(:,2) < TrigCfg.minpulsewidth, :);
@@ -83,8 +83,7 @@ if ~isempty(TrigCfg.minpulsewidth)
 end
 
 % Grab the opto pulse info and snap it to the photometry pulses
-opto = tcpDatasnapper(data(TrigCfg.opto_channel,:), data(TrigCfg.ch1_pulse_ind,:), 'max', 'pulsetopulse');
-opto = opto(1:n_points, 2);
+opto = opto_pulse_table(:,2);
 
 % Grab opto onsets
 opto_ons = chainfinder(opto > 0.5);
