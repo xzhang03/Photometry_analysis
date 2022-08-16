@@ -78,28 +78,54 @@ rigs.rbg.scoptophoto.ch1_pulse_thresh = 1;
 rigs.rbg.scoptophoto.ch2_pulse_thresh = 0.5;
 rigs.rbg.scoptophoto.optomode = true;
 
-% Filter out stim artifact
-filt_stim = false;
-stim_filt_range = [9 11]; % Notch filter to remove stim artifacts (in Hz)
+% Check if config exist
+tf = evalin('base','exist(''ppCfg'')');
+
+if tf
+    ppCfg = evalin('base', 'ppCfg');
+    rignamess = fieldnames(rigs);
+    rigsel = ppCfg.rig;
     
-% Use 60 Hz filter
-use_fnotch_60 = true;
-fnotch_60 = [59 61];
+    [expts, exptns] = listexpts(rigs.(rigsel));
+    exptsel = ppCfg.mode;
+    
+    filt_stim = ppCfg.filt_stim;
+    stim_filt_range = ppCfg.stim_filt_range;
+    use_fnotch_60 = ppCfg.use_fnotch_60;
+    fnotch_60 = ppCfg.fnotch_60;
+    blackout_window = ppCfg.blackout_window;
+    freq = ppCfg.freq;
+    Ambientpts = ppCfg.Ambientpts;
+    PULSE_SIM_MODE = ppCfg.PULSE_SIM_MODE;
+else
+    % Filter out stim artifact
+    filt_stim = false;
+    stim_filt_range = [9 11]; % Notch filter to remove stim artifacts (in Hz)
 
-% [ Black out points ] This will change the values that come out of your analysis!
-blackout_window = 9; % Ignore the first X points within each pulse due to capacitated currents (9 for 2500 Hz)
+    % Use 60 Hz filter
+    use_fnotch_60 = true;
+    fnotch_60 = [59 61];
 
-% Channel and frequency data
-freq = 50; % Sampling rate after downsampling (i.e., pulse rate of each channel in Hz)
+    % [ Black out points ] This will change the values that come out of your analysis!
+    blackout_window = 9; % Ignore the first X points within each pulse due to capacitated currents (9 for 2500 Hz)
 
-% Shoulder size for subtraction
-% The number of points before the onset of each pulse that can be averaged
-% and subtracted off as ambient background. Set to 0 to skip this step
-Ambientpts = 0;
+    % Channel and frequency data
+    freq = 50; % Sampling rate after downsampling (i.e., pulse rate of each channel in Hz)
 
-% No pulse info (and no pulses are used during photometry)
-PULSE_SIM_MODE = false;
+    % Shoulder size for subtraction
+    % The number of points before the onset of each pulse that can be averaged
+    % and subtracted off as ambient background. Set to 0 to skip this step
+    Ambientpts = 0;
 
+    % No pulse info (and no pulses are used during photometry)
+    PULSE_SIM_MODE = false;
+    
+    rignamess = fieldnames(rigs);
+    rigsel = rignamess{1};
+    
+    [expts, exptns] = listexpts(rigs.(rigsel));
+    exptsel = expts{1};
+end
 %% UI
 hfig = figure('position', [300 500 250 480], 'MenuBar', 'none', 'ToolBar', 'none');
 topleft = [20 450 0 0];
@@ -108,18 +134,14 @@ majory = -60;
 minorx = 70;
 
 % Rig
-rignamess = fieldnames(rigs);
-rigsel = rignamess{1};
 uicontrol(hfig, 'Style', 'text', 'String', '1. Select a rig: ', 'Position', topleft + [0 0 200 20]);
 hrigsel = uicontrol(hfig, 'Style', 'popup', 'String', rignamess, 'Position', topleft + [0, minory, 200, 20], ...
-    'Callback', @getexpts);
+    'Callback', @getexpts, 'Value', find(strcmp(rignamess, rigsel)));
 
 % Expts
-[expts, exptns] = listexpts(rigs.(rigsel));
-exptsel = expts{1};
 uicontrol(hfig, 'Style', 'text', 'String', '2. Select an experiment: ', 'Position', topleft + [0 majory 200 20]);
 hexptsel = uicontrol(hfig, 'Style', 'popup', 'String', exptns, 'Position', topleft + [0, majory + minory, 200, 20], ...
-    'Callback', @getboxes);
+    'Callback', @getboxes, 'Value', find(strcmp(expts, exptsel)));
 
 % Boxes
 % Ch1 data

@@ -6,6 +6,9 @@ if ~exist('filepath', 'var')
     clear
     % common path
     defaultpath = '\\anastasia\data\photometry';
+elseif exist('TrigCfg', 'var')
+    defaultpath = filepath;
+    keep defaultpath TrigCfg
 else
     defaultpath = filepath;
     keep defaultpath
@@ -17,7 +20,7 @@ waitfor(hfig);
 
 %% IO
 % Work out outputpath
-[filename, filepath] = uigetfile(fullfile(defaultpath , '*_preprocessed.mat'));
+[filename, filepath] = uigetfile(fullfile(defaultpath , '*.mat'));
 if isempty(TrigCfg.suffix)
     filename_output_triggered = [filename(1:end-4), '_trig.mat'];
 else

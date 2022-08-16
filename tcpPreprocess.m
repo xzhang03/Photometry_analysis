@@ -3,8 +3,13 @@
 
 % Use previous path if exists
 if exist('filepath', 'var')
-    defaultpath = filepath;
-    keep defaultpath
+    if exist('ppCfg', 'var')
+        defaultpath = filepath;
+        keep defaultpath ppCfg
+    else
+        defaultpath = filepath;
+        keep defaultpath
+    end
 elseif exist('filepath2', 'var')
     defaultpath = filepath2;
     keep defaultpath
@@ -40,7 +45,7 @@ Ambientpts = ppCfg.Ambientpts;
 %% IO
 
 % Work out outputpath
-[filename, filepath] = uigetfile(fullfile(defaultpath , '*nidaq.mat'));
+[filename, filepath] = uigetfile(fullfile(defaultpath , '*.mat'));
 filename_output = [filename(1:end-4), '_preprocessed.mat'];
 load(fullfile(filepath, filename), 'data', 'timestamps', 'Fs');
 
@@ -155,6 +160,7 @@ if Ambientpts > 0
 end
 
 %% Grab opto pulses
+%
 if OPTO_MODE
     % Grab the pulses
     opto_pulse_table = tcpDatasnapper(data(opto_channel,:),...
@@ -165,6 +171,7 @@ if OPTO_MODE
 else
     opto_pulse_table = [];
 end
+%}
 
 %% Copy opto table from a different experiment (debug)
 %{

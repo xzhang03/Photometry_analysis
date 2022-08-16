@@ -61,37 +61,56 @@ rigs.rbg.audiophoto.optomode = true;
 rigs.rbg.audiophoto.camch = 3;
 rigs.rbg.audiophoto.lickch = 6;
 
-% Flatten data
-TrigCfg.flatten_data = false;
+% Check if config exist
+tf = evalin('base','exist(''TrigCfg'')');
 
-% Dff data
-TrigCfg.dff_data = false;
-TrigCfg.dff_win = 60; % In seconds
-TrigCfg.dff_prc = 10; % Percentile (10 excitation, 90 inhibition)
+if tf 
+    TrigCfg = evalin('base', 'TrigCfg');
+    rignamess = fieldnames(rigs);
+    rigsel = TrigCfg.rig;
+    
+    [expts, exptns] = listexpts(rigs.(rigsel));
+    exptsel = TrigCfg.mode;
 
-% Window info (seconds before and after pulse onsets)
-TrigCfg.prew = 10; % 8
-TrigCfg.postw = 50; % 28
+else
+    % Flatten data
+    TrigCfg.flatten_data = false;
 
-% Interpolate out artifacts (problem with small NIDAQs)
-TrigCfg.Remove_artifacts = false;
-TrigCfg.artifact_ch = [4, 8];
+    % Dff data
+    TrigCfg.dff_data = false;
+    TrigCfg.dff_win = 60; % In seconds
+    TrigCfg.dff_prc = 10; % Percentile (10 excitation, 90 inhibition)
 
-% GLM regress out artifacts
-TrigCfg.GLM_artifacts = true;
-TrigCfg.GLM_ch = 6;
+    % Window info (seconds before and after pulse onsets)
+    TrigCfg.prew = 10; % 8
+    TrigCfg.postw = 50; % 28
 
-% The minimal number of seconds between pulses that are still in the same
-% train
-TrigCfg.trainlength_threshold = 5;
+    % Interpolate out artifacts (problem with small NIDAQs)
+    TrigCfg.Remove_artifacts = false;
+    TrigCfg.artifact_ch = [4, 8];
 
-% Suffix (for making multiple trigger files)
-TrigCfg.suffix = '';
+    % GLM regress out artifacts
+    TrigCfg.GLM_artifacts = true;
+    TrigCfg.GLM_ch = 6;
 
-% Debugging variable (do not change)
-TrigCfg.DebugMode = false;
-if TrigCfg.DebugMode
-    TrigCfg.opto_on_offset = 1; % In seconds
+    % The minimal number of seconds between pulses that are still in the same
+    % train
+    TrigCfg.trainlength_threshold = 5;
+
+    % Suffix (for making multiple trigger files)
+    TrigCfg.suffix = '';
+
+    % Debugging variable (do not change)
+    TrigCfg.DebugMode = false;
+    if TrigCfg.DebugMode
+        TrigCfg.opto_on_offset = 1; % In seconds
+    end
+    
+    rignamess = fieldnames(rigs);
+    rigsel = rignamess{1};
+    
+    [expts, exptns] = listexpts(rigs.(rigsel));
+    exptsel = expts{1};
 end
 
 %% UI
@@ -102,18 +121,14 @@ majory = -60;
 minorx = 70;
 
 % Rig
-rignamess = fieldnames(rigs);
-rigsel = rignamess{1};
 uicontrol(hfig, 'Style', 'text', 'String', '1. Select a rig: ', 'Position', topleft + [0 0 200 20]);
 hrigsel = uicontrol(hfig, 'Style', 'popup', 'String', rignamess, 'Position', topleft + [0, minory, 200, 20], ...
-    'Callback', @getexpts);
+    'Callback', @getexpts, 'Value', find(strcmp(rignamess, rigsel)));
 
 % Expts
-[expts, exptns] = listexpts(rigs.(rigsel));
-exptsel = expts{1};
 uicontrol(hfig, 'Style', 'text', 'String', '2. Select an experiment: ', 'Position', topleft + [0 majory 200 20]);
 hexptsel = uicontrol(hfig, 'Style', 'popup', 'String', exptns, 'Position', topleft + [0, majory + minory, 200, 20], ...
-    'Callback', @getboxes);
+    'Callback', @getboxes, 'Value', find(strcmp(expts, exptsel)));
 
 % Boxes
 % Ch1 in
