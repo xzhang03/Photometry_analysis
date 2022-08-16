@@ -166,6 +166,21 @@ else
     opto_pulse_table = [];
 end
 
+%% Copy opto table from a different experiment (debug)
+%{
+[optofn, optofp] = uigetfile(fullfile(filepath, '*.mat'));
+loaded = load(fullfile(optofp, optofn), 'opto_pulse_table');
+opto_pulse_table = ch1_data_table;
+opto_pulse_table(:,2) = 0;
+opto_pulse_table(:,3) = loaded.opto_pulse_table(2,3);
+ptable = chainfinder(loaded.opto_pulse_table(:,2) > 0.5);
+for i = 1 : size(ptable,1)
+    istart = ptable(i,1);
+    iend = ptable(i,1) + ptable(i,2) - 1;
+    opto_pulse_table(istart:iend,2) = 1;
+end
+%}
+
 %% Plot raw data data
 figure(100)
 

@@ -48,6 +48,7 @@ if isempty(p.lickstruct)
     % Load
     hwait = waitbar(0, 'Processing');
     for i = 1 : n_loadingcell
+%         disp(i);
         waitbar(i/n_loadingcell, hwait, sprintf('Processing %i/%i', i, n_loadingcell))
         fpath = fullfile(loadingcell{i,1}, loadingcell{i,5});
         out = lickanalysis('fpath', fpath, 'makeplot', false, 'trigwindow', ...

@@ -84,7 +84,7 @@ opto = tcpDatasnapper(data(TrigCfg.opto_channel,:), data(TrigCfg.ch1_pulse_ind,:
 opto = opto(1:n_points, 2);
 
 % Grab opto onsets
-opto_ons = chainfinder(opto > 2);
+opto_ons = chainfinder(opto > 0.5);
 
 % Grab opto inter-stim interval
 opto_isi = diff(opto_ons(:,1));

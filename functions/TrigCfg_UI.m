@@ -9,7 +9,7 @@ end
 % Cleopatra optophoto (Green Sensor + Red Stim)
 rigs.cleopatra.optophoto.name = 'Cleopatra GCaMP + Chrimson';
 rigs.cleopatra.optophoto.mode = '1. Green sensor + Red stim';
-rigs.cleopatra.optophoto.opto_channel = 6;
+rigs.cleopatra.optophoto.opto_channel = 9;
 rigs.cleopatra.optophoto.ch1_pulse_ind = 2;
 rigs.cleopatra.optophoto.minpulsewidth = 5;
 rigs.cleopatra.optophoto.ch1_pulse_thresh = 1;
