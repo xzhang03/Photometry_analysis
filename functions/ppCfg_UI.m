@@ -17,6 +17,7 @@ rigs.cleopatra.tcp.ch2_pulse_ind = 9;
 rigs.cleopatra.tcp.ch1_pulse_thresh = 2;
 rigs.cleopatra.tcp.ch2_pulse_thresh = 0.5;
 rigs.cleopatra.tcp.optomode = false;
+rigs.cleopatra.tcp.tone_channel = 99; 
 
 % Cleopatra optophoto (Green Sensor + Red Stim)
 rigs.cleopatra.optophoto.name = 'Cleopatra GCaMP + Chrimson';
@@ -29,6 +30,7 @@ rigs.cleopatra.optophoto.ch2_pulse_ind = 2;
 rigs.cleopatra.optophoto.ch1_pulse_thresh = 1;
 rigs.cleopatra.optophoto.ch2_pulse_thresh = 0.5;
 rigs.cleopatra.optophoto.optomode = true;
+rigs.cleopatra.optophoto.tone_channel = 99; 
 
 % Minerva optophoto
 rigs.minerva.optophoto.name = 'Minerva placeholder';
@@ -41,6 +43,7 @@ rigs.minerva.optophoto.ch2_pulse_ind = 99;
 rigs.minerva.optophoto.ch1_pulse_thresh = 99;
 rigs.minerva.optophoto.ch2_pulse_thresh = 99;
 rigs.minerva.optophoto.optomode = true;
+rigs.minerva.optophoto.tone_channel = 99; 
 
 % RBG tcp (GCaMP + RFP)
 rigs.rbg.tcp.name = 'RBG GCaMP + RFP';
@@ -53,6 +56,7 @@ rigs.rbg.tcp.ch2_pulse_ind = 7;
 rigs.rbg.tcp.ch1_pulse_thresh = 2;
 rigs.rbg.tcp.ch2_pulse_thresh = 2;
 rigs.rbg.tcp.optomode = false;
+rigs.rbg.tcp.tone_channel = 8; 
 
 % RBG optophoto (RCaMP + ChR2)
 rigs.rbg.optophoto.name = 'RBG RCaMP + ChR2';
@@ -65,6 +69,7 @@ rigs.rbg.optophoto.ch2_pulse_ind = 2;
 rigs.rbg.optophoto.ch1_pulse_thresh = 1;
 rigs.rbg.optophoto.ch2_pulse_thresh = 0.5;
 rigs.rbg.optophoto.optomode = true;
+rigs.rbg.optophoto.tone_channel = 8; 
 
 % RBG scoptophoto (GCaMP + biPAC)
 rigs.rbg.scoptophoto.name = 'RBG GCaMP + biPAC';
@@ -77,6 +82,7 @@ rigs.rbg.scoptophoto.ch2_pulse_ind = 2;
 rigs.rbg.scoptophoto.ch1_pulse_thresh = 1;
 rigs.rbg.scoptophoto.ch2_pulse_thresh = 0.5;
 rigs.rbg.scoptophoto.optomode = true;
+rigs.rbg.scoptophoto.tone_channel = 8; 
 
 % Check if config exist
 tf = evalin('base','exist(''ppCfg'')');
@@ -179,6 +185,11 @@ uicontrol(hfig, 'Style', 'text', 'String', 'Ch2 Thresh', 'Position', topleft + [
 ht2 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch2_pulse_thresh,...
     'Position', topleft + [minorx 4*majory+minory 50 20]);
 
+% Tone channel
+uicontrol(hfig, 'Style', 'text', 'String', 'Tone Pulse', 'Position', topleft + [minorx*2 4*majory 60 20]);
+hoc = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).tone_channel,...
+    'Position', topleft + [minorx*2 4*majory+minory 50 20]);
+
 % Rare items
 % Expts
 uicontrol(hfig, 'Style', 'text', 'String', '3. Rare changes: ', 'Position', topleft + [0 5*majory 200 20]);
@@ -262,6 +273,7 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         hio.String = rigs.(rigsel).(exptsel).opto_channel;
         ht1.String = rigs.(rigsel).(exptsel).ch1_pulse_thresh;
         ht2.String = rigs.(rigsel).(exptsel).ch2_pulse_thresh;
+        hoc.String = rigs.(rigsel).(exptsel).tone_channel;
     end
 
 % Stim filter check
@@ -290,7 +302,7 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
             'ch2_pulse_thresh', rigs.(rigsel).(exptsel).ch2_pulse_thresh, ...
             'filt_stim', hfswitch.Value, 'stim_filt_range', [str2double(hf1.String), str2double(hf2.String)],...
             'use_fnotch_60', hfnotch.Value,'fnotch_60', fnotch_60, 'blackout_window', str2double(hbw.String),...
-            'freq', str2double(hfreq.String), 'Ambientpts', str2double(ham.String));
+            'freq', str2double(hfreq.String), 'Ambientpts', str2double(ham.String), 'tone_channel', str2double(hoc.String));
         assignin('base', 'ppCfg', ppCfg)
         close(hfig);
     end
@@ -316,6 +328,7 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         hbw.String = num2str(ppCfg_load.blackout_window);
         hfreq.String = num2str(ppCfg_load.freq);
         ham.String = num2str(ppCfg_load.Ambientpts);
+        hoc.String = num2str(ppCfg_load.tone_channel);
         
         PULSE_SIM_MODE = ppCfg_load.PULSE_SIM_MODE;
         fnotch_60 = ppCfg_load.fnotch_60;

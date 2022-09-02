@@ -40,12 +40,12 @@ fnotch_60 = ppCfg.fnotch_60;
 blackout_window = ppCfg.blackout_window;
 freq = ppCfg.freq;
 Ambientpts = ppCfg.Ambientpts;
-
+tone_channel = ppCfg.tone_channel;
 
 %% IO
 
 % Work out outputpath
-[filename, filepath] = uigetfile(fullfile(defaultpath , '*.mat'));
+[filename, filepath] = uigetfile(fullfile(defaultpath, '*.mat'));
 filename_output = [filename(1:end-4), '_preprocessed.mat'];
 load(fullfile(filepath, filename), 'data', 'timestamps', 'Fs');
 
@@ -173,6 +173,18 @@ else
 end
 %}
 
+%% Grab tone pulses
+if tone_channel < 99
+     % Grab the pulses
+    tone_pulse_table = tcpDatasnapper(data(tone_channel,:),...
+        data(ch1_pulse_ind,:), 'max', 'pulsetopulse');
+    
+    % Sync the number of pulses
+    tone_pulse_table = tone_pulse_table(1 : n_points, :);
+else
+    tone_pulse_table = [];
+end
+
 %% Copy opto table from a different experiment (debug)
 %{
 [optofn, optofp] = uigetfile(fullfile(filepath, '*.mat'));
@@ -237,4 +249,4 @@ ylabel('Photodiod voltage (V)')
 %% Save
 save(fullfile(filepath, filename_output), 'ch1_data_table', 'ch2_data_table',...
     'data', 'freq', 'Fs', 'n_points', 'PULSE_SIM_MODE', 'OPTO_MODE',...
-    'timestamps', 'Ch1_filtered', 'Ch2_filtered', 'opto_pulse_table', 'ppCfg');
+    'timestamps', 'Ch1_filtered', 'Ch2_filtered', 'opto_pulse_table', 'ppCfg', 'tone_pulse_table');

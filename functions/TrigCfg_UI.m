@@ -16,6 +16,7 @@ rigs.cleopatra.optophoto.ch1_pulse_thresh = 1;
 rigs.cleopatra.optophoto.optomode = true;
 rigs.cleopatra.optophoto.camch = 4;
 rigs.cleopatra.optophoto.lickch = 8;
+rigs.cleopatra.optophoto.trigtone = false;
 
 % Minerva optophoto
 rigs.minerva.optophoto.name = 'Minerva placeholder';
@@ -27,6 +28,7 @@ rigs.minerva.optophoto.ch1_pulse_thresh = 99;
 rigs.minerva.optophoto.optomode = true;
 rigs.minerva.optophoto.camch = 99;
 rigs.minerva.optophoto.lickch = 99;
+rigs.minerva.optophoto.trigtone = false;
 
 % RBG optophoto (RCaMP + ChR2)
 rigs.rbg.optophoto.name = 'RBG RCaMP + ChR2';
@@ -38,6 +40,7 @@ rigs.rbg.optophoto.ch1_pulse_thresh = 1;
 rigs.rbg.optophoto.optomode = true;
 rigs.rbg.optophoto.camch = 3;
 rigs.rbg.optophoto.lickch = 6;
+rigs.rbg.optophoto.trigtone = false;
 
 % RBG scoptophoto (GCaMP + biPAC)
 rigs.rbg.scoptophoto.name = 'RBG GCaMP + biPAC';
@@ -49,6 +52,7 @@ rigs.rbg.scoptophoto.ch1_pulse_thresh = 1;
 rigs.rbg.scoptophoto.optomode = true;
 rigs.rbg.scoptophoto.camch = 3;
 rigs.rbg.scoptophoto.lickch = 6;
+rigs.rbg.scoptophoto.trigtone = false;
 
 % RBG scoptophoto (GCaMP + Audio)
 rigs.rbg.audiophoto.name = 'RBG GCaMP + Audio Trigger';
@@ -60,6 +64,7 @@ rigs.rbg.audiophoto.ch1_pulse_thresh = 1;
 rigs.rbg.audiophoto.optomode = true;
 rigs.rbg.audiophoto.camch = 3;
 rigs.rbg.audiophoto.lickch = 6;
+rigs.rbg.audiophoto.trigtone = true;
 
 % Check if config exist
 tf = evalin('base','exist(''TrigCfg'')');
@@ -114,120 +119,141 @@ else
 end
 
 %% UI
-hfig = figure('position', [350 250 250 680], 'MenuBar', 'none', 'ToolBar', 'none');
+hfig = figure('position', [350 250 250 710], 'MenuBar', 'none', 'ToolBar', 'none');
 topleft = [20 650 0 0];
 minory = -20;
 majory = -60;
 minorx = 70;
 
+% Keep track of current y
+currenty = 0;
+
 % Rig
-uicontrol(hfig, 'Style', 'text', 'String', '1. Select a rig: ', 'Position', topleft + [0 0 200 20]);
-hrigsel = uicontrol(hfig, 'Style', 'popup', 'String', rignamess, 'Position', topleft + [0, minory, 200, 20], ...
+uicontrol(hfig, 'Style', 'text', 'String', '1. Select a rig: ', 'Position', topleft + [0 currenty 200 20]);
+hrigsel = uicontrol(hfig, 'Style', 'popup', 'String', rignamess, 'Position', topleft + [0, currenty + minory, 200, 20], ...
     'Callback', @getexpts, 'Value', find(strcmp(rignamess, rigsel)));
 
 % Expts
-uicontrol(hfig, 'Style', 'text', 'String', '2. Select an experiment: ', 'Position', topleft + [0 majory 200 20]);
-hexptsel = uicontrol(hfig, 'Style', 'popup', 'String', exptns, 'Position', topleft + [0, majory + minory, 200, 20], ...
+currenty = currenty + majory;
+uicontrol(hfig, 'Style', 'text', 'String', '2. Select an experiment: ', 'Position', topleft + [0 currenty 200 20]);
+hexptsel = uicontrol(hfig, 'Style', 'popup', 'String', exptns, 'Position', topleft + [0, currenty + minory, 200, 20], ...
     'Callback', @getboxes, 'Value', find(strcmp(expts, exptsel)));
 
 % Boxes
+currenty = currenty + majory;
+
 % Ch1 in
-uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Pulse', 'Position', topleft + [0 2*majory 50 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Pulse', 'Position', topleft + [0 currenty 50 20]);
 hi1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch1_pulse_ind,...
-    'Position', topleft + [0 2*majory+minory 50 20]);
+    'Position', topleft + [0 currenty+minory 50 20]);
 
 % Opto in
-uicontrol(hfig, 'Style', 'text', 'String', 'Opto Pulse', 'Position', topleft + [minorx 2*majory 60 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Opto Pulse', 'Position', topleft + [minorx currenty 60 20]);
 hio = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).opto_channel,...
-    'Position', topleft + [minorx 2*majory+minory 50 20]);
-
-% Ch1 thresh
-uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Thresh', 'Position', topleft + [0 3*majory 60 20]);
-ht1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch1_pulse_thresh,...
-    'Position', topleft + [0 3*majory+minory 50 20]);
-
-% Min opto pulse width
-uicontrol(hfig, 'Style', 'text', 'String', 'Opto MinPW', 'Position', topleft + [minorx 3*majory 65 20]);
-hmpw = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).minpulsewidth,...
-    'Position', topleft + [minorx 3*majory+minory 50 20]);
+    'Position', topleft + [minorx currenty+minory 50 20]);
 
 % Other channels
 % Cam
 uicontrol(hfig, 'Style', 'text', 'String', 'Cam Pulse', 'Position', topleft + [minorx*2 2*majory 55 20]);
 hcam = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).camch,...
-    'Position', topleft + [minorx*2 2*majory+minory 50 20]);
+    'Position', topleft + [minorx*2 currenty+minory 50 20]);
 
+
+% Ch1 thresh
+currenty = currenty + majory;
+uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Thresh', 'Position', topleft + [0 currenty 60 20]);
+ht1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch1_pulse_thresh,...
+    'Position', topleft + [0 currenty+minory 50 20]);
+
+% Min opto pulse width
+uicontrol(hfig, 'Style', 'text', 'String', 'Opto MinPW', 'Position', topleft + [minorx currenty 65 20]);
+hmpw = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).minpulsewidth,...
+    'Position', topleft + [minorx currenty+minory 50 20]);
+
+
+% Other channels
 % Lick
-uicontrol(hfig, 'Style', 'text', 'String', 'Licks', 'Position', topleft + [minorx*2 3*majory 30 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Licks', 'Position', topleft + [minorx*2 currenty 30 20]);
 hlick = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).lickch,...
-    'Position', topleft + [minorx*2 3*majory+minory 50 20]);
+    'Position', topleft + [minorx*2 currenty+minory 50 20]);
 
 % Window
+currenty = currenty + majory;
+
 % Pre window
-uicontrol(hfig, 'Style', 'text', 'String', 'Pre Win', 'Position', topleft + [0 4*majory 50 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Pre Win', 'Position', topleft + [0 currenty 50 20]);
 hprew = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.prew,...
-    'Position', topleft + [0 4*majory+minory 50 20]);
+    'Position', topleft + [0 currenty+minory 50 20]);
 
 % Post window
-uicontrol(hfig, 'Style', 'text', 'String', 'Post Win', 'Position', topleft + [minorx 4*majory 50 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Post Win', 'Position', topleft + [minorx currenty 50 20]);
 hpostw = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.postw,...
-    'Position', topleft + [minorx 4*majory+minory 50 20]);
+    'Position', topleft + [minorx currenty+minory 50 20]);
 
 % Min train length
-uicontrol(hfig, 'Style', 'text', 'String', 'Min train length', 'Position', topleft + [minorx*2 4*majory 80 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Min train length', 'Position', topleft + [minorx*2 currenty 80 20]);
 hmtl = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.trainlength_threshold,...
-    'Position', topleft + [minorx*2 4*majory+minory 50 20]);
+    'Position', topleft + [minorx*2 currenty+minory 50 20]);
+
+% Tone
+currenty = currenty + majory;
+hct = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Trigger Tone', 'Position', topleft + ...
+    [0 currenty 90 20], 'Value', rigs.(rigsel).(exptsel).trigtone);
 
 % Flatten and Sliding window DFF
-uicontrol(hfig, 'Style', 'text', 'String', '3. Preprocess: ', 'Position', topleft + [0 5*majory 200 20]);
+currenty = currenty + minory + minory;
+uicontrol(hfig, 'Style', 'text', 'String', '3. Preprocess: ', 'Position', topleft + [0 currenty 200 20]);
 
 % Flatten stim
 hflat = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Flatten', 'Position', topleft + ...
-    [0 5*majory+minory 90 20], 'Value', TrigCfg.flatten_data);
+    [0 currenty+minory 90 20], 'Value', TrigCfg.flatten_data);
 
 % DFF
 hdff = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Slide-DFF:', 'Position', topleft + ...
-    [minorx 5*majory+minory 90 20], 'Value', TrigCfg.dff_data, 'Callback', @dffswitch);
+    [minorx currenty+minory 90 20], 'Value', TrigCfg.dff_data, 'Callback', @dffswitch);
 hdffw = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.dff_win, 'Position', ...
-    topleft + [2*minorx 5*majory+minory 30 20]);
+    topleft + [2*minorx currenty+minory 30 20]);
 uicontrol(hfig, 'Style', 'text', 'String', 's', 'Position', topleft + ...
-    [2*minorx+30 5*majory+minory-3 10 20]);
+    [2*minorx+30 currenty+minory-3 10 20]);
 hdffp = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.dff_prc, 'Position', ...
-    topleft + [2*minorx+50 5*majory+minory 20 20]);
+    topleft + [2*minorx+50 currenty+minory 20 20]);
 uicontrol(hfig, 'Style', 'text', 'String', '%', 'Position', topleft + ...
-    [2*minorx+70 5*majory+minory-3 10 20]);
+    [2*minorx+70 currenty+minory-3 10 20]);
 dffswitch(hdff, []);
 
 % Rare items
-uicontrol(hfig, 'Style', 'text', 'String', '4. Rare changes: ', 'Position', topleft + [0 6*majory 200 20]);
+currenty = currenty + majory;
+uicontrol(hfig, 'Style', 'text', 'String', '4. Rare changes: ', 'Position', topleft + [0 currenty 200 20]);
 
 % Suffix
-uicontrol(hfig, 'Style', 'text', 'String', 'File suffix:', 'Position', topleft + [0 6*majory+minory-3 60 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'File suffix:', 'Position', topleft + [0 currenty+minory-3 60 20]);
 hsuffix = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.suffix,...
-    'Position', topleft + [minorx 6*majory+minory 120 20]);
+    'Position', topleft + [minorx currenty+minory 120 20]);
 
 % Interpolate
+currenty = currenty + majory;
 chs = num2cell(1:8)';
 hint = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Interpolate artifact', 'Position', topleft + ...
-    [0 7*majory 120 20], 'Value', TrigCfg.Remove_artifacts, 'Callback', @intswitch);
+    [0 currenty 120 20], 'Value', TrigCfg.Remove_artifacts, 'Callback', @intswitch);
 hintch = uicontrol(hfig, 'Style', 'listbox', 'String', chs, 'max', 8, 'min', 0, 'Position', topleft + ...
-    [20, 8*majory+minory*4, 60, 130], 'Value', TrigCfg.artifact_ch);
+    [20, currenty+majory+minory*4, 60, 130], 'Value', TrigCfg.artifact_ch);
 intswitch(hint);
 
 % GLM
 hglm = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'GLM artifact', 'Position', topleft + ...
-    [minorx*2-20 7*majory 100 20], 'Value', TrigCfg.GLM_artifacts, 'Callback', @glmswitch);
+    [minorx*2-20 currenty 100 20], 'Value', TrigCfg.GLM_artifacts, 'Callback', @glmswitch);
 hglmch = uicontrol(hfig, 'Style', 'listbox', 'String', chs, 'max', 8, 'min', 0, 'Position', topleft + ...
-    [minorx*2, 8*majory+minory*4, 60, 130], 'Value', TrigCfg.GLM_ch);
+    [minorx*2, currenty+majory+minory*4, 60, 130], 'Value', TrigCfg.GLM_ch);
 glmswitch(hglm);
 
 % Buttons
+currenty = currenty + 2 * majory + minory;
 uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Load', 'Position', ...
-    topleft + [0 10*majory+2*minory 70 30], 'Callback', @loadsetting);
+    topleft + [0 currenty+2*minory 70 30], 'Callback', @loadsetting);
 uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Done', 'Position', ...
-    topleft + [75 10*majory+2*minory 70 30], 'Callback', @done);
+    topleft + [75 currenty+2*minory 70 30], 'Callback', @done);
 uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
-    topleft + [150 10*majory+2*minory 70 30], 'Callback', @cancel);
+    topleft + [150 currenty+2*minory 70 30], 'Callback', @cancel);
 
 %% Call backs
 % When a rig is selected
@@ -263,6 +289,7 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         hmpw.String = rigs.(rigsel).(exptsel).minpulsewidth;
         hcam.String = rigs.(rigsel).(exptsel).camch;
         hlick.String = rigs.(rigsel).(exptsel).lickch;
+        hct.Value = rigs.(rigsel).(exptsel).trigtone;
     end
 
 % Dff switch
@@ -312,6 +339,7 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         TrigCfg.optomode = rigs.(rigsel).(exptsel).optomode;
         TrigCfg.camch = rigs.(rigsel).(exptsel).camch;
         TrigCfg.lickch = rigs.(rigsel).(exptsel).lickch;
+        TrigCfg.trigtone = rigs.(rigsel).(exptsel).trigtone;
         
         % Window info
         TrigCfg.prew = str2double(hprew.String);

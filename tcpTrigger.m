@@ -27,7 +27,7 @@ else
     filename_output_triggered = sprintf('%s_trig_%s.mat', filename(1:end-4), TrigCfg.suffix);
 end
 load(fullfile(filepath, filename), 'data', 'freq', 'ch1_data_table',...
-    'Ch1_filtered', 'n_points', 'opto_pulse_table');
+    'Ch1_filtered', 'n_points', 'opto_pulse_table', 'tone_pulse_table');
 
 %% GLM remove channel artifacts
 % Issue with small NIDAQ 
@@ -67,10 +67,20 @@ postw_f = TrigCfg.postw * freq;
 l = prew_f + postw_f + 1;
 
 %% Optopulses
+% Replace with tone if needed
+useTone = TrigCfg.trigtone;
+
+% Grab the opto pulse info and snap it to the photometry pulses
+if ~useTone
+    opto = opto_pulse_table(:,2);
+else
+    opto = tone_pulse_table(:,2);
+end
+    
 % Find bad pulses if needed
 if ~isempty(TrigCfg.minpulsewidth)
     % Get all pulses
-    pulseinfo = chainfinder(opto_pulse_table(:,2)>0.5);
+    pulseinfo = chainfinder(opto>0.5);
     
     % Bad pulses
     badpulses = pulseinfo(pulseinfo(:,2) < TrigCfg.minpulsewidth, :);
@@ -81,9 +91,6 @@ if ~isempty(TrigCfg.minpulsewidth)
         data(TrigCfg.opto_channel, badpulses(i,1) : badpulses(i,2)) = 0; %#ok<SAGROW>
     end
 end
-
-% Grab the opto pulse info and snap it to the photometry pulses
-opto = opto_pulse_table(:,2);
 
 % Grab opto onsets
 opto_ons = chainfinder(opto > 0.5);
@@ -259,10 +266,10 @@ if TrigCfg.flatten_data
     save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
         'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
         'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', 'exp_fit',...
-        'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg');
+        'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone');
 else
     save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
         'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
         'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', ...
-        'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg');
+        'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone');
 end
