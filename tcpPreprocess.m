@@ -216,9 +216,9 @@ ylabel('Photodiod voltage (V)')
 %% Power analysis
 % FFT (data, sampling rate, don't plot)
 if OPTO_MODE
-    [Powers, fft_freq] = ft2(ch1_data_table(:,2), 50, 0);
+    [Powers, fft_freq] = ft2(ch1_data_table(2:end,2), 50, 0);
 else
-    [Powers, fft_freq] = ft2([ch1_data_table(:,2) , ch2_data_table(:,2)] , 50, 0);
+    [Powers, fft_freq] = ft2([ch1_data_table(2:end,2) , ch2_data_table(2:end,2)] , 50, 0);
 end
 
 % Plot FFT info
