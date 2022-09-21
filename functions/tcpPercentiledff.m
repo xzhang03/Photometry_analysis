@@ -1,7 +1,7 @@
-function out = tcpPercentiledff(vec, fps, time_window, percentile)
+function [out, f0] = tcpPercentiledff(vec, fps, time_window, percentile)
 % tcpPercentiledff Return a dff with the 10th percentile subtracted across
 % a default 32-second window. Input data cannot be negative
-% out = tcpPercentiledff(vec, fps, time_window, percentile, offset)
+% [out, f0] = tcpPercentiledff(vec, fps, time_window, percentile, offset)
 % Now deals with nans better
 
 % Default values from Rohan and Christian
