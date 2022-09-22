@@ -119,7 +119,7 @@ else
 end
 
 %% UI
-hfig = figure('position', [350 250 250 710], 'MenuBar', 'none', 'ToolBar', 'none');
+hfig = figure('position', [350 100 250 710], 'MenuBar', 'none', 'ToolBar', 'none');
 topleft = [20 650 0 0];
 minory = -20;
 majory = -60;
@@ -145,37 +145,37 @@ currenty = currenty + majory;
 % Ch1 in
 uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Pulse', 'Position', topleft + [0 currenty 50 20]);
 hi1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch1_pulse_ind,...
-    'Position', topleft + [0 currenty+minory 50 20]);
+    'Position', topleft + [0 currenty+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Opto in
 uicontrol(hfig, 'Style', 'text', 'String', 'Opto Pulse', 'Position', topleft + [minorx currenty 60 20]);
 hio = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).opto_channel,...
-    'Position', topleft + [minorx currenty+minory 50 20]);
+    'Position', topleft + [minorx currenty+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Other channels
 % Cam
 uicontrol(hfig, 'Style', 'text', 'String', 'Cam Pulse', 'Position', topleft + [minorx*2 2*majory 55 20]);
 hcam = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).camch,...
-    'Position', topleft + [minorx*2 currenty+minory 50 20]);
+    'Position', topleft + [minorx*2 currenty+minory 50 20], 'callback', @updaterigsfromboxes);
 
 
 % Ch1 thresh
 currenty = currenty + majory;
 uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Thresh', 'Position', topleft + [0 currenty 60 20]);
 ht1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch1_pulse_thresh,...
-    'Position', topleft + [0 currenty+minory 50 20]);
+    'Position', topleft + [0 currenty+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Min opto pulse width
 uicontrol(hfig, 'Style', 'text', 'String', 'Opto MinPW', 'Position', topleft + [minorx currenty 65 20]);
 hmpw = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).minpulsewidth,...
-    'Position', topleft + [minorx currenty+minory 50 20]);
+    'Position', topleft + [minorx currenty+minory 50 20], 'callback', @updaterigsfromboxes);
 
 
 % Other channels
 % Lick
 uicontrol(hfig, 'Style', 'text', 'String', 'Licks', 'Position', topleft + [minorx*2 currenty 30 20]);
 hlick = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).lickch,...
-    'Position', topleft + [minorx*2 currenty+minory 50 20]);
+    'Position', topleft + [minorx*2 currenty+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Window
 currenty = currenty + majory;
@@ -198,7 +198,7 @@ hmtl = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.trainlength_threshold,
 % Tone
 currenty = currenty + majory;
 hct = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Trigger Tone', 'Position', topleft + ...
-    [0 currenty 90 20], 'Value', rigs.(rigsel).(exptsel).trigtone);
+    [0 currenty 90 20], 'Value', rigs.(rigsel).(exptsel).trigtone, 'callback', @updaterigsfromboxes);
 
 % Flatten and Sliding window DFF
 currenty = currenty + minory + minory;
@@ -248,7 +248,7 @@ glmswitch(hglm);
 
 % Buttons
 currenty = currenty + 2 * majory + minory;
-uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Load', 'Position', ...
+uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Load Setting', 'Position', ...
     topleft + [0 currenty+2*minory 70 30], 'Callback', @loadsetting);
 uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Done', 'Position', ...
     topleft + [75 currenty+2*minory 70 30], 'Callback', @done);
@@ -290,6 +290,17 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         hcam.String = rigs.(rigsel).(exptsel).camch;
         hlick.String = rigs.(rigsel).(exptsel).lickch;
         hct.Value = rigs.(rigsel).(exptsel).trigtone;
+    end
+
+% Update rigs from boxes
+    function updaterigsfromboxes(~,~)
+        rigs.(rigsel).(exptsel).ch1_pulse_ind = str2double(hi1.String);
+        rigs.(rigsel).(exptsel).opto_channel = str2double(hio.String);
+        rigs.(rigsel).(exptsel).ch1_pulse_thresh = str2double(ht1.String);
+        rigs.(rigsel).(exptsel).minpulsewidth = str2double(hmpw.String);
+        rigs.(rigsel).(exptsel).camch = str2double(hcam.String);
+        rigs.(rigsel).(exptsel).lickch = str2double(hlick.String);
+        rigs.(rigsel).(exptsel).trigtone = hct.Value;
     end
 
 % Dff switch
@@ -364,7 +375,10 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         % GLM regress out artifacts
         TrigCfg.GLM_artifacts = hglm.Value;
         TrigCfg.GLM_ch = hglmch.Value;
-                
+        
+        % Rigs
+        TrigCfg.rigs = rigs;
+        
         assignin('base', 'TrigCfg', TrigCfg)
         close(hfig);
     end
@@ -373,6 +387,9 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
     function loadsetting(~,~)
         [filename, filepath] = uigetfile(fullfile(defaultpath , '*_preprocessed_trig.mat'));
         TrigCfg = load(fullfile(filepath, filename), 'TrigCfg');
+        if isfield(TrigCfg, 'rigs')
+            rigs = TrigCfg.rigs;
+        end
         TrigCfg = TrigCfg.TrigCfg;
         rigsel = TrigCfg.rig;
         exptsel = TrigCfg.mode;

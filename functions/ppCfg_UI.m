@@ -133,7 +133,7 @@ else
     exptsel = expts{1};
 end
 %% UI
-hfig = figure('position', [300 500 250 480], 'MenuBar', 'none', 'ToolBar', 'none');
+hfig = figure('position', [300 200 250 480], 'MenuBar', 'none', 'ToolBar', 'none');
 topleft = [20 450 0 0];
 minory = -20;
 majory = -60;
@@ -153,42 +153,42 @@ hexptsel = uicontrol(hfig, 'Style', 'popup', 'String', exptns, 'Position', tople
 % Ch1 data
 uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Data', 'Position', topleft + [0 2*majory 50 20]);
 hd1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).data_channel,...
-    'Position', topleft + [0 2*majory+minory 50 20]);
+    'Position', topleft + [0 2*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Ch2 data
 uicontrol(hfig, 'Style', 'text', 'String', 'Ch2 Data', 'Position', topleft + [minorx 2*majory 50 20]);
 hd2 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).data_channel2,...
-    'Position', topleft + [minorx 2*majory+minory 50 20]);
+    'Position', topleft + [minorx 2*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Ch1 in
 uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Pulse', 'Position', topleft + [0 3*majory 50 20]);
 hi1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch1_pulse_ind,...
-    'Position', topleft + [0 3*majory+minory 50 20]);
+    'Position', topleft + [0 3*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Ch2 in
 uicontrol(hfig, 'Style', 'text', 'String', 'Ch2 Pulse', 'Position', topleft + [minorx 3*majory 50 20]);
 hi2 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch2_pulse_ind,...
-    'Position', topleft + [minorx 3*majory+minory 50 20]);
+    'Position', topleft + [minorx 3*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Opto
 uicontrol(hfig, 'Style', 'text', 'String', 'Opto Pulse', 'Position', topleft + [minorx*2 3*majory 60 20]);
 hio = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).opto_channel,...
-    'Position', topleft + [minorx*2 3*majory+minory 50 20]);
+    'Position', topleft + [minorx*2 3*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Ch1 thresh
 uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Thresh', 'Position', topleft + [0 4*majory 60 20]);
 ht1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch1_pulse_thresh,...
-    'Position', topleft + [0 4*majory+minory 50 20]);
+    'Position', topleft + [0 4*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Ch2 thresh
 uicontrol(hfig, 'Style', 'text', 'String', 'Ch2 Thresh', 'Position', topleft + [minorx 4*majory 60 20]);
 ht2 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch2_pulse_thresh,...
-    'Position', topleft + [minorx 4*majory+minory 50 20]);
+    'Position', topleft + [minorx 4*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Tone channel
 uicontrol(hfig, 'Style', 'text', 'String', 'Tone Pulse', 'Position', topleft + [minorx*2 4*majory 60 20]);
 hoc = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).tone_channel,...
-    'Position', topleft + [minorx*2 4*majory+minory 50 20]);
+    'Position', topleft + [minorx*2 4*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Rare items
 % Expts
@@ -231,7 +231,7 @@ hfreq = uicontrol(hfig, 'Style', 'edit', 'String', freq, 'Position', ...
     topleft + [150 5*majory+3.5*minory 70 20]);
 
 % Buttons
-uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Load', 'Position', ...
+uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Load Setting', 'Position', ...
     topleft + [0 7*majory 70 30], 'Callback', @loadsetting);
 uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Done', 'Position', ...
     topleft + [75 7*majory 70 30], 'Callback', @done);
@@ -276,6 +276,18 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         hoc.String = rigs.(rigsel).(exptsel).tone_channel;
     end
 
+% Update rig values from boxes
+    function updaterigsfromboxes(~, ~)
+        rigs.(rigsel).(exptsel).data_channel = str2double(hd1.String);
+        rigs.(rigsel).(exptsel).data_channel2 = str2double(hd2.String);
+        rigs.(rigsel).(exptsel).ch1_pulse_ind = str2double(hi1.String);
+        rigs.(rigsel).(exptsel).ch2_pulse_ind = str2double(hi2.String);
+        rigs.(rigsel).(exptsel).opto_channel = str2double(hio.String);
+        rigs.(rigsel).(exptsel).ch1_pulse_thresh = str2double(ht1.String);
+        rigs.(rigsel).(exptsel).ch2_pulse_thresh = str2double(ht2.String);
+        rigs.(rigsel).(exptsel).tone_channel = str2double(hoc.String);
+    end
+
 % Stim filter check
     function stimfiltercheck(src,~)
         if src.Value
@@ -302,7 +314,8 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
             'ch2_pulse_thresh', rigs.(rigsel).(exptsel).ch2_pulse_thresh, ...
             'filt_stim', hfswitch.Value, 'stim_filt_range', [str2double(hf1.String), str2double(hf2.String)],...
             'use_fnotch_60', hfnotch.Value,'fnotch_60', fnotch_60, 'blackout_window', str2double(hbw.String),...
-            'freq', str2double(hfreq.String), 'Ambientpts', str2double(ham.String), 'tone_channel', str2double(hoc.String));
+            'freq', str2double(hfreq.String), 'Ambientpts', str2double(ham.String), 'tone_channel', str2double(hoc.String),...
+            'rigs', rigs);
         assignin('base', 'ppCfg', ppCfg)
         close(hfig);
     end
@@ -312,6 +325,9 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         [filename, filepath] = uigetfile(fullfile(defaultpath , '*_preprocessed.mat'));
         ppCfg_load = load(fullfile(filepath, filename), 'ppCfg');
         ppCfg_load = ppCfg_load.ppCfg;
+        if isfield(ppCfg_load, 'rigs')
+            rigs = ppCfg_load.rigs;
+        end
         rigsel = ppCfg_load.rig;
         exptsel = ppCfg_load.mode;
                 
