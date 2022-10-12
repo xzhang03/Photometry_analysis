@@ -145,11 +145,11 @@ end
 plot([data2use, opto])
 
 %% Sliding window dff data
-% Pull data
-data2use = Ch1_filtered;
-
 % Dff data if needed
 if TrigCfg.dff_data
+    % Pull data
+    data2use = Ch1_filtered;
+
     if TrigCfg.Remove_artifacts
         data2use = tcpPercentiledff(datavec_artifactremoved, freq, TrigCfg.dff_win, TrigCfg.dff_prc);
         data2use_unfilt = data2use;
@@ -158,8 +158,9 @@ if TrigCfg.dff_data
         data2use_unfilt = tcpPercentiledff(ch1_data_table(:, 2), freq, TrigCfg.dff_win, TrigCfg.dff_prc);
     end
     exp_fit = [];
+    plot([data2use, opto])
 end
-plot([data2use, opto])
+
 
 %% Grab the point indices
 % Indices

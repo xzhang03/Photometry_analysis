@@ -84,6 +84,19 @@ rigs.rbg.scoptophoto.ch2_pulse_thresh = 0.5;
 rigs.rbg.scoptophoto.optomode = true;
 rigs.rbg.scoptophoto.tone_channel = 8; 
 
+% RBG scoptophoto (GCaMP + biPAC)
+rigs.rbg.foodphoto.name = 'RBG GCaMP + food';
+rigs.rbg.foodphoto.mode = '4. Green sensor (food channel as tone)';
+rigs.rbg.foodphoto.data_channel = 1;
+rigs.rbg.foodphoto.data_channel2 = 99;
+rigs.rbg.foodphoto.opto_channel = 7;
+rigs.rbg.foodphoto.ch1_pulse_ind = 2;
+rigs.rbg.foodphoto.ch2_pulse_ind = 2;
+rigs.rbg.foodphoto.ch1_pulse_thresh = 1;
+rigs.rbg.foodphoto.ch2_pulse_thresh = 0.5;
+rigs.rbg.foodphoto.optomode = true;
+rigs.rbg.foodphoto.tone_channel = 4; 
+
 % Check if config exist
 tf = evalin('base','exist(''ppCfg'')');
 

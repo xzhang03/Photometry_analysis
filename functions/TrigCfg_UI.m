@@ -66,6 +66,18 @@ rigs.rbg.audiophoto.camch = 3;
 rigs.rbg.audiophoto.lickch = 6;
 rigs.rbg.audiophoto.trigtone = true;
 
+% RBG scoptophoto (GCaMP + Audio)
+rigs.rbg.foodphoto.name = 'RBG GCaMP + Food Trigger';
+rigs.rbg.foodphoto.mode = '4. Green sensor + Food Trig';
+rigs.rbg.foodphoto.opto_channel = 4;
+rigs.rbg.foodphoto.ch1_pulse_ind = 2;
+rigs.rbg.foodphoto.minpulsewidth = [];
+rigs.rbg.foodphoto.ch1_pulse_thresh = 1;
+rigs.rbg.foodphoto.optomode = true;
+rigs.rbg.foodphoto.camch = 3;
+rigs.rbg.foodphoto.lickch = 6;
+rigs.rbg.foodphoto.trigtone = true;
+
 % Check if config exist
 tf = evalin('base','exist(''TrigCfg'')');
 
