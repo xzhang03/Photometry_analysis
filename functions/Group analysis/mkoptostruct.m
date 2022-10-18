@@ -69,7 +69,7 @@ n_series = size(loadingcell, 1);
 
 % Initialize
 datastruct = struct('photometry_trig', 0, 'photometry_trigavg', 0, 'mouse', '',... 
-    'mouseid',[],'order', 0, 'rorder', 0, 'Fs', 0, 'nstims', 0, 'window_info', [0 0 0]);
+    'mi', 0, 'mouseid',[],'order', 0, 'rorder', 0, 'Fs', 0, 'nstims', 0, 'window_info', [0 0 0]);
 datastruct = repmat(datastruct, [size(loadingcell,1), 1]);
 
 % Load data
@@ -374,6 +374,9 @@ for i = 1 : n_series
     
     % Fill mouse id
     datastruct(i).mouseid = ones(1, datastruct(i).nstims) * mouseid;
+    
+    % Fill singular mouse id
+    datastruct(i).mi = mouseid;
 end
 
 end
