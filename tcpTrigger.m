@@ -230,13 +230,7 @@ end
 
 %% Deal with licking
 % Initialize a triggered lick matrix
-lickvec = ch1_data_table;
-for i = 1 : n_points
-    % Wavelength 1
-    ini_ind = lickvec(i,1) + 6;
-    end_ind = lickvec(i,1) + lickvec(i,3) - 1;
-    lickvec(i,2) = mean(data(TrigCfg.lickch, ini_ind:end_ind));
-end
+lickvec = tcpDatasnapper(data(TrigCfg.lickch,:)', data(TrigCfg.ch1_pulse_ind,:)', 'max', 'pulsetopulse');
 lickvec = lickvec(:,2);
 
 lickmat = zeros(l, n_optostims);
