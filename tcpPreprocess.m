@@ -72,7 +72,7 @@ ch2_data_table(:,3) = ch2_data_table(:,2);
 ch2_data_table(:,2) = nan;
 
 % Equalize the pulse numbers of the two wavelenghts
-n_points = min(size(ch1_data_table(:,1),1),size(ch1_data_table(:,2),1)) - 1;
+n_points = min(size(ch1_data_table(:,1),1),size(ch2_data_table(:,2),1)) - 1;
 
 % Fix pulse 1 if needed
 if size(ch1_data_table,1) > n_points
