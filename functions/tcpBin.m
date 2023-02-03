@@ -120,6 +120,8 @@ for i = 1 : nseries
     end
 end
 
-
+if dim == 2
+    binneddata = binneddata';
+end
 
 end
