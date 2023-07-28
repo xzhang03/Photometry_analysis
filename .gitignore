@@ -26,3 +26,4 @@ $RECYCLE.BIN/
 Legacy_no_git/
 Analysis scripts/
 Behavior scripts/
+*.asv
