@@ -92,7 +92,11 @@ ntrials = size(datamat, 2);
 p.showmotion = p.showmotion & strcmpi(p.datatype, 'trig');
 p.subtractmotion = p.subtractmotion & strcmpi(p.datatype, 'trig');
 if p.showmotion || p.subtractmotion
-    motionmat = cell2mat({optostruct(:).locomotion});
+    if isempty(p.datasets)
+        motionmat = cell2mat({optostruct(:).locomotion});
+    else
+        motionmat = cell2mat({optostruct(p.datasets).locomotion});
+    end
     
     % Apply delay (Debug. This is only an estimate)
     if p.motiondelay > 0
@@ -108,7 +112,11 @@ end
 
 % Licking mat
 if p.showlick
-    lickmat = cell2mat({optostruct(:).lick});
+    if isempty(p.datasets)
+        lickmat = cell2mat({optostruct(:).lick});
+    else
+        lickmat = cell2mat({optostruct(p.datasets).lick});
+    end
 end
 
 % Keep data as criteria
@@ -230,6 +238,11 @@ if p.subtractmotion
         datamat2show(:,i) = vd - (vm * fitinfo(1) + fitinfo(2));
     end
 end
+
+bads = mean(lickmat2show(500:700,:)) < 0.1;
+d2 = datamat(:,bads);
+d2good = datamat(:,~bads);
+plot(movmean([mean(d2good,2), mean(d2,2)],5))
 
 %% Plot
 % Plot

@@ -97,6 +97,19 @@ rigs.rbg.foodphoto.ch2_pulse_thresh = 0.5;
 rigs.rbg.foodphoto.optomode = true;
 rigs.rbg.foodphoto.tone_channel = 4; 
 
+% Cleopatra tcp
+rigs.roger.tcp.name = 'Roger TCP';
+rigs.roger.tcp.mode = '1. Green sensor + 405 movement';
+rigs.roger.tcp.data_channel = 1;
+rigs.roger.tcp.data_channel2 = 99;
+rigs.roger.tcp.opto_channel = 99;
+rigs.roger.tcp.ch1_pulse_ind = 2;
+rigs.roger.tcp.ch2_pulse_ind = 7;
+rigs.roger.tcp.ch1_pulse_thresh = 2;
+rigs.roger.tcp.ch2_pulse_thresh = 2;
+rigs.roger.tcp.optomode = false;
+rigs.roger.tcp.tone_channel = 99; 
+
 % Check if config exist
 tf = evalin('base','exist(''ppCfg'')');
 
