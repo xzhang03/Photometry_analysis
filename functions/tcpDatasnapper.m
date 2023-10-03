@@ -15,18 +15,28 @@ if nargin < 4
 end
 
 % Get pulse table
-pulse_table = chainfinder(input_pulses > 0.5);
-n_points = size(pulse_table, 1);
+if size(input_pulses,2) == 3
+    % Reuse pulse table
+    pulse_table = input_pulses;
+    pulse_table(:,2) = nan;
+    n_points = size(pulse_table, 1);
+else
+    % Make new pulse table
+    pulse_table = chainfinder(input_pulses > 0.5);
+    n_points = size(pulse_table, 1);
+    
+    % Rearrange pulse table
+    pulse_table(:,3) = pulse_table(:,2);
+    pulse_table(:,2) = nan;
 
-% Rearrange pulse table
-pulse_table(:,3) = pulse_table(:,2);
-pulse_table(:,2) = nan;
-
-if strcmpi(window, 'pulsetopulse') % pulse to pulse mode
-    pulse_table(1 : end-1, 3) = diff(pulse_table(:,1));
-    pulse_table(end,3) = length(input_vec) - pulse_table(end,1) + 1;
-    % Grab as many points as possible
+    if strcmpi(window, 'pulsetopulse') % pulse to pulse mode
+        pulse_table(1 : end-1, 3) = diff(pulse_table(:,1));
+        pulse_table(end,3) = length(input_vec) - pulse_table(end,1) + 1;
+        % Grab as many points as possible
+    end
 end
+
+
 
 % Loop through
 switch method

@@ -1,4 +1,5 @@
-function [ch1_flattened, ch2_flattened, ch1_expfit_out, ch2_expfit_out] = tcpUIflatten(ch1_input, ch2_input)
+function [ch1_flattened, ch2_flattened, ch1_expfit_out, ch2_expfit_out]...
+    = tcpUIflatten(ch1_input, ch2_input)
 % tcpUIflatten uses a flatten to let user to choose how to perform the
 % trace flattening
 % [ch1_flattened, ch2_flattened, ch1_expfit_out, ch2_expfit_out] = tcpUIflatten(ch1_input, ch2_input)
