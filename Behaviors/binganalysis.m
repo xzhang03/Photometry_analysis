@@ -15,8 +15,8 @@ addOptional(p, 'defaultext', '*.mat');
 % Channels
 addOptional(p, 'clockch', 5);
 addOptional(p, 'optoch', 6);
-addOptional(p, 'lickch', [7 8 9]);
-
+% addOptional(p, 'lickch', [7 8 9]);
+addOptional(p, 'lickch', [10 11 12]);
 % Filter
 addOptional(p, 'caplickrate', 50);
 
@@ -38,7 +38,7 @@ if isempty(p.fpath)
 end
 
 % Load
-fprintf('Loading... ');
+fprintf('Loading %s... ', fn);
 tic;
 nidaqdata = load(p.fpath, '-mat');
 t = toc;
@@ -65,7 +65,7 @@ for imice = 1 : nmice
     licks = chainfinder(data(:,imice) > 0.5);
     
     if isempty(licks)
-        return;
+        continue;
     end
     
     % Consolidate pulses to licks
