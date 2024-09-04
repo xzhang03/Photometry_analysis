@@ -18,7 +18,7 @@ addOptional(p, 'optoch', 6);
 % addOptional(p, 'lickch', [7 8 9]);
 addOptional(p, 'lickch', [10 11 12]);
 % Filter
-addOptional(p, 'caplickrate', 50);
+addOptional(p, 'caplickrate', 10);
 
 % Output
 addOptional(p, 'increment', 10); % seconds
@@ -56,7 +56,7 @@ tthresh = Fs / p.caplickrate;
 
 % Time
 tmax = nidaqdata.timestamps(end);
-tvec = 0 : p.increment : tmax;
+tvec = (0 : p.increment : tmax)';
 ltvec = length(tvec);
 lvec = zeros(ltvec, nmice);
 
@@ -93,5 +93,9 @@ for imice = 1 : nmice
         lvec(i, imice) = sum(truelicks(:,1) <=  tvec(i));
     end
 end
+
+%% Plot
+figure
+plot(tvec, lvec)
 
 end
