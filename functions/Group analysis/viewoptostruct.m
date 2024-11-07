@@ -1,4 +1,4 @@
-function dataout = viewoptostruct(optostruct, varargin)
+function [dataout, datamat2show] = viewoptostruct(optostruct, varargin)
 % View opto structures
 % Dataout is a x-by-3 matrix of [mean SEM N].
 
@@ -238,11 +238,11 @@ if p.subtractmotion
         datamat2show(:,i) = vd - (vm * fitinfo(1) + fitinfo(2));
     end
 end
-
-bads = mean(lickmat2show(500:700,:)) < 0.1;
-d2 = datamat(:,bads);
-d2good = datamat(:,~bads);
-plot(movmean([mean(d2good,2), mean(d2,2)],5))
+% 
+% bads = mean(lickmat2show(500:700,:)) < 0.1;
+% d2 = datamat(:,bads);
+% d2good = datamat(:,~bads);
+% plot(movmean([mean(d2good,2), mean(d2,2)],5))
 
 %% Plot
 % Plot

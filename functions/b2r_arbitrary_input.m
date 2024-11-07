@@ -68,6 +68,11 @@ function newmap = b2r_arbitrary_input(cmin_input,cmax_input,color1,color2,bg)
 % 
 % end
 
+if nargin < 3
+    color1 = [1 0 0];
+    color2 = [0 0 1];
+    bg = [1 1 1];
+end
 
 
 if cmin_input >= cmax_input

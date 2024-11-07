@@ -61,7 +61,7 @@ AlignCfg.presmoothwindow = 10; % Window size for smoothing
 % This flatten step can be used either before or after the alignment to
 % the two channels. If used either before or after, the flattened results
 % will be used in the final trace. If you are only using parts of the trace
-% to align, you should set this to either 'post_flatten' or 'none';
+% to align, you should set this to either 'pre_flatten', 'post_flatten', or 'none';
 AlignCfg.flatten_mode = 'none';
 
 % =============================== Fit mode ================================
