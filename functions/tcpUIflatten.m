@@ -1,8 +1,12 @@
 function [ch1_flattened, ch2_flattened, ch1_expfit_out, ch2_expfit_out]...
-    = tcpUIflatten(ch1_input, ch2_input)
+    = tcpUIflatten(ch1_input, ch2_input, mode)
 % tcpUIflatten uses a flatten to let user to choose how to perform the
 % trace flattening
 % [ch1_flattened, ch2_flattened, ch1_expfit_out, ch2_expfit_out] = tcpUIflatten(ch1_input, ch2_input)
+
+if nargin < 3
+    mode = 1;
+end
 
 % Calculate the number of points
 n_points = length(ch1_input);
@@ -36,8 +40,8 @@ else
 end
 
 % fit (ignore NaNs)
-[~, ch1_expfit] = tcpFlatten(ch1_to_flatten);
-[~, ch2_expfit] = tcpFlatten(ch2_to_flatten);
+[~, ch1_expfit] = tcpFlatten(ch1_to_flatten, length(ch1_to_flatten), mode);
+[~, ch2_expfit] = tcpFlatten(ch2_to_flatten, length(ch2_to_flatten), mode);
 
 % Exponential fits
 ch1_expfit_out = ch1_expfit(1 : n_points);

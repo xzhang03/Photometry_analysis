@@ -16,7 +16,7 @@ elseif exist('filepath2', 'var')
 else
     clear
     % common path
-    defaultpath = '\\anastasia\data\photometry';
+    defaultpath = 'E:\data\photometry';
 end
 
 % Use UI

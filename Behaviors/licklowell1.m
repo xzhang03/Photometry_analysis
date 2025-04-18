@@ -1,4 +1,4 @@
-function licklowell1(varargin)
+function output = licklowell1(varargin)
 % 3 channel lick analysis for lowell lab
 
 %% Parse inputs
@@ -19,7 +19,11 @@ addOptional(p, 'clockch', 5);
 addOptional(p, 'optoch', []);
 addOptional(p, 'lickchs', 6);
 addOptional(p, 'ensurechs', 7);
-addOptional(p, 'lickct', 27); % Works out to be ~3 pulses per lick
+addOptional(p, 'lickct', 27); % Pulse width of a lick
+
+
+% Output vectors
+addOptional(p, 'tint', 10); % Time interval in seconds for output
 
 % Unpack if needed
 if iscell(varargin) && size(varargin,1) * size(varargin,2) == 1
@@ -37,10 +41,6 @@ if isempty(p.fpath)
 else
     [fpath, fname, ~] = fileparts(p.fpath);
 end
-
-% Mouse
-m1 = strfind(fname, '-');
-mouse = fname(1:m1(1)-1);
 
 % Load
 fprintf('Loading... ');
@@ -72,7 +72,7 @@ figure('Position', [50 50 600 600]);
 % Mouse 1
 plotyy(licktable1(:,1),licktable1(:,3), ensuretable1(:,1),ensuretable1(:,3))
 
-title(mouse);
+title(fname);
 xlabel('min')
 legend({'Licks', 'Ensure (s)'})
 
@@ -80,9 +80,48 @@ fnout = sprintf('%s_lickgroup.png', fname);
 saveas(gcf, fullfile(fpath, fnout));
 fprintf('Figure saved.\n');
 
+%% Output vectors
+% Time
+tvec = (0 : p.tint/60 : max(licktable1(:,1)))';
+
+% Licks
+lvec = interp1(licktable1(:,1), licktable1(:,3), tvec);
+
+% Remove nans
+lvec_nanchain = chainfinder(isnan(lvec));
+if size(lvec_nanchain,1) > 0
+    lvec_nanchain(:,2) = lvec_nanchain(:,2) + lvec_nanchain(:,1) - 1;
+    if lvec_nanchain(1,1) == 1
+        lvec(lvec_nanchain(1,1):lvec_nanchain(1,2)) = 0;
+    end
+end
+if size(lvec_nanchain,1) > 1
+    if lvec_nanchain(end,2) == length(lvec)
+        lvec(lvec_nanchain(end,1):lvec_nanchain(end,2)) = envec(lvec_nanchain(end,1) - 1);
+    end
+end
+
+% Ensure
+envec = interp1(ensuretable1(:,1), ensuretable1(:,3), tvec);
+
+% Remove nans
+envec_nanchain = chainfinder(isnan(envec));
+if size(lvec_nanchain,1) > 0
+    envec_nanchain(:,2) = envec_nanchain(:,2) + envec_nanchain(:,1) - 1;
+    if envec_nanchain(1,1) == 1
+        envec(envec_nanchain(1,1):envec_nanchain(1,2)) = 0;
+    end
+end
+if size(lvec_nanchain,1) > 1
+    if envec_nanchain(end,2) == length(envec)
+        envec(envec_nanchain(end,1):envec_nanchain(end,2)) = envec(envec_nanchain(end,1) - 1);
+    end
+end
+output = [tvec, lvec, envec];
+
 %% Save
 savestruct = struct('fn', fn, 'fname', fname, 'ensuretable1', ensuretable1,...
-    'licktable1', licktable1, 'p', p);
+    'licktable1', licktable1, 'p', p, 'tvec', tvec, 'lvec', lvec, 'envec', envec);
 fnoutmat = sprintf('%s_lickgroup.mat', fname);
 save(fullfile(fpath, fnoutmat), '-struct', 'savestruct', '-v7.3');
 fprintf('Mat saved.\n');

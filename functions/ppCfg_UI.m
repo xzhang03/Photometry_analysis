@@ -6,6 +6,32 @@ if nargin < 1
     defaultpath = '';
 end
 
+% Apollo SCOpto
+rigs.apollo.scp.name = 'Apollo SCP';
+rigs.apollo.scp.mode = '1. Green sensor + blue opto';
+rigs.apollo.scp.data_channel = 1;
+rigs.apollo.scp.data_channel2 = 99;
+rigs.apollo.scp.opto_channel = 6;
+rigs.apollo.scp.ch1_pulse_ind = 5;
+rigs.apollo.scp.ch2_pulse_ind = 5;
+rigs.apollo.scp.ch1_pulse_thresh = 0.5;
+rigs.apollo.scp.ch2_pulse_thresh = 0.5;
+rigs.apollo.scp.optomode = true;
+rigs.apollo.scp.tone_channel = 99; 
+
+% Artemis Optophoto
+rigs.artemis.optophoto.name = 'Artemis Optophotometry';
+rigs.artemis.optophoto.mode = '1. Green sensor + red stim';
+rigs.artemis.optophoto.data_channel = 1;
+rigs.artemis.optophoto.data_channel2 = 99;
+rigs.artemis.optophoto.opto_channel = 6;
+rigs.artemis.optophoto.ch1_pulse_ind = 5;
+rigs.artemis.optophoto.ch2_pulse_ind = 5;
+rigs.artemis.optophoto.ch1_pulse_thresh = 0.5;
+rigs.artemis.optophoto.ch2_pulse_thresh = 0.5;
+rigs.artemis.optophoto.optomode = true;
+rigs.artemis.optophoto.tone_channel = 99; 
+
 % Cleopatra tcp
 rigs.cleopatra.tcp.name = 'Cleopatra TCP';
 rigs.cleopatra.tcp.mode = '1. Green sensor + 405 movement';

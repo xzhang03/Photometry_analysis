@@ -6,6 +6,30 @@ if nargin < 1
     defaultpath = '';
 end
 
+% Apollo scoptophoto (GCaMP + biPAC)
+rigs.Apollo.scoptophoto.name = 'RBG GCaMP + biPAC';
+rigs.Apollo.scoptophoto.mode = '1. Green sensor + Blue stim';
+rigs.Apollo.scoptophoto.opto_channel = 6;
+rigs.Apollo.scoptophoto.ch1_pulse_ind = 5;
+rigs.Apollo.scoptophoto.minpulsewidth = [];
+rigs.Apollo.scoptophoto.ch1_pulse_thresh = 0.1;
+rigs.Apollo.scoptophoto.optomode = true;
+rigs.Apollo.scoptophoto.camch = 7;
+rigs.Apollo.scoptophoto.lickch = 8;
+rigs.Apollo.scoptophoto.trigtone = false;
+
+% Artemis optophoto (Green Sensor + Red Stim)
+rigs.Artemis.optophoto.name = 'Artemis GCaMP + Chrimson';
+rigs.Artemis.optophoto.mode = '1. Green sensor + Red stim';
+rigs.Artemis.optophoto.opto_channel = 6;
+rigs.Artemis.optophoto.ch1_pulse_ind = 5;
+rigs.Artemis.optophoto.minpulsewidth = 5;
+rigs.Artemis.optophoto.ch1_pulse_thresh = 0.5;
+rigs.Artemis.optophoto.optomode = true;
+rigs.Artemis.optophoto.camch = 7;
+rigs.Artemis.optophoto.lickch = 8;
+rigs.Artemis.optophoto.trigtone = false;
+
 % Cleopatra optophoto (Green Sensor + Red Stim)
 rigs.cleopatra.optophoto.name = 'Cleopatra GCaMP + Chrimson';
 rigs.cleopatra.optophoto.mode = '1. Green sensor + Red stim';

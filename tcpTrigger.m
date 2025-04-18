@@ -5,7 +5,7 @@
 if ~exist('filepath', 'var')
     clear
     % common path
-    defaultpath = '\\anastasia\data\photometry';
+    defaultpath = 'E:\data\photometry';
 elseif exist('TrigCfg', 'var')
     defaultpath = filepath;
     keep defaultpath TrigCfg
@@ -188,7 +188,7 @@ if exist(runningfn_full, 'file')
     running = load(runningfn_full, 'speed');
     
     % Running running sample count
-    nrunpulse = size(chainfinder(data(TrigCfg.camch,:)>1),1);
+    nrunpulse = size(chainfinder(data(TrigCfg.camch,:)>0.5),1);
     nrunlength = length(running.speed);
     if nrunpulse ~= nrunlength
         % Say something
