@@ -35,8 +35,8 @@ if strcmp(flattening_segments, 'A segment')
 
 else
     % Load up the data that are used to flatten
-    ch1_to_flatten = ch1_input;
-    ch2_to_flatten = ch2_input;
+    ch1_to_flatten = ch1_input(50:end);
+    ch2_to_flatten = ch2_input(50:end);
 end
 
 % fit (ignore NaNs)

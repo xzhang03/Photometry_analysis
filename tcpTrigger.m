@@ -125,14 +125,15 @@ n_optostims = length(opto_ons);
 %% Flatten data
 % Pull data
 data2use = Ch1_filtered;
+flattenmode = 1;
 
 % Flatten if needed
 if TrigCfg.flatten_data
     if TrigCfg.Remove_artifacts
-        [data2use, ~, exp_fit, ~] = tcpUIflatten(datavec_artifactremoved, opto);
+        [data2use, ~, exp_fit, ~] = tcpUIflatten(datavec_artifactremoved, opto, flattenmode);
         data2use_unfilt = datavec_artifactremoved - exp_fit;
     else
-        [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, opto);
+        [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, opto, flattenmode);
         data2use_unfilt = ch1_data_table(:, 2) - exp_fit;
     end
 else
@@ -170,13 +171,16 @@ inds(:,2) = inds(:,2) + postw_f;
 
 % Initialize a triggered matrix
 trigmat = zeros(l, n_optostims);
+trigmat_unfilt = zeros(l, n_optostims);
 for i = 1 : n_optostims
     trigmat(:,i) = data2use(inds(i,1) : inds(i,2));
+    trigmat_unfilt(:,i) = data2use_unfilt(inds(i,1) : inds(i,2));
 end
 
 % Calculate the average triggered results
 % trigmat_avg = mean(trigmat(:,end-10:end),2);
 trigmat_avg = nanmean(trigmat,2);
+trigmat_avg_unfilt = nanmean(trigmat_unfilt, 2);
 
 %% Deal with motion
 % Check if the running file is there
@@ -241,6 +245,7 @@ lickmat_avg = mean(lickmat,2);
 
 %% Plot
 figure
+subplot(1,2,1)
 hold on
 plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg)
 plot([0 tl]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
@@ -255,16 +260,36 @@ end
 hold off
 xlabel('time (s)')
 ylabel('Fluorescence')
+title('Filtered')
+
+subplot(1,2,2)
+hold on
+plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg_unfilt)
+plot([0 tl]/freq, [mean(trigmat_avg_unfilt), mean(trigmat_avg_unfilt)], 'LineWidth', 5)
+
+% Plot running
+if ~isempty(speedmat_avg)
+    ylims = get(gca, 'YLim');
+    plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
+        speedmat_avg / max(speedmat_avg) * ylims(2));
+end
+
+hold off
+xlabel('time (s)')
+ylabel('Fluorescence')
+title('Unfiltered')
 
 %% Save results
 if TrigCfg.flatten_data
     save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
         'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
         'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', 'exp_fit',...
-        'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone');
+        'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone',...
+        'trigmat_unfilt', 'trigmat_avg_unfilt');
 else
     save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
         'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
         'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', ...
-        'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone');
+        'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone',...
+        'trigmat_unfilt', 'trigmat_avg_unfilt');
 end
