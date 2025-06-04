@@ -5,7 +5,7 @@
 if ~exist('filepath', 'var')
     clear
     % common path
-    defaultpath = 'E:\data\photometry';
+    defaultpath = 'D:\Shared\photometry';
 elseif exist('TrigCfg', 'var')
     defaultpath = filepath;
     keep defaultpath TrigCfg
@@ -93,7 +93,8 @@ if ~isempty(TrigCfg.minpulsewidth)
 end
 
 % Grab opto onsets
-opto_ons = chainfinder(opto > 0.5);
+optothresh = max(opto)/2;
+opto_ons = chainfinder(opto > optothresh);
 
 % Grab opto inter-stim interval
 opto_isi = diff(opto_ons(:,1));

@@ -5,7 +5,7 @@ function [datastruct, n_series] = mkoptostruct(inputloadingcell, varargin)
 % Parse input
 p  = inputParser;
 
-addOptional(p, 'defaultpath', '\\anastasia\data\photometry'); % Default photometry path
+addOptional(p, 'defaultpath', 'D:\Shared\photometry'); % Default photometry path
 addOptional(p, 'trigsuffix', '');
 
 % Data type

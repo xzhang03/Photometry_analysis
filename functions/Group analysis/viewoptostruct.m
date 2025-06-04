@@ -1,4 +1,5 @@
-function [dataout, datamat2show] = viewoptostruct(optostruct, varargin)
+function [dataout, motionout, lickout, datamat2show, motionmat2show, lickmat2show]...
+    = viewoptostruct(optostruct, varargin)
 % View opto structures
 % Dataout is a x-by-3 matrix of [mean SEM N].
 
@@ -359,6 +360,24 @@ if p.outputdata
     dataout(:,2) = nanstd(datamat,[],2);
     dataout(:,3) = ones(size(datamat,1),1) * N_plotted;
     
+    if p.showmotion
+        motionout = nanmean(motionmat, 2);
+        motionout(:,2) = nanstd(motionmat,[],2);
+        motionout(:,3) = ones(size(motionmat,1),1) * N_plotted;
+    else
+        motionout = [];
+        motionmat2show = [];
+    end
+    
+    if p.showlick
+        lickout = nanmean(lickmat, 2);
+        lickout(:,2) = nanstd(lickmat,[],2);
+        lickout(:,3) = ones(size(lickmat,1),1) * N_plotted;
+    else
+        lickout = [];
+        lickmat2show = [];
+    end
+
     % Adjust output sampling rate if needed
     if Fs ~= p.outputfs
         dataout2 = tcpBin(dataout(:,1), Fs, p.outputfs, 'median');
@@ -367,6 +386,21 @@ if p.outputdata
         
         % Put the variable back
         dataout = dataout2;
+
+        if p.showmotion
+            motionout2 = tcpBin(motionout(:,1), Fs, p.outputfs, 'median');
+            motionout2(:,2) = tcpBin(motionout(:,2), Fs, p.outputfs, 'median');
+            motionout2(:,3) = tcpBin(motionout(:,3), Fs, p.outputfs, 'median');
+            motionout = motionout2;
+        end
+        
+        if p.showlick
+            lickout2 = tcpBin(lickout(:,1), Fs, p.outputfs, 'median');
+            lickout2(:,2) = tcpBin(lickout(:,2), Fs, p.outputfs, 'median');
+            lickout2(:,3) = tcpBin(lickout(:,3), Fs, p.outputfs, 'median');
+            lickout = lickout2;
+        end
+        
     end
 end
 end

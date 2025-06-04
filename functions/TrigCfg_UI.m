@@ -7,9 +7,9 @@ if nargin < 1
 end
 
 % Apollo scoptophoto (GCaMP + biPAC)
-rigs.Apollo.scoptophoto.name = 'RBG GCaMP + biPAC';
+rigs.Apollo.scoptophoto.name = 'Apollo GCaMP + biPAC';
 rigs.Apollo.scoptophoto.mode = '1. Green sensor + Blue stim';
-rigs.Apollo.scoptophoto.opto_channel = 6;
+rigs.Apollo.scoptophoto.opto_channel = 4;
 rigs.Apollo.scoptophoto.ch1_pulse_ind = 5;
 rigs.Apollo.scoptophoto.minpulsewidth = [];
 rigs.Apollo.scoptophoto.ch1_pulse_thresh = 0.1;
