@@ -74,6 +74,7 @@ hplot = plotyy(t, lickcount, t, ensurecount);
 hplot(1).YLabel.String = 'Licks';
 hplot(2).YLabel.String = 'Ensure time (s)';
 xlabel('Time (min)')
+title(fname);
 
 subplot(1,3,2)
 lickdur = hist(licktable(:,2), p.lickdurs);

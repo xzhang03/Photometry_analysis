@@ -33,6 +33,7 @@ addOptional(p, 'motiondelay', 0); % Debug variable. Don't change
 
 % Show licking
 addOptional(p, 'showlick', false);
+addOptional(p, 'licksmoothwin', 0);
 
 % Output settings
 addOptional(p, 'outputdata', false); % Output data
@@ -331,8 +332,10 @@ if p.showlick
     lickvec = mat2gray(lickvec) * (ymax - ymin) + ymin;
     
     % Smoowth
-    lickvec = movmean(lickvec,50);
-    
+    if p.licksmoothwin > 0
+        lickvec = movmean(lickvec, p.licksmoothwin);
+    end
+
     % Plot
     plot(lickvec, 'Color', [0.1 0.6 0.6], 'LineWidth', 1)
 end

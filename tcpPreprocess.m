@@ -41,9 +41,11 @@ blackout_window = ppCfg.blackout_window;
 freq = ppCfg.freq;
 Ambientpts = ppCfg.Ambientpts;
 tone_channel = ppCfg.tone_channel;
+lick_channel = ppCfg.lick_channel;
+ensure_channel = ppCfg.ensure_channel;
+cam_channel = ppCfg.cam_channel;
 
 %% IO
-
 % Work out outputpath
 [filename, filepath] = uigetfile(fullfile(defaultpath, '*.mat'));
 filename_output = [filename(1:end-4), '_preprocessed.mat'];
@@ -64,15 +66,26 @@ end
 % downsampling (which is the rate of pulses)
 ch1_data_table = chainfinder(ch1_pulse);
 ch2_data_table = chainfinder(ch2_pulse);
+if ~isempty(ch2_data_table)
+    doch2 = true;
+else
+    doch2 = false;
+end
 
 % Rearrange data
 ch1_data_table(:,3) = ch1_data_table(:,2);
 ch1_data_table(:,2) = nan;
-ch2_data_table(:,3) = ch2_data_table(:,2);
-ch2_data_table(:,2) = nan;
+if doch2
+    ch2_data_table(:,3) = ch2_data_table(:,2);
+    ch2_data_table(:,2) = nan;
+end
 
 % Equalize the pulse numbers of the two wavelenghts
-n_points = min(size(ch1_data_table(:,1),1),size(ch2_data_table(:,2),1)) - 1;
+if doch2
+    n_points = min(size(ch1_data_table(:,1),1),size(ch2_data_table(:,2),1)) - 1;
+else
+    n_points = size(ch1_data_table(:,1),1) - 1;
+end
 
 % Fix pulse 1 if needed
 if size(ch1_data_table,1) > n_points
@@ -84,14 +97,27 @@ if size(ch2_data_table,1) > n_points
     ch2_data_table = ch2_data_table(1:n_points, :);
 end
 
+% Check freq
+truefreq = Fs / median(diff(ch1_data_table(:,1)));
+if truefreq < freq * 0.9 || truefreq > freq * 0.9
+    freq = truefreq;
+end
+
 %% Notch filters
 if use_fnotch_60
     % Apply notch filter to remove 60 Hz noise
     d_notch = designfilt('bandstopiir','FilterOrder',2, 'HalfPowerFrequency1',...
         fnotch_60(1), 'HalfPowerFrequency2',fnotch_60(2), 'DesignMethod','butter','SampleRate', Fs);
     data_notch = filter(d_notch, data(data_channel,:));
+
+    if data_channel2 ~= data_channel && ch1_pulse_ind ~= ch2_pulse_ind && doch2
+        data_notch2 = filter(d_notch, data(data_channel2,:));
+    end
 else
     data_notch = data(data_channel,:);
+    if data_channel2 ~= data_channel && ch1_pulse_ind ~= ch2_pulse_ind && doch2
+        data_notch2 = data_notch;
+    end
 end
 
 % Apply another filter to filter out stim artifacts if needed
@@ -115,9 +141,15 @@ for i = 1 : n_points
     ch1_data_table(i,2) = median(data_notch(ini_ind:end_ind));
     
     % Wavelength 2
-    ini_ind = ch2_data_table(i,1) + blackout_window;
-    end_ind = ch2_data_table(i,1) + ch2_data_table(i,3) - 1;
-    ch2_data_table(i,2) = median(data_notch(ini_ind:end_ind));
+    if doch2
+        ini_ind = ch2_data_table(i,1) + blackout_window;
+        end_ind = ch2_data_table(i,1) + ch2_data_table(i,3) - 1;
+        if data_channel2 ~= data_channel && ch1_pulse_ind ~= ch2_pulse_ind
+            ch2_data_table(i,2) = median(data_notch2(ini_ind:end_ind));
+        else
+            ch2_data_table(i,2) = median(data_notch(ini_ind:end_ind));
+        end
+    end
 end
 
 %% Ambient-light subtraction
@@ -175,7 +207,7 @@ end
 
 %% Grab tone pulses
 if tone_channel < 99
-     % Grab the pulses
+    % Grab the pulses
     tone_pulse_table = tcpDatasnapper(data(tone_channel,:),...
         data(ch1_pulse_ind,:), 'max', 'pulsetopulse');
     
@@ -185,20 +217,39 @@ else
     tone_pulse_table = [];
 end
 
-%% Copy opto table from a different experiment (debug)
-%{
-[optofn, optofp] = uigetfile(fullfile(filepath, '*.mat'));
-loaded = load(fullfile(optofp, optofn), 'opto_pulse_table');
-opto_pulse_table = ch1_data_table;
-opto_pulse_table(:,2) = 0;
-opto_pulse_table(:,3) = loaded.opto_pulse_table(2,3);
-ptable = chainfinder(loaded.opto_pulse_table(:,2) > 0.5);
-for i = 1 : size(ptable,1)
-    istart = ptable(i,1);
-    iend = ptable(i,1) + ptable(i,2) - 1;
-    opto_pulse_table(istart:iend,2) = 1;
+%% Grab lick pulses
+if lick_channel < 99
+    % Grab the pulses
+    lick_pulse_table = tcpDatasnapper(data(lick_channel,:),...
+        data(ch1_pulse_ind,:), 'max', 'pulsetopulse');
+    
+    % Sync the number of pulses
+    lick_pulse_table = lick_pulse_table(1 : n_points, :);
+else
+    lick_pulse_table = [];
 end
-%}
+
+%% Grab ensure pulses
+if ensure_channel < 99
+    % Grab the pulses
+    ensure_pulse_table = tcpDatasnapper(data(ensure_channel,:),...
+        data(ch1_pulse_ind,:), 'max', 'pulsetopulse');
+    
+    % Sync the number of pulses
+    ensure_pulse_table = ensure_pulse_table(1 : n_points, :);
+else
+    ensure_pulse_table = [];
+end
+
+%% Grab running
+% Grab position vec
+ix = strfind(filename, '-nidaq');
+rundir = dir(fullfile(filepath, sprintf('%srunning.mat', filename(1:ix))));
+position = load(fullfile(rundir.folder, rundir.name), 'position');
+position = position.position;
+
+% cam pulse
+speedvec = resamplepos(position, data(cam_channel,:), ch1_data_table);
 
 %% Plot raw data data
 figure(100)
@@ -216,9 +267,9 @@ ylabel('Photodiod voltage (V)')
 %% Power analysis
 % FFT (data, sampling rate, don't plot)
 if OPTO_MODE
-    [Powers, fft_freq] = ft2(ch1_data_table(2:end,2), 50, 0);
+    [Powers, fft_freq] = ft2(ch1_data_table(2:end,2), freq, 0);
 else
-    [Powers, fft_freq] = ft2([ch1_data_table(2:end,2) , ch2_data_table(2:end,2)] , 50, 0);
+    [Powers, fft_freq] = ft2([ch1_data_table(2:end,2) , ch2_data_table(2:end,2)] , freq, 0);
 end
 
 % Plot FFT info
@@ -231,13 +282,22 @@ xlabel('Frequency')
 
 %% Low pass filter
 % Design a filter kernel
-d = fdesign.lowpass('Fp,Fst,Ap,Ast',8,10,0.5,40, freq);
+switch freq
+    case 10
+        d = fdesign.lowpass('Fp,Fst,Ap,Ast', 4, 5, 0.5, 20, freq);
+    otherwise
+        d = fdesign.lowpass('Fp,Fst,Ap,Ast', 8, 10, 0.5, 40, freq);
+end
 Hd = design(d,'equiripple');
 % fvtool(Hd)
 
 % Filter data
 Ch1_filtered = filter(Hd,ch1_data_table(:,2));
-Ch2_filtered = filter(Hd,ch2_data_table(:,2));
+if doch2
+    Ch2_filtered = filter(Hd,ch2_data_table(:,2));
+else
+    Ch2_filtered = [];
+end
 
 % Plot filtered fluorescence data on the right
 figure(100)
@@ -248,5 +308,6 @@ ylabel('Photodiod voltage (V)')
 
 %% Save
 save(fullfile(filepath, filename_output), 'ch1_data_table', 'ch2_data_table',...
-    'data', 'freq', 'Fs', 'n_points', 'PULSE_SIM_MODE', 'OPTO_MODE',...
-    'timestamps', 'Ch1_filtered', 'Ch2_filtered', 'opto_pulse_table', 'ppCfg', 'tone_pulse_table');
+    'freq', 'Fs', 'n_points', 'PULSE_SIM_MODE', 'OPTO_MODE', 'lick_pulse_table', ...
+    'timestamps', 'Ch1_filtered', 'Ch2_filtered', 'opto_pulse_table', 'ppCfg',...
+    'ensure_pulse_table', 'tone_pulse_table', 'speedvec');

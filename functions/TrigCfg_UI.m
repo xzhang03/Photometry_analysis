@@ -18,6 +18,18 @@ rigs.Apollo.scoptophoto.camch = 7;
 rigs.Apollo.scoptophoto.lickch = 8;
 rigs.Apollo.scoptophoto.trigtone = false;
 
+% Apollo licks (GCaMP + biPAC)
+rigs.Apollo.licks.name = 'Apollo GCaMP (licks)';
+rigs.Apollo.licks.mode = '2. Green sensor + licks (+ red)';
+rigs.Apollo.licks.opto_channel = 8;
+rigs.Apollo.licks.ch1_pulse_ind = 5;
+rigs.Apollo.licks.minpulsewidth = [];
+rigs.Apollo.licks.ch1_pulse_thresh = 0.1;
+rigs.Apollo.licks.optomode = true;
+rigs.Apollo.licks.camch = 7;
+rigs.Apollo.licks.lickch = 8;
+rigs.Apollo.licks.trigtone = false;
+
 % Artemis optophoto (Green Sensor + Red Stim)
 rigs.Artemis.optophoto.name = 'Artemis GCaMP + Chrimson';
 rigs.Artemis.optophoto.mode = '1. Green sensor + Red stim';
@@ -123,15 +135,19 @@ else
     TrigCfg.dff_prc = 10; % Percentile (10 excitation, 90 inhibition)
 
     % Window info (seconds before and after pulse onsets)
-    TrigCfg.prew = 10; % 8
-    TrigCfg.postw = 50; % 28
+    if ~isfield(TrigCfg, 'prew')
+        TrigCfg.prew = 10; % 8
+    end
+    if ~isfield(TrigCfg, 'postw')
+        TrigCfg.postw = 50; % 28
+    end
 
     % Interpolate out artifacts (problem with small NIDAQs)
     TrigCfg.Remove_artifacts = false;
     TrigCfg.artifact_ch = [4, 8];
 
     % GLM regress out artifacts
-    TrigCfg.GLM_artifacts = true;
+    TrigCfg.GLM_artifacts = false;
     TrigCfg.GLM_ch = 6;
 
     % The minimal number of seconds between pulses that are still in the same
