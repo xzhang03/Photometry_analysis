@@ -284,17 +284,20 @@ xlabel('Frequency')
 % Design a filter kernel
 switch freq
     case 10
-        d = fdesign.lowpass('Fp,Fst,Ap,Ast', 4, 5, 0.5, 20, freq);
+        d = designfilt("lowpassfir", 'PassbandFrequency', 4, 'StopbandFrequency', 5, ...
+            'PassbandRipple', 0.1, 'StopbandAttenuation', 40, 'DesignMethod', 'equiripple',...
+            'SampleRate', freq);
     otherwise
-        d = fdesign.lowpass('Fp,Fst,Ap,Ast', 8, 10, 0.5, 40, freq);
+        d = designfilt("lowpassfir", 'PassbandFrequency', 8, 'StopbandFrequency', 10, ...
+            'PassbandRipple', 0.1, 'StopbandAttenuation', 40, 'DesignMethod', 'equiripple',...
+            'SampleRate', freq);
 end
-Hd = design(d,'equiripple');
 % fvtool(Hd)
 
 % Filter data
-Ch1_filtered = filter(Hd,ch1_data_table(:,2));
+Ch1_filtered = filtfilt(d,ch1_data_table(:,2));
 if doch2
-    Ch2_filtered = filter(Hd,ch2_data_table(:,2));
+    Ch2_filtered = filtfilt(d,ch2_data_table(:,2));
 else
     Ch2_filtered = [];
 end

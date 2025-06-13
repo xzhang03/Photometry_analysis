@@ -31,6 +31,7 @@ load(fullfile(filepath, filename), 'freq', 'ch1_data_table', 'Ch1_filtered',...
 
 %% GLM remove channel artifacts
 % Issue with small NIDAQ 
+% Don't use this anymore after switching to picodaq
 if isfield(TrigCfg, 'GLM_artifacts')
     if TrigCfg.GLM_artifacts
         % Interpolate method (last resort)
@@ -40,15 +41,18 @@ if isfield(TrigCfg, 'GLM_artifacts')
         % Design a filter kernel
         switch freq
             case 10
-                d = fdesign.lowpass('Fp,Fst,Ap,Ast', 4, 5, 0.5, 20, freq);
+                d = designfilt("lowpassfir", 'PassbandFrequency', 4, 'StopbandFrequency', 5, ...
+                    'PassbandRipple', 0.1, 'StopbandAttenuation', 40, 'DesignMethod', 'equiripple',...
+                    'SampleRate', freq);
             otherwise
-                d = fdesign.lowpass('Fp,Fst,Ap,Ast', 8, 10, 0.5, 40, freq);
+                d = designfilt("lowpassfir", 'PassbandFrequency', 8, 'StopbandFrequency', 10, ...
+                    'PassbandRipple', 0.1, 'StopbandAttenuation', 40, 'DesignMethod', 'equiripple',...
+                    'SampleRate', freq);
         end
-        Hd = design(d,'equiripple');
-        % fvtool(Hd)
+        % fvtool(d)
 
         % Filter data
-        Ch1_filtered = filter(Hd,ch1_data_table(:,2));
+        Ch1_filtered = filtfilt(d,ch1_data_table(:,2));
     end
 else
     TrigCfg.GLM_artifacts = false;
@@ -56,6 +60,7 @@ end
 
 %% remove channel artifacts
 % Issue with small NIDAQ
+% Don't use this anymore after switching to picodaq
 if isfield(TrigCfg, 'Remove_artifacts')
     if TrigCfg.Remove_artifacts
         % Interpolate method (last resort)
@@ -88,7 +93,7 @@ if ~isempty(TrigCfg.minpulsewidth)
     % Get all pulses
     pulseinfo = chainfinder(opto>0.5);
     
-    % Bad pulses
+    % Bad pulses (the pulse is too short)
     badpulses = pulseinfo(pulseinfo(:,2) < TrigCfg.minpulsewidth, :);
     badpulses(:,2) = badpulses(:,1) + badpulses(:,2) - 1;
     
