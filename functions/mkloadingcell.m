@@ -50,8 +50,10 @@ for i = 1 : size(inputcell,1)
     
     % Folder name
     loadingcell{i,1} =...
-        fullfile(genpath, inputcell{i,1}, [date,'_',mouse]);
-    
+        fullfile(genpath, inputcell{i,1}, [mouse,'_',date]);
+    % loadingcell{i,1} =...
+    %     fullfile(genpath, inputcell{i,1}, [date,'_',mouse]);
+
     % Photometry data name
     loadingcell{i,2} =...
         sprintf('%s-%s-%s-nidaq_preprocessed_fixed.mat', mouse, date, runind);

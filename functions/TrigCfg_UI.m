@@ -7,99 +7,66 @@ if nargin < 1
 end
 
 % Apollo scoptophoto (GCaMP + biPAC)
-rigs.Apollo.scoptophoto.name = 'RBG GCaMP + biPAC';
+rigs.Apollo.scoptophoto.name = 'Apollo GCaMP + biPAC';
 rigs.Apollo.scoptophoto.mode = '1. Green sensor + Blue stim';
-rigs.Apollo.scoptophoto.opto_channel = 6;
-rigs.Apollo.scoptophoto.ch1_pulse_ind = 5;
 rigs.Apollo.scoptophoto.minpulsewidth = [];
-rigs.Apollo.scoptophoto.ch1_pulse_thresh = 0.1;
 rigs.Apollo.scoptophoto.optomode = true;
-rigs.Apollo.scoptophoto.camch = 7;
-rigs.Apollo.scoptophoto.lickch = 8;
 rigs.Apollo.scoptophoto.trigtone = false;
+
+% Apollo licks (GCaMP + biPAC)
+rigs.Apollo.licks.name = 'Apollo GCaMP (licks)';
+rigs.Apollo.licks.mode = '2. Green sensor + licks (+ red)';
+rigs.Apollo.licks.minpulsewidth = [];
+rigs.Apollo.licks.optomode = true;
+rigs.Apollo.licks.trigtone = false;
 
 % Artemis optophoto (Green Sensor + Red Stim)
 rigs.Artemis.optophoto.name = 'Artemis GCaMP + Chrimson';
 rigs.Artemis.optophoto.mode = '1. Green sensor + Red stim';
-rigs.Artemis.optophoto.opto_channel = 6;
-rigs.Artemis.optophoto.ch1_pulse_ind = 5;
 rigs.Artemis.optophoto.minpulsewidth = 5;
-rigs.Artemis.optophoto.ch1_pulse_thresh = 0.5;
 rigs.Artemis.optophoto.optomode = true;
-rigs.Artemis.optophoto.camch = 7;
-rigs.Artemis.optophoto.lickch = 8;
 rigs.Artemis.optophoto.trigtone = false;
 
 % Cleopatra optophoto (Green Sensor + Red Stim)
 rigs.cleopatra.optophoto.name = 'Cleopatra GCaMP + Chrimson';
 rigs.cleopatra.optophoto.mode = '1. Green sensor + Red stim';
-rigs.cleopatra.optophoto.opto_channel = 9;
-rigs.cleopatra.optophoto.ch1_pulse_ind = 2;
 rigs.cleopatra.optophoto.minpulsewidth = 5;
-rigs.cleopatra.optophoto.ch1_pulse_thresh = 1;
 rigs.cleopatra.optophoto.optomode = true;
-rigs.cleopatra.optophoto.camch = 4;
-rigs.cleopatra.optophoto.lickch = 8;
 rigs.cleopatra.optophoto.trigtone = false;
 
 % Minerva optophoto
 rigs.minerva.optophoto.name = 'Minerva placeholder';
 rigs.minerva.optophoto.mode = '1. placeholder';
-rigs.minerva.optophoto.opto_channel = 99;
-rigs.minerva.optophoto.ch1_pulse_ind = 99;
 rigs.minerva.optophoto.minpulsewidth = 99;
-rigs.minerva.optophoto.ch1_pulse_thresh = 99;
 rigs.minerva.optophoto.optomode = true;
-rigs.minerva.optophoto.camch = 99;
-rigs.minerva.optophoto.lickch = 99;
 rigs.minerva.optophoto.trigtone = false;
 
 % RBG optophoto (RCaMP + ChR2)
 rigs.rbg.optophoto.name = 'RBG RCaMP + ChR2';
 rigs.rbg.optophoto.mode = '1. Red sensor + Blue stim';
-rigs.rbg.optophoto.opto_channel = 7;
-rigs.rbg.optophoto.ch1_pulse_ind = 2;
 rigs.rbg.optophoto.minpulsewidth = [];
-rigs.rbg.optophoto.ch1_pulse_thresh = 1;
 rigs.rbg.optophoto.optomode = true;
-rigs.rbg.optophoto.camch = 3;
-rigs.rbg.optophoto.lickch = 6;
 rigs.rbg.optophoto.trigtone = false;
 
 % RBG scoptophoto (GCaMP + biPAC)
 rigs.rbg.scoptophoto.name = 'RBG GCaMP + biPAC';
 rigs.rbg.scoptophoto.mode = '2. Green sensor + Blue stim';
-rigs.rbg.scoptophoto.opto_channel = 7;
-rigs.rbg.scoptophoto.ch1_pulse_ind = 2;
 rigs.rbg.scoptophoto.minpulsewidth = [];
-rigs.rbg.scoptophoto.ch1_pulse_thresh = 1;
 rigs.rbg.scoptophoto.optomode = true;
-rigs.rbg.scoptophoto.camch = 3;
-rigs.rbg.scoptophoto.lickch = 6;
 rigs.rbg.scoptophoto.trigtone = false;
 
 % RBG scoptophoto (GCaMP + Audio)
 rigs.rbg.audiophoto.name = 'RBG GCaMP + Audio Trigger';
 rigs.rbg.audiophoto.mode = '3. Green sensor + Audio Trig';
-rigs.rbg.audiophoto.opto_channel = 8;
-rigs.rbg.audiophoto.ch1_pulse_ind = 2;
 rigs.rbg.audiophoto.minpulsewidth = [];
-rigs.rbg.audiophoto.ch1_pulse_thresh = 1;
 rigs.rbg.audiophoto.optomode = true;
-rigs.rbg.audiophoto.camch = 3;
-rigs.rbg.audiophoto.lickch = 6;
 rigs.rbg.audiophoto.trigtone = true;
 
 % RBG scoptophoto (GCaMP + Audio)
 rigs.rbg.foodphoto.name = 'RBG GCaMP + Food Trigger';
 rigs.rbg.foodphoto.mode = '4. Green sensor + Food Trig';
-rigs.rbg.foodphoto.opto_channel = 4;
-rigs.rbg.foodphoto.ch1_pulse_ind = 2;
 rigs.rbg.foodphoto.minpulsewidth = [];
-rigs.rbg.foodphoto.ch1_pulse_thresh = 1;
 rigs.rbg.foodphoto.optomode = true;
-rigs.rbg.foodphoto.camch = 3;
-rigs.rbg.foodphoto.lickch = 6;
 rigs.rbg.foodphoto.trigtone = true;
 
 % Check if config exist
@@ -115,6 +82,7 @@ if tf
 
 else
     % Flatten data
+    TrigCfg.usech2 = false;
     TrigCfg.flatten_data = false;
 
     % Dff data
@@ -123,15 +91,22 @@ else
     TrigCfg.dff_prc = 10; % Percentile (10 excitation, 90 inhibition)
 
     % Window info (seconds before and after pulse onsets)
-    TrigCfg.prew = 10; % 8
-    TrigCfg.postw = 50; % 28
+    if ~isfield(TrigCfg, 'prew')
+        TrigCfg.prew = 10; % 8
+    end
+    if ~isfield(TrigCfg, 'postw')
+        TrigCfg.postw = 50; % 28
+    end
+    
+    % Use offset
+    TrigCfg.useoffset = false;
 
     % Interpolate out artifacts (problem with small NIDAQs)
     TrigCfg.Remove_artifacts = false;
     TrigCfg.artifact_ch = [4, 8];
 
     % GLM regress out artifacts
-    TrigCfg.GLM_artifacts = true;
+    TrigCfg.GLM_artifacts = false;
     TrigCfg.GLM_ch = 6;
 
     % The minimal number of seconds between pulses that are still in the same
@@ -178,44 +153,7 @@ hexptsel = uicontrol(hfig, 'Style', 'popup', 'String', exptns, 'Position', tople
 % Boxes
 currenty = currenty + majory;
 
-% Ch1 in
-uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Pulse', 'Position', topleft + [0 currenty 50 20]);
-hi1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch1_pulse_ind,...
-    'Position', topleft + [0 currenty+minory 50 20], 'callback', @updaterigsfromboxes);
-
-% Opto in
-uicontrol(hfig, 'Style', 'text', 'String', 'Opto Pulse', 'Position', topleft + [minorx currenty 60 20]);
-hio = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).opto_channel,...
-    'Position', topleft + [minorx currenty+minory 50 20], 'callback', @updaterigsfromboxes);
-
 % Other channels
-% Cam
-uicontrol(hfig, 'Style', 'text', 'String', 'Cam Pulse', 'Position', topleft + [minorx*2 2*majory 55 20]);
-hcam = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).camch,...
-    'Position', topleft + [minorx*2 currenty+minory 50 20], 'callback', @updaterigsfromboxes);
-
-
-% Ch1 thresh
-currenty = currenty + majory;
-uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Thresh', 'Position', topleft + [0 currenty 60 20]);
-ht1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch1_pulse_thresh,...
-    'Position', topleft + [0 currenty+minory 50 20], 'callback', @updaterigsfromboxes);
-
-% Min opto pulse width
-uicontrol(hfig, 'Style', 'text', 'String', 'Opto MinPW', 'Position', topleft + [minorx currenty 65 20]);
-hmpw = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).minpulsewidth,...
-    'Position', topleft + [minorx currenty+minory 50 20], 'callback', @updaterigsfromboxes);
-
-
-% Other channels
-% Lick
-uicontrol(hfig, 'Style', 'text', 'String', 'Licks', 'Position', topleft + [minorx*2 currenty 30 20]);
-hlick = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).lickch,...
-    'Position', topleft + [minorx*2 currenty+minory 50 20], 'callback', @updaterigsfromboxes);
-
-% Window
-currenty = currenty + majory;
-
 % Pre window
 uicontrol(hfig, 'Style', 'text', 'String', 'Pre Win', 'Position', topleft + [0 currenty 50 20]);
 hprew = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.prew,...
@@ -226,15 +164,34 @@ uicontrol(hfig, 'Style', 'text', 'String', 'Post Win', 'Position', topleft + [mi
 hpostw = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.postw,...
     'Position', topleft + [minorx currenty+minory 50 20]);
 
+% Min opto pulse width
+uicontrol(hfig, 'Style', 'text', 'String', 'Opto MinPW', 'Position', topleft + [minorx*2 currenty 65 20]);
+hmpw = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).minpulsewidth,...
+    'Position', topleft + [minorx*2 currenty+minory 50 20], 'callback', @updaterigsfromboxes);
+
+% Other channels
+% Window
+currenty = currenty + majory;
+
 % Min train length
-uicontrol(hfig, 'Style', 'text', 'String', 'Min train length', 'Position', topleft + [minorx*2 currenty 80 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Min train length', 'Position', topleft + [0 currenty 80 20]);
 hmtl = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.trainlength_threshold,...
-    'Position', topleft + [minorx*2 currenty+minory 50 20]);
+    'Position', topleft + [0 currenty+minory 50 20]);
+
+% Channel 2
+currenty = currenty + majory;
+currenty = currenty + minory;
+hc2 = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Use Ch2', 'Position', topleft + ...
+    [0 currenty 90 20], 'Value', TrigCfg.usech2, 'callback', @updaterigsfromboxes);
 
 % Tone
-currenty = currenty + majory;
+currenty = currenty + minory;
 hct = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Trigger Tone', 'Position', topleft + ...
     [0 currenty 90 20], 'Value', rigs.(rigsel).(exptsel).trigtone, 'callback', @updaterigsfromboxes);
+
+% Offset
+hos = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Use Offset', 'Position', topleft + ...
+    [1.5*minorx currenty 90 20], 'Value', TrigCfg.useoffset, 'callback', @updaterigsfromboxes);
 
 % Flatten and Sliding window DFF
 currenty = currenty + minory + minory;
@@ -319,23 +276,13 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
 
 % Update box values
     function updateboxes()
-        hi1.String = rigs.(rigsel).(exptsel).ch1_pulse_ind;
-        hio.String = rigs.(rigsel).(exptsel).opto_channel;
-        ht1.String = rigs.(rigsel).(exptsel).ch1_pulse_thresh;
         hmpw.String = rigs.(rigsel).(exptsel).minpulsewidth;
-        hcam.String = rigs.(rigsel).(exptsel).camch;
-        hlick.String = rigs.(rigsel).(exptsel).lickch;
         hct.Value = rigs.(rigsel).(exptsel).trigtone;
     end
 
 % Update rigs from boxes
     function updaterigsfromboxes(~,~)
-        rigs.(rigsel).(exptsel).ch1_pulse_ind = str2double(hi1.String);
-        rigs.(rigsel).(exptsel).opto_channel = str2double(hio.String);
-        rigs.(rigsel).(exptsel).ch1_pulse_thresh = str2double(ht1.String);
         rigs.(rigsel).(exptsel).minpulsewidth = str2double(hmpw.String);
-        rigs.(rigsel).(exptsel).camch = str2double(hcam.String);
-        rigs.(rigsel).(exptsel).lickch = str2double(hlick.String);
         rigs.(rigsel).(exptsel).trigtone = hct.Value;
     end
 
@@ -379,13 +326,9 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         TrigCfg.mode = exptsel;
         
         % Expt specific info
-        TrigCfg.ch1_pulse_ind = rigs.(rigsel).(exptsel).ch1_pulse_ind;
-        TrigCfg.opto_channel = rigs.(rigsel).(exptsel).opto_channel;
-        TrigCfg.ch1_pulse_thresh = rigs.(rigsel).(exptsel).ch1_pulse_thresh;
         TrigCfg.minpulsewidth = rigs.(rigsel).(exptsel).minpulsewidth;
         TrigCfg.optomode = rigs.(rigsel).(exptsel).optomode;
-        TrigCfg.camch = rigs.(rigsel).(exptsel).camch;
-        TrigCfg.lickch = rigs.(rigsel).(exptsel).lickch;
+        % TrigCfg.camch = rigs.(rigsel).(exptsel).camch;
         TrigCfg.trigtone = rigs.(rigsel).(exptsel).trigtone;
         
         % Window info
@@ -395,6 +338,10 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         
         % Preprocessing
         TrigCfg.flatten_data = hflat.Value;
+        TrigCfg.usech2 = hc2.Value;
+
+        % Offset
+        TrigCfg.useoffset = hos.Value;
 
         % Dff data
         TrigCfg.dff_data = hdff.Value;
@@ -443,6 +390,7 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         
         % Preprocessing
         hflat.Value = TrigCfg.flatten_data;
+        hc2.Value = TrigCfg.usech2;
 
         % Dff data
         hdff.Value = TrigCfg.dff_data;
@@ -462,6 +410,10 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         hglm.Value = TrigCfg.GLM_artifacts;
         hglmch.Value = TrigCfg.GLM_ch;
         glmswitch(hglm);
+
+        % Offset
+        hos.Value = TrigCfg.useoffset;
+
     end
 
 

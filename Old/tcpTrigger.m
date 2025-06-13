@@ -26,12 +26,11 @@ if isempty(TrigCfg.suffix)
 else
     filename_output_triggered = sprintf('%s_trig_%s.mat', filename(1:end-4), TrigCfg.suffix);
 end
-load(fullfile(filepath, filename), 'freq', 'ch1_data_table', 'Ch1_filtered',...
-    'n_points', 'opto_pulse_table', 'tone_pulse_table', 'ensure_pulse_table', 'speedvec', 'lick_pulse_table');
+load(fullfile(filepath, filename), 'data', 'freq', 'ch1_data_table',...
+    'Ch1_filtered', 'n_points', 'opto_pulse_table', 'tone_pulse_table');
 
 %% GLM remove channel artifacts
 % Issue with small NIDAQ 
-% Don't use this anymore after switching to picodaq
 if isfield(TrigCfg, 'GLM_artifacts')
     if TrigCfg.GLM_artifacts
         % Interpolate method (last resort)
@@ -41,18 +40,15 @@ if isfield(TrigCfg, 'GLM_artifacts')
         % Design a filter kernel
         switch freq
             case 10
-                d = designfilt("lowpassfir", 'PassbandFrequency', 4, 'StopbandFrequency', 5, ...
-                    'PassbandRipple', 0.1, 'StopbandAttenuation', 40, 'DesignMethod', 'equiripple',...
-                    'SampleRate', freq);
+                d = fdesign.lowpass('Fp,Fst,Ap,Ast', 4, 5, 0.5, 20, freq);
             otherwise
-                d = designfilt("lowpassfir", 'PassbandFrequency', 8, 'StopbandFrequency', 10, ...
-                    'PassbandRipple', 0.1, 'StopbandAttenuation', 40, 'DesignMethod', 'equiripple',...
-                    'SampleRate', freq);
+                d = fdesign.lowpass('Fp,Fst,Ap,Ast', 8, 10, 0.5, 40, freq);
         end
-        % fvtool(d)
+        Hd = design(d,'equiripple');
+        % fvtool(Hd)
 
         % Filter data
-        Ch1_filtered = filtfilt(d,ch1_data_table(:,2));
+        Ch1_filtered = filter(Hd,ch1_data_table(:,2));
     end
 else
     TrigCfg.GLM_artifacts = false;
@@ -60,7 +56,6 @@ end
 
 %% remove channel artifacts
 % Issue with small NIDAQ
-% Don't use this anymore after switching to picodaq
 if isfield(TrigCfg, 'Remove_artifacts')
     if TrigCfg.Remove_artifacts
         % Interpolate method (last resort)
@@ -68,7 +63,6 @@ if isfield(TrigCfg, 'Remove_artifacts')
     end
 else
     TrigCfg.Remove_artifacts = false;
-    datavec_artifactremoved = Ch1_filtered;
 end
 
 %% Window info
@@ -93,7 +87,7 @@ if ~isempty(TrigCfg.minpulsewidth)
     % Get all pulses
     pulseinfo = chainfinder(opto>0.5);
     
-    % Bad pulses (the pulse is too short)
+    % Bad pulses
     badpulses = pulseinfo(pulseinfo(:,2) < TrigCfg.minpulsewidth, :);
     badpulses(:,2) = badpulses(:,1) + badpulses(:,2) - 1;
     
@@ -195,18 +189,59 @@ trigmat_avg = nanmean(trigmat,2);
 trigmat_avg_unfilt = nanmean(trigmat_unfilt, 2);
 
 %% Deal with motion
-% Initialize a triggered speed matrix
-speedmat = zeros(l, n_optostims);
-for i = 1 : n_optostims
-    speedmat(:,i) = speedvec(inds(i,1) : inds(i,2));
-end
+% Check if the running file is there
+runningfn = sprintf('%srunning.mat', filename(1:end-22));
+runningfn_full = fullfile(filepath, runningfn);
 
-% Calculate the average triggered results
-speedmat_avg = mean(speedmat,2);
+if exist(runningfn_full, 'file')
+    % Load running data
+    running = load(runningfn_full, 'speed');
+    
+    % Running running sample count
+    nrunpulse = size(chainfinder(data(TrigCfg.camch,:)>0.5),1);
+    nrunlength = length(running.speed);
+    if nrunpulse ~= nrunlength
+        % Say something
+        fprintf('Running digitization is %0.3f%% off\n', (1 - nrunlength/nrunpulse)*100);
+        
+        % Upsample running data
+        speed_upsampled0 = TDresamp(running.speed', 'resample', nrunpulse/nrunlength * 0.9974);
+        speed_upsampled = TDresamp(speed_upsampled0, 'resample',...
+            n_points/nrunpulse);
+    else
+        % Upsample running data
+        speed_upsampled = TDresamp(running.speed', 'resample',...
+            n_points/length(running.speed));
+    end
+    
+    % Fix the number of points if needed
+    if length(speed_upsampled) > n_points
+        speed_upsampled = speed_upsampled(1:n_points);
+    elseif length(speed_upsampled) < n_points
+        speed_upsampled(end:end + n_points - length(speed_upsampled)) = 0;
+    end
+    
+    % Initialize a triggered speed matrix
+    speedmat = zeros(l, n_optostims);
+    for i = 1 : n_optostims
+        speedmat(:,i) = speed_upsampled(inds(i,1) : inds(i,2));
+    end
+    
+%     imagesc(speedmat')
+%     corr([speed_upsampled, Ch1_filtered],'rows','complete')
+    
+    % Calculate the average triggered results
+    speedmat_avg = mean(speedmat,2);
+else
+    % Store empty speed matrices
+    speedmat = [];
+    speedmat_avg = [];
+end
 
 %% Deal with licking
 % Initialize a triggered lick matrix
-lickvec = lick_pulse_table(:,2);
+lickvec = tcpDatasnapper(data(TrigCfg.lickch,:)', data(TrigCfg.ch1_pulse_ind,:)', 'max', 'pulsetopulse');
+lickvec = lickvec(:,2);
 
 lickmat = zeros(l, n_optostims);
 for i = 1 : n_optostims
@@ -225,13 +260,13 @@ plot([0 tl]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
 if ~isempty(speedmat_avg)
     ylims = get(gca, 'YLim');
     plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
-        speedmat_avg / max(speedmat_avg) * max(ylims));
+        speedmat_avg / max(speedmat_avg) * ylims(2));
 end
 
 % Plot licking
 if ~isempty(lickmat_avg)
     plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
-        lickmat_avg / max(lickmat_avg) * max(ylims));
+        lickmat_avg / max(lickmat_avg) * ylims(2));
 end
 
 hold off
@@ -248,13 +283,13 @@ plot([0 tl]/freq, [mean(trigmat_avg_unfilt), mean(trigmat_avg_unfilt)], 'LineWid
 if ~isempty(speedmat_avg)
     ylims = get(gca, 'YLim');
     plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
-        speedmat_avg / max(speedmat_avg) * max(ylims));
+        speedmat_avg / max(speedmat_avg) * ylims(2));
 end
 
 % Plot licking
 if ~isempty(lickmat_avg)
     plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
-        lickmat_avg / max(lickmat_avg) * max(ylims));
+        lickmat_avg / max(lickmat_avg) * ylims(2));
 end
 
 hold off

@@ -8,16 +8,51 @@ end
 
 % Apollo SCOpto
 rigs.apollo.scp.name = 'Apollo SCP';
-rigs.apollo.scp.mode = '1. Green sensor + blue opto';
+rigs.apollo.scp.mode = '1. Green sensor (+ blue opto)';
 rigs.apollo.scp.data_channel = 1;
 rigs.apollo.scp.data_channel2 = 99;
-rigs.apollo.scp.opto_channel = 6;
+rigs.apollo.scp.opto_channel = 4;
 rigs.apollo.scp.ch1_pulse_ind = 5;
 rigs.apollo.scp.ch2_pulse_ind = 5;
+rigs.apollo.scp.cam_channel = 7;
 rigs.apollo.scp.ch1_pulse_thresh = 0.5;
 rigs.apollo.scp.ch2_pulse_thresh = 0.5;
 rigs.apollo.scp.optomode = true;
-rigs.apollo.scp.tone_channel = 99; 
+rigs.apollo.scp.tone_channel = 10; 
+rigs.apollo.scp.lick_channel = 8; 
+rigs.apollo.scp.ensure_channel = 9; 
+
+% Apollo TCP
+rigs.apollo.tcp.name = 'Apollo TCP';
+rigs.apollo.tcp.mode = '2. Green + red sensor';
+rigs.apollo.tcp.data_channel = 1;
+rigs.apollo.tcp.data_channel2 = 2;
+rigs.apollo.tcp.opto_channel = 99;
+rigs.apollo.tcp.ch1_pulse_ind = 5;
+rigs.apollo.tcp.ch2_pulse_ind = 6;
+rigs.apollo.tcp.cam_channel = 7;
+rigs.apollo.tcp.ch1_pulse_thresh = 0.5;
+rigs.apollo.tcp.ch2_pulse_thresh = 0.5;
+rigs.apollo.tcp.optomode = false;
+rigs.apollo.tcp.tone_channel = 10; 
+rigs.apollo.tcp.lick_channel = 8; 
+rigs.apollo.tcp.ensure_channel = 9; 
+
+% Apollo licks
+rigs.apollo.licktrig.name = 'Apollo licks';
+rigs.apollo.licktrig.mode = '3. Green + lick trig (+ red sensor)';
+rigs.apollo.licktrig.data_channel = 1;
+rigs.apollo.licktrig.data_channel2 = 2;
+rigs.apollo.licktrig.opto_channel = 8;
+rigs.apollo.licktrig.ch1_pulse_ind = 5;
+rigs.apollo.licktrig.ch2_pulse_ind = 6;
+rigs.apollo.licktrig.cam_channel = 7;
+rigs.apollo.licktrig.ch1_pulse_thresh = 0.5;
+rigs.apollo.licktrig.ch2_pulse_thresh = 0.5;
+rigs.apollo.licktrig.optomode = true;
+rigs.apollo.licktrig.tone_channel = 10; 
+rigs.apollo.licktrig.lick_channel = 8; 
+rigs.apollo.licktrig.ensure_channel = 9; 
 
 % Artemis Optophoto
 rigs.artemis.optophoto.name = 'Artemis Optophotometry';
@@ -27,10 +62,13 @@ rigs.artemis.optophoto.data_channel2 = 99;
 rigs.artemis.optophoto.opto_channel = 6;
 rigs.artemis.optophoto.ch1_pulse_ind = 5;
 rigs.artemis.optophoto.ch2_pulse_ind = 5;
+rigs.artemis.optophoto.cam_channel = 7;
 rigs.artemis.optophoto.ch1_pulse_thresh = 0.5;
 rigs.artemis.optophoto.ch2_pulse_thresh = 0.5;
 rigs.artemis.optophoto.optomode = true;
-rigs.artemis.optophoto.tone_channel = 99; 
+rigs.artemis.optophoto.tone_channel = 10; 
+rigs.artemis.optophoto.lick_channel = 8; 
+rigs.artemis.optophoto.ensure_channel = 9; 
 
 % Cleopatra tcp
 rigs.cleopatra.tcp.name = 'Cleopatra TCP';
@@ -44,6 +82,9 @@ rigs.cleopatra.tcp.ch1_pulse_thresh = 2;
 rigs.cleopatra.tcp.ch2_pulse_thresh = 0.5;
 rigs.cleopatra.tcp.optomode = false;
 rigs.cleopatra.tcp.tone_channel = 99; 
+rigs.cleopatra.tcp.lick_channel = 99; 
+rigs.cleopatra.tcp.ensure_channel = 99; 
+rigs.cleopatra.tcp.cam_channel = 99;
 
 % Cleopatra optophoto (Green Sensor + Red Stim)
 rigs.cleopatra.optophoto.name = 'Cleopatra GCaMP + Chrimson';
@@ -57,6 +98,9 @@ rigs.cleopatra.optophoto.ch1_pulse_thresh = 1;
 rigs.cleopatra.optophoto.ch2_pulse_thresh = 0.5;
 rigs.cleopatra.optophoto.optomode = true;
 rigs.cleopatra.optophoto.tone_channel = 99; 
+rigs.cleopatra.optophoto.lick_channel = 99; 
+rigs.cleopatra.optophoto.ensure_channel = 99; 
+rigs.cleopatra.optophoto.cam_channel = 99;
 
 % Minerva optophoto
 rigs.minerva.optophoto.name = 'Minerva placeholder';
@@ -70,6 +114,9 @@ rigs.minerva.optophoto.ch1_pulse_thresh = 99;
 rigs.minerva.optophoto.ch2_pulse_thresh = 99;
 rigs.minerva.optophoto.optomode = true;
 rigs.minerva.optophoto.tone_channel = 99; 
+rigs.minerva.optophoto.lick_channel = 99; 
+rigs.minerva.optophoto.ensure_channel = 99; 
+rigs.minerva.optophoto.cam_channel = 99;
 
 % RBG tcp (GCaMP + RFP)
 rigs.rbg.tcp.name = 'RBG GCaMP + RFP';
@@ -83,6 +130,9 @@ rigs.rbg.tcp.ch1_pulse_thresh = 2;
 rigs.rbg.tcp.ch2_pulse_thresh = 2;
 rigs.rbg.tcp.optomode = false;
 rigs.rbg.tcp.tone_channel = 8; 
+rigs.rbg.tcp.lick_channel = 99; 
+rigs.rbg.tcp.ensure_channel = 99; 
+rigs.rbg.tcp.cam_channel = 99;
 
 % RBG optophoto (RCaMP + ChR2)
 rigs.rbg.optophoto.name = 'RBG RCaMP + ChR2';
@@ -96,6 +146,9 @@ rigs.rbg.optophoto.ch1_pulse_thresh = 1;
 rigs.rbg.optophoto.ch2_pulse_thresh = 0.5;
 rigs.rbg.optophoto.optomode = true;
 rigs.rbg.optophoto.tone_channel = 8; 
+rigs.rbg.optophoto.lick_channel = 99; 
+rigs.rbg.optophoto.ensure_channel = 99; 
+rigs.rbg.optophoto.cam_channel = 99;
 
 % RBG scoptophoto (GCaMP + biPAC)
 rigs.rbg.scoptophoto.name = 'RBG GCaMP + biPAC';
@@ -109,6 +162,9 @@ rigs.rbg.scoptophoto.ch1_pulse_thresh = 1;
 rigs.rbg.scoptophoto.ch2_pulse_thresh = 0.5;
 rigs.rbg.scoptophoto.optomode = true;
 rigs.rbg.scoptophoto.tone_channel = 8; 
+rigs.rbg.scoptophoto.lick_channel = 99; 
+rigs.rbg.scoptophoto.ensure_channel = 99; 
+rigs.rbg.scoptophoto.cam_channel = 99;
 
 % RBG scoptophoto (GCaMP + biPAC)
 rigs.rbg.foodphoto.name = 'RBG GCaMP + food';
@@ -122,6 +178,9 @@ rigs.rbg.foodphoto.ch1_pulse_thresh = 1;
 rigs.rbg.foodphoto.ch2_pulse_thresh = 0.5;
 rigs.rbg.foodphoto.optomode = true;
 rigs.rbg.foodphoto.tone_channel = 4; 
+rigs.rbg.foodphoto.lick_channel = 99; 
+rigs.rbg.foodphoto.ensure_channel = 99; 
+rigs.rbg.foodphoto.cam_channel = 99;
 
 % Cleopatra tcp
 rigs.roger.tcp.name = 'Roger TCP';
@@ -135,6 +194,9 @@ rigs.roger.tcp.ch1_pulse_thresh = 2;
 rigs.roger.tcp.ch2_pulse_thresh = 2;
 rigs.roger.tcp.optomode = false;
 rigs.roger.tcp.tone_channel = 99; 
+rigs.roger.tcp.lick_channel = 99; 
+rigs.roger.tcp.ensure_channel = 99; 
+rigs.roger.tcp.cam_channel = 99;
 
 % Check if config exist
 tf = evalin('base','exist(''ppCfg'')');
@@ -185,8 +247,8 @@ else
     exptsel = expts{1};
 end
 %% UI
-hfig = figure('position', [300 200 250 480], 'MenuBar', 'none', 'ToolBar', 'none');
-topleft = [20 450 0 0];
+hfig = figure('position', [300 200 250 550], 'MenuBar', 'none', 'ToolBar', 'none');
+topleft = [20 520 0 0];
 minory = -20;
 majory = -60;
 minorx = 70;
@@ -211,6 +273,11 @@ hd1 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).data_ch
 uicontrol(hfig, 'Style', 'text', 'String', 'Ch2 Data', 'Position', topleft + [minorx 2*majory 50 20]);
 hd2 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).data_channel2,...
     'Position', topleft + [minorx 2*majory+minory 50 20], 'callback', @updaterigsfromboxes);
+
+% Cam pulses
+uicontrol(hfig, 'Style', 'text', 'String', 'Cam', 'Position', topleft + [minorx*2 2*majory 50 20]);
+hc = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).cam_channel,...
+    'Position', topleft + [minorx*2 2*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Ch1 in
 uicontrol(hfig, 'Style', 'text', 'String', 'Ch1 Pulse', 'Position', topleft + [0 3*majory 50 20]);
@@ -238,23 +305,35 @@ ht2 = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ch2_pul
     'Position', topleft + [minorx 4*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Tone channel
-uicontrol(hfig, 'Style', 'text', 'String', 'Tone Pulse', 'Position', topleft + [minorx*2 4*majory 60 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Tone Pulse', 'Position', topleft + [0 5*majory 60 20]);
 hoc = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).tone_channel,...
-    'Position', topleft + [minorx*2 4*majory+minory 50 20], 'callback', @updaterigsfromboxes);
+    'Position', topleft + [0 5*majory+minory 50 20], 'callback', @updaterigsfromboxes);
+
+% Lick channel
+uicontrol(hfig, 'Style', 'text', 'String', 'Lick Pulse', 'Position', topleft + [minorx 5*majory 60 20]);
+hlc = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).lick_channel,...
+    'Position', topleft + [minorx 5*majory+minory 50 20], 'callback', @updaterigsfromboxes);
+
+% Ensure channel
+uicontrol(hfig, 'Style', 'text', 'String', 'Ensure Pulse', 'Position', topleft + [minorx*2 5*majory 70 20]);
+hec = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).ensure_channel,...
+    'Position', topleft + [minorx*2 5*majory+minory 50 20], 'callback', @updaterigsfromboxes);
 
 % Rare items
+ri = 6;
+
 % Expts
-uicontrol(hfig, 'Style', 'text', 'String', '3. Rare changes: ', 'Position', topleft + [0 5*majory 200 20]);
+uicontrol(hfig, 'Style', 'text', 'String', '3. Rare changes: ', 'Position', topleft + [0 ri*majory 200 20]);
 
 % Filter stim
 hfswitch = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Stim Filter Hz:', 'Position', topleft + ...
-    [0 5*majory+minory 90 20], 'Value', filt_stim, 'Callback', @stimfiltercheck);
+    [0 ri*majory+minory 90 20], 'Value', filt_stim, 'Callback', @stimfiltercheck);
 hf1 = uicontrol(hfig, 'Style', 'edit', 'String', stim_filt_range(1), 'Position', ...
-    topleft + [minorx+20 5*majory+minory 20 20]);
+    topleft + [minorx+20 ri*majory+minory 20 20]);
 uicontrol(hfig, 'Style', 'text', 'String', '-', 'Position', topleft + ...
-    [minorx+40 5*majory+minory 10 20]);
+    [minorx+40 ri*majory+minory 10 20]);
 hf2 = uicontrol(hfig, 'Style', 'edit', 'String', stim_filt_range(2), 'Position', ...
-    topleft + [minorx+50 5*majory+minory 20 20]);
+    topleft + [minorx+50 ri*majory+minory 20 20]);
 if filt_stim
     hf1.Enable = 'on';
     hf2.Enable = 'on';
@@ -265,30 +344,30 @@ end
       
 % Filter notch
 hfnotch = uicontrol(hfig, 'Style', 'radiobutton', 'String', '60Hz Filter', 'Position', topleft + ...
-    [minorx+80 5*majory+minory 90 20], 'Value', use_fnotch_60);
+    [minorx+80 ri*majory+minory 90 20], 'Value', use_fnotch_60);
 
 % Blackout window
-uicontrol(hfig, 'Style', 'text', 'String', 'Blackout Win', 'Position', topleft + [0 5*majory+2.5*minory 65 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Blackout Win', 'Position', topleft + [0 ri*majory+2.5*minory 65 20]);
 hbw = uicontrol(hfig, 'Style', 'edit', 'String', blackout_window, 'Position', ...
-    topleft + [0 5*majory+3.5*minory 70 20]);
+    topleft + [0 ri*majory+3.5*minory 70 20]);
 
 % Ambient light window
-uicontrol(hfig, 'Style', 'text', 'String', 'Ambient Win', 'Position', topleft + [75 5*majory+2.5*minory 65 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Ambient Win', 'Position', topleft + [75 ri*majory+2.5*minory 65 20]);
 ham = uicontrol(hfig, 'Style', 'edit', 'String', Ambientpts, 'Position', ...
-    topleft + [75 5*majory+3.5*minory 70 20]);
+    topleft + [75 ri*majory+3.5*minory 70 20]);
 
 % Data freq
-uicontrol(hfig, 'Style', 'text', 'String', 'Data Freq', 'Position', topleft + [150 5*majory+2.5*minory 65 20]);
+uicontrol(hfig, 'Style', 'text', 'String', 'Data Freq', 'Position', topleft + [150 ri*majory+2.5*minory 65 20]);
 hfreq = uicontrol(hfig, 'Style', 'edit', 'String', freq, 'Position', ...
-    topleft + [150 5*majory+3.5*minory 70 20]);
+    topleft + [150 ri*majory+3.5*minory 70 20]);
 
 % Buttons
 uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Load Setting', 'Position', ...
-    topleft + [0 7*majory 70 30], 'Callback', @loadsetting);
+    topleft + [0 (ri+2)*majory 70 30], 'Callback', @loadsetting);
 uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Done', 'Position', ...
-    topleft + [75 7*majory 70 30], 'Callback', @done);
+    topleft + [75 (ri+2)*majory 70 30], 'Callback', @done);
 uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
-    topleft + [150 7*majory 70 30], 'Callback', @cancel);
+    topleft + [150 (ri+2)*majory 70 30], 'Callback', @cancel);
 
 %% Call backs
 % When a rig is selected
@@ -326,6 +405,9 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         ht1.String = rigs.(rigsel).(exptsel).ch1_pulse_thresh;
         ht2.String = rigs.(rigsel).(exptsel).ch2_pulse_thresh;
         hoc.String = rigs.(rigsel).(exptsel).tone_channel;
+        hlc.String = rigs.(rigsel).(exptsel).lick_channel;
+        hec.String = rigs.(rigsel).(exptsel).ensure_channel;
+        hc.String = rigs.(rigsel).(exptsel).cam_channel;
     end
 
 % Update rig values from boxes
@@ -338,6 +420,9 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         rigs.(rigsel).(exptsel).ch1_pulse_thresh = str2double(ht1.String);
         rigs.(rigsel).(exptsel).ch2_pulse_thresh = str2double(ht2.String);
         rigs.(rigsel).(exptsel).tone_channel = str2double(hoc.String);
+        rigs.(rigsel).(exptsel).lick_channel = str2double(hlc.String);
+        rigs.(rigsel).(exptsel).ensure_channel = str2double(hec.String);
+        rigs.(rigsel).(exptsel).cam_channel = str2double(hc.String);
     end
 
 % Stim filter check
@@ -363,11 +448,11 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
             'data_channel', rigs.(rigsel).(exptsel).data_channel, 'data_channel2', rigs.(rigsel).(exptsel).data_channel2,...
             'ch1_pulse_ind', rigs.(rigsel).(exptsel).ch1_pulse_ind, 'ch2_pulse_ind', rigs.(rigsel).(exptsel).ch2_pulse_ind,...
             'opto_channel', rigs.(rigsel).(exptsel).opto_channel, 'ch1_pulse_thresh', rigs.(rigsel).(exptsel).ch1_pulse_thresh,...
-            'ch2_pulse_thresh', rigs.(rigsel).(exptsel).ch2_pulse_thresh, ...
+            'ch2_pulse_thresh', rigs.(rigsel).(exptsel).ch2_pulse_thresh, 'cam_channel', str2double(hc.String),...
             'filt_stim', hfswitch.Value, 'stim_filt_range', [str2double(hf1.String), str2double(hf2.String)],...
             'use_fnotch_60', hfnotch.Value,'fnotch_60', fnotch_60, 'blackout_window', str2double(hbw.String),...
             'freq', str2double(hfreq.String), 'Ambientpts', str2double(ham.String), 'tone_channel', str2double(hoc.String),...
-            'rigs', rigs);
+            'lick_channel', str2double(hlc.String), 'ensure_channel', str2double(hec.String), 'rigs', rigs);
         assignin('base', 'ppCfg', ppCfg)
         close(hfig);
     end
@@ -397,7 +482,10 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         hfreq.String = num2str(ppCfg_load.freq);
         ham.String = num2str(ppCfg_load.Ambientpts);
         hoc.String = num2str(ppCfg_load.tone_channel);
-        
+        hlc.String = num2str(ppCfg_load.lick_channel);
+        hec.String = num2str(ppCfg_load.ensure_channel);
+        hc.String = num2str(ppCfg_load.cam_channel);
+
         PULSE_SIM_MODE = ppCfg_load.PULSE_SIM_MODE;
         fnotch_60 = ppCfg_load.fnotch_60;
     end
