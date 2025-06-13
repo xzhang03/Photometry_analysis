@@ -152,6 +152,24 @@ for i = 1 : n_points
     end
 end
 
+% Checknans
+if any(isnan(ch1_data_table(:,2)))
+    nanind = find(isnan(ch1_data_table(:,2)));
+    fprintf('Found %i nan in ch1\n', length(nanind));
+    for i = 1 : length(nanind)
+        ni = nanind(i);
+        ch1_data_table(ni,2) = ch1_data_table(ni-1,2);
+    end
+end
+if doch2 && any(isnan(ch2_data_table(:,2)))
+    nanind = find(isnan(ch2_data_table(:,2)));
+    fprintf('Found %i nan in ch1\n', length(nanind));
+    for i = 1 : length(nanind)
+        ni = nanind(i);
+        ch2_data_table(ni,2) = ch2_data_table(ni-1,2);
+    end
+end
+
 %% Ambient-light subtraction
 if Ambientpts > 0
     % Initialize matrices
@@ -285,7 +303,7 @@ xlabel('Frequency')
 switch freq
     case 10
         d = designfilt("lowpassfir", 'PassbandFrequency', 4, 'StopbandFrequency', 5, ...
-            'PassbandRipple', 0.1, 'StopbandAttenuation', 40, 'DesignMethod', 'equiripple',...
+            'PassbandRipple', 0.1, 'StopbandAttenuation', 20, 'DesignMethod', 'equiripple',...
             'SampleRate', freq);
     otherwise
         d = designfilt("lowpassfir", 'PassbandFrequency', 8, 'StopbandFrequency', 10, ...

@@ -107,19 +107,21 @@ end
 optothresh = max(opto)/2;
 opto_ons = chainfinder(opto > optothresh);
 
-% Grab opto inter-stim interval
-opto_isi = diff(opto_ons(:,1));
-opto_isi = [Inf; opto_isi];
+% Merge into opto trains
+if TrigCfg.trainlength_threshold > 0
+    opto_ons = chainmerger(opto_ons, TrigCfg.trainlength_threshold * freq, 1);
+end
 
-% Train lengths
-train_ons = find(opto_isi > TrigCfg.trainlength_threshold * freq);
-tl = opto_ons(train_ons(3)-1) - opto_ons(train_ons(2)) + 2;
+tl = TrigCfg.trainlength_threshold * freq;
 
-% Inter-train interval
-ITI = opto_ons(train_ons(3)) - opto_ons(train_ons(2));
-
-% Determine the actual onsets of trains
-opto_ons = opto_ons(opto_isi > TrigCfg.trainlength_threshold * freq);
+% Use onset (default) or offset
+if TrigCfg.useoffset
+    % Offset
+    opto_ons = opto_ons(:,1) + opto_ons(:,2) - 1;
+else
+    % Onset
+    opto_ons = opto_ons(:,1);
+end
 
 % Apply offset in debugging mode
 if TrigCfg.DebugMode
@@ -154,6 +156,7 @@ else
     else
         data2use_unfilt = ch1_data_table(:, 2);
     end
+    exp_fit = [];
 end
 plot([data2use, opto])
 
@@ -216,10 +219,15 @@ lickmat_avg = mean(lickmat,2);
 
 %% Plot
 figure
+
 subplot(1,2,1)
 hold on
 plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg)
-plot([0 tl]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
+if TrigCfg.useoffset
+    plot([-tl 0]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
+else
+    plot([0 tl]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
+end
 
 % Plot running
 if ~isempty(speedmat_avg)
@@ -242,7 +250,11 @@ title('Filtered')
 subplot(1,2,2)
 hold on
 plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg_unfilt)
-plot([0 tl]/freq, [mean(trigmat_avg_unfilt), mean(trigmat_avg_unfilt)], 'LineWidth', 5)
+if TrigCfg.useoffset
+    plot([-tl 0]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
+else
+    plot([0 tl]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
+end
 
 % Plot running
 if ~isempty(speedmat_avg)
@@ -263,16 +275,8 @@ ylabel('Fluorescence')
 title('Unfiltered')
 
 %% Save results
-if TrigCfg.flatten_data
-    save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
-        'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
-        'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', 'exp_fit',...
-        'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone',...
-        'trigmat_unfilt', 'trigmat_avg_unfilt');
-else
-    save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
-        'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
-        'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', ...
-        'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone',...
-        'trigmat_unfilt', 'trigmat_avg_unfilt');
-end
+save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
+    'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
+    'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', 'exp_fit',...
+    'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone',...
+    'trigmat_unfilt', 'trigmat_avg_unfilt');
