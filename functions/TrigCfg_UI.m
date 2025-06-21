@@ -368,7 +368,7 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
 
 % Load setting
     function loadsetting(~,~)
-        [filename, filepath] = uigetfile(fullfile(defaultpath , '*_preprocessed_trig.mat'));
+        [filename, filepath] = uigetfile(fullfile(defaultpath , '*_preprocessed_trig*.mat'));
         TrigCfg = load(fullfile(filepath, filename), 'TrigCfg');
         if isfield(TrigCfg, 'rigs')
             rigs = TrigCfg.rigs;
