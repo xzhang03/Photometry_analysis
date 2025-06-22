@@ -158,7 +158,11 @@ if any(isnan(ch1_data_table(:,2)))
     fprintf('Found %i nan in ch1\n', length(nanind));
     for i = 1 : length(nanind)
         ni = nanind(i);
-        ch1_data_table(ni,2) = ch1_data_table(ni-1,2);
+        if ni == 1
+            ch1_data_table(ni,2) = ch1_data_table(ni+1,2);
+        else
+            ch1_data_table(ni,2) = ch1_data_table(ni-1,2);
+        end
     end
 end
 if doch2 && any(isnan(ch2_data_table(:,2)))
