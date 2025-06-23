@@ -70,6 +70,22 @@ rigs.artemis.optophoto.tone_channel = 10;
 rigs.artemis.optophoto.lick_channel = 8; 
 rigs.artemis.optophoto.ensure_channel = 9; 
 
+% Artemis photometry
+rigs.artemis.photo.name = 'Artemis Photometry';
+rigs.artemis.photo.mode = '2. Green sensor + food';
+rigs.artemis.photo.data_channel = 1;
+rigs.artemis.photo.data_channel2 = 99;
+rigs.artemis.photo.opto_channel = 6;
+rigs.artemis.photo.ch1_pulse_ind = 5;
+rigs.artemis.photo.ch2_pulse_ind = 5;
+rigs.artemis.photo.cam_channel = 7;
+rigs.artemis.photo.ch1_pulse_thresh = 0.5;
+rigs.artemis.photo.ch2_pulse_thresh = 0.5;
+rigs.artemis.photo.optomode = true;
+rigs.artemis.photo.tone_channel = 10; 
+rigs.artemis.photo.lick_channel = 8; 
+rigs.artemis.photo.ensure_channel = 9; 
+
 % Cleopatra tcp
 rigs.cleopatra.tcp.name = 'Cleopatra TCP';
 rigs.cleopatra.tcp.mode = '1. Green sensor + 405 movement';

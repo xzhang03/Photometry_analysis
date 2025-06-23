@@ -27,6 +27,13 @@ rigs.Artemis.optophoto.minpulsewidth = 5;
 rigs.Artemis.optophoto.optomode = true;
 rigs.Artemis.optophoto.trigtone = false;
 
+% Artemis optophoto (Green Sensor + Red Stim)
+rigs.Artemis.foodphoto.name = 'Artemis GCaMP + Cued feeding';
+rigs.Artemis.foodphoto.mode = '1. Green sensor + Cued';
+rigs.Artemis.foodphoto.minpulsewidth = 5;
+rigs.Artemis.foodphoto.optomode = true;
+rigs.Artemis.foodphoto.trigtone = true;
+
 % Cleopatra optophoto (Green Sensor + Red Stim)
 rigs.cleopatra.optophoto.name = 'Cleopatra GCaMP + Chrimson';
 rigs.cleopatra.optophoto.mode = '1. Green sensor + Red stim';
