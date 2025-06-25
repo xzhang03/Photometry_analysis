@@ -86,7 +86,7 @@ if tf
     
     [expts, exptns] = listexpts(rigs.(rigsel));
     exptsel = TrigCfg.mode;
-
+    
 else
     % Flatten data
     TrigCfg.usech2 = false;
@@ -116,9 +116,15 @@ else
     TrigCfg.GLM_artifacts = false;
     TrigCfg.GLM_ch = 6;
 
-    % The minimal number of seconds between pulses that are still in the same
-    % train
-    TrigCfg.trainlength_threshold = 5;
+    % Pulses within this number of seconds will be merged together as the
+    % same train. This creates a natural ITI
+    TrigCfg.merge = 5;
+
+    % Trains shorther than this length will be removed
+    TrigCfg.minlength = 0;
+
+    % Trains closers to the previous train than this length will be removed
+    TrigCfg.minITI = 0;
 
     % Suffix (for making multiple trigger files)
     TrigCfg.suffix = '';
@@ -180,10 +186,20 @@ hmpw = uicontrol(hfig, 'Style', 'edit', 'String', rigs.(rigsel).(exptsel).minpul
 % Window
 currenty = currenty + majory;
 
-% Min train length
-uicontrol(hfig, 'Style', 'text', 'String', 'Min train length', 'Position', topleft + [0 currenty 80 20]);
-hmtl = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.trainlength_threshold,...
+% Merge length
+uicontrol(hfig, 'Style', 'text', 'String', 'Merge length', 'Position', topleft + [0 currenty 65 20]);
+hmel = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.merge,...
     'Position', topleft + [0 currenty+minory 50 20]);
+
+% Min length
+uicontrol(hfig, 'Style', 'text', 'String', 'Min length', 'Position', topleft + [minorx currenty 55 20]);
+hminl = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.minlength,...
+    'Position', topleft + [minorx currenty+minory 50 20]);
+
+% Min length
+uicontrol(hfig, 'Style', 'text', 'String', 'Min ITI', 'Position', topleft + [minorx*2 currenty 50 20]);
+hminiti = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.minITI,...
+    'Position', topleft + [minorx*2 currenty+minory 50 20]);
 
 % Channel 2
 currenty = currenty + majory;
@@ -335,14 +351,15 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         % Expt specific info
         TrigCfg.minpulsewidth = rigs.(rigsel).(exptsel).minpulsewidth;
         TrigCfg.optomode = rigs.(rigsel).(exptsel).optomode;
-        % TrigCfg.camch = rigs.(rigsel).(exptsel).camch;
         TrigCfg.trigtone = rigs.(rigsel).(exptsel).trigtone;
         
         % Window info
         TrigCfg.prew = str2double(hprew.String);
         TrigCfg.postw = str2double(hpostw.String);
-        TrigCfg.trainlength_threshold = str2double(hmtl.String);
-        
+        TrigCfg.merge = str2double(hmel.String);
+        TrigCfg.minlength = str2double(hminl.String);
+        TrigCfg.minITI = str2double(hminiti.String);
+
         % Preprocessing
         TrigCfg.flatten_data = hflat.Value;
         TrigCfg.usech2 = hc2.Value;
@@ -393,7 +410,9 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         % Window
         hprew.String = num2str(TrigCfg.prew);
         hpostw.String = num2str(TrigCfg.postw);
-        hmtl.String = num2str(TrigCfg.trainlength_threshold);
+        hmel.String = num2str(TrigCfg.merge);
+        hminl.String = num2str(TrigCfg.minlength);
+        hminiti.String = num2str(TrigCfg.minITI);
         
         % Preprocessing
         hflat.Value = TrigCfg.flatten_data;

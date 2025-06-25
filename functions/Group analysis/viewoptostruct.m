@@ -25,6 +25,9 @@ addOptional(p, 'removenans', true); % Remove nans or not
 addOptional(p, 'nantolerance', 0); % Remove trials with more than this fraction of nan data
 addOptional(p, 'keepc', {'order',[]}); % Criteria for keeping data (just a 1 x 2 cell)
 
+% Sort by trigger length
+addOptional(p, 'sortbytls', false);
+
 % Show motion
 addOptional(p, 'showmotion', false);
 addOptional(p, 'subtractmotion', false); % Linearly regress out motion trial by trial
@@ -121,6 +124,15 @@ if p.showlick
     end
 end
 
+% Trigger length
+if p.sortbytls
+    if isempty(p.datasets)
+        tls = cell2mat({optostruct(:).tls});
+    else
+        tls= cell2mat({optostruct(p.datasets).tls});
+    end
+end
+
 % Keep data as criteria
 % (Skip this if we are plotting pre/post-triggered data)
 if ~isempty(p.keepc{1,2}) && strcmp(p.datatype, 'trig')
@@ -161,6 +173,11 @@ if ~isempty(p.keepc{1,2}) && strcmp(p.datatype, 'trig')
         lickmat = lickmat(:, keepvec > 0);
     end
     
+    % Update trigger lengths
+    if p.sortbytls
+        tls = tls(keepvec > 0);
+    end
+
     % Update Number of trials
     ntrials = size(datamat, 2);
    
@@ -186,6 +203,11 @@ if p.removenans
         lickmat = lickmat(:, goodtrials);
     end
     
+    % Update trigger lengths
+    if p.sortbytls
+        tls = tls(goodtrials);
+    end
+
     % *need to update showX*
 end
 
@@ -198,6 +220,7 @@ if isempty(p.showX)
     if p.showlick
         lickmat2show = lickmat;
     end
+
 elseif isscalar(p.showX)
     % If specifying the number of trials
     % Grab X number of trials
@@ -210,6 +233,9 @@ elseif isscalar(p.showX)
         if p.showlick
             lickmat2show = lickmat(:, showind);
         end
+        if p.sortbytls
+            tls = tls(showind);
+        end
     else
         datamat2show = datamat;
     end
@@ -221,6 +247,9 @@ else
     end
     if p.showlick
         lickmat2show = lickmat(:, p.showX);
+    end
+    if p.sortbytls
+        tls = tls(p.showX);
     end
 end
 
@@ -246,6 +275,18 @@ end
 % d2good = datamat(:,~bads);
 % plot(movmean([mean(d2good,2), mean(d2,2)],5))
 
+%% Sort by trigger lengths
+if p.sortbytls
+    [tls, ki] = sort(tls);
+    datamat2show = datamat2show(:, ki);
+    if p.showmotion
+        motionmat2show = motionmat2show(:,ki);
+    end
+    if p.showlick
+        lickmat2show = lickmat2show(:,ki);
+    end
+end
+
 %% Plot
 % Plot
 figure('position',[200 50 600 600]);
@@ -270,10 +311,20 @@ end
 set(gca, 'XTickLabel', xcell);
 
 % Add line for stim
-hold on
-plot([prew_f prew_f], yrange, ...
-    [prew_f + p.optolength, prew_f + p.optolength], yrange, 'Color', [0 0 0 0.5])
-hold off
+if p.optolength > 0
+    hold on
+    plot([prew_f prew_f], yrange, ...
+        [prew_f + p.optolength, prew_f + p.optolength], yrange, 'Color', [0 0 0 0.5])
+    hold off
+elseif p.optolength < 0
+    hold on
+    for i = 1 : size(datamat, 2)
+        yrangetrial = [yrange(1)+(i-1) yrange(1)+i];
+        plot([prew_f prew_f], yrangetrial, ...
+            [prew_f + tls(i), prew_f + tls(i)], yrangetrial, 'Color', [0 0 0 0.5])
+    end
+    hold off
+end
 ylabel('Trials (random ordered)')
 
 % 2. Subplot for overall average

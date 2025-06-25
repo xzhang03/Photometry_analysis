@@ -1,4 +1,4 @@
-function [datastruct, n_series] = mkdatastruct(inputloadingcell, varargin)
+function [datastruct, n_series] = mkdatastruct_mating(inputloadingcell, varargin)
 % mkdatastruct makes a data structure based on the input data addresses.
 % [datastruct, n_series] = mkdatastruct(inputloadingcell, defaultpath)
 

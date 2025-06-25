@@ -150,6 +150,18 @@ for i = 1 : n_series
         datastruct(i).nstims = loaded.n_optostims;
     end
     
+    % Trigger lengths
+    if isfield(loaded, 'tls')
+        datastruct(i).tls = loaded.tls';
+        if ~isempty(p.badtrials)
+            % Current bad trials
+            currentbt = p.badtrials(p.badtrials(:,1) == i, 2);
+            
+            % Remove
+            datastruct(i).tls(:,currentbt) = [];
+        end
+    end
+
     % Zero baseline
     if p.zero_baseline % Per sweep
         % Baseline vector

@@ -108,11 +108,39 @@ optothresh = max(opto)/2;
 opto_ons = chainfinder(opto > optothresh);
 
 % Merge into opto trains
-if TrigCfg.trainlength_threshold > 0
-    opto_ons = chainmerger(opto_ons, TrigCfg.trainlength_threshold * freq, 1);
+if TrigCfg.merge > 0
+    opto_ons = chainmerger(opto_ons, TrigCfg.merge * freq, 1);
 end
 
-tl = TrigCfg.trainlength_threshold * freq;
+if TrigCfg.minlength > 0
+    opto_ons = opto_ons(opto_ons(:,2) >= (TrigCfg.minlength * freq), :);
+end
+
+if TrigCfg.minITI > 0
+    opto_ons(:, 3) = opto_ons(:, 1) - TrigCfg.minITI * freq;
+    opto_ons(:, 4) = opto_ons(:, 1) - 1;
+    opto_ons(:, 5) = opto_ons(:, 1) + opto_ons(:, 2) + 1;
+    opto_ons(:, 6) = opto_ons(:, 1) + opto_ons(:, 2) + TrigCfg.minITI * freq;
+
+    for i = 1 : size(opto_ons, 1)
+        if opto_ons(i, 3) >= 1
+            opto_ons(i, 7) = sum(opto(opto_ons(i, 3):opto_ons(i, 4)));
+        else
+            opto_ons(i, 7) = 0;
+        end
+        if opto_ons(i, 6) <= n_points
+            opto_ons(i, 8) = sum(opto(opto_ons(i, 5):opto_ons(i, 6)));
+        else
+            opto_ons(i, 8) = 0;
+        end
+
+    end
+
+    opto_ons = opto_ons(opto_ons(:,7)==0 & opto_ons(:,8)==0, :);
+end
+
+tls = opto_ons(:,2);
+tl = TrigCfg.merge * freq;
 
 % Use onset (default) or offset
 if TrigCfg.useoffset
@@ -135,6 +163,7 @@ opto_ons(badstims > 0) = [];
 
 % Number of stims
 n_optostims = length(opto_ons);
+tls = tls(badstims == 0);
 
 %% Flatten data
 % Pull data
@@ -251,9 +280,9 @@ subplot(1,2,2)
 hold on
 plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg_unfilt)
 if TrigCfg.useoffset
-    plot([-tl 0]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
+    plot([-tl 0]/freq, [mean(trigmat_avg_unfilt), mean(trigmat_avg_unfilt)], 'LineWidth', 5)
 else
-    plot([0 tl]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
+    plot([0 tl]/freq, [mean(trigmat_avg_unfilt), mean(trigmat_avg_unfilt)], 'LineWidth', 5)
 end
 
 % Plot running
@@ -277,6 +306,6 @@ title('Unfiltered')
 %% Save results
 save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
     'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
-    'trigmat_avg', 'data2use' , 'tl', 'opto', 'data2use_unfilt', 'exp_fit',...
+    'trigmat_avg', 'data2use' , 'tl', 'tls', 'opto', 'data2use_unfilt', 'exp_fit',...
     'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone',...
     'trigmat_unfilt', 'trigmat_avg_unfilt');
