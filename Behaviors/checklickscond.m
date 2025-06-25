@@ -17,6 +17,9 @@ addOptional(p, 'lickchs', 8);
 addOptional(p, 'ensurechs', 9);
 addOptional(p, 'cuechs', 10);
 
+% Cue merging
+addOptional(p, 'cuemerge', 2500); % Points to merge for cue. 2500 pts per second
+
 % Windows
 addOptional(p, 'prew', 10);
 addOptional(p, 'postw', 50);
@@ -61,6 +64,7 @@ cuevec = tcpBin(cuevec', p.downsample, 1, 'max');
 
 % Trials
 trials = chainfinder(cuevec > 0.5);
+trials = chainmerger(trials, round(p.cuemerge/p.downsample));
 ntrials = size(trials, 1);
 
 % prew
