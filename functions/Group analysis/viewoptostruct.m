@@ -288,119 +288,137 @@ if p.sortbytls
 end
 
 %% Plot
-% Plot
-figure('position',[200 50 600 600]);
-
-% 1. Subplot for imagesc
-subplot(p.subplotrows, 1, 2 : p.subplotrows);
-
-% Imagesc
-imagesc(datamat2show');
-colormap(b2r_arbitrary_input(p.heatmaprange(1), p.heatmaprange(2), [1 0 0], [0 0 1], [1 1 1]));
-
-xrange = get(gca,'xlim');
-yrange = get(gca, 'ylim');
-xlabel('Time (s)')
-
-% X axis
-Fs = optostruct(1).Fs;
-xcell = get(gca, 'XTickLabel');
-for i = 1 : length(xcell)
-    xcell{i} = num2str(str2double(xcell{i}) / Fs);
-end
-set(gca, 'XTickLabel', xcell);
-
-% Add line for stim
-if p.optolength > 0
-    hold on
-    plot([prew_f prew_f], yrange, ...
-        [prew_f + p.optolength, prew_f + p.optolength], yrange, 'Color', [0 0 0 0.5])
-    hold off
-elseif p.optolength < 0
-    hold on
-    for i = 1 : size(datamat, 2)
-        yrangetrial = [yrange(1)+(i-1) yrange(1)+i];
-        plot([prew_f prew_f], yrangetrial, ...
-            [prew_f + tls(i), prew_f + tls(i)], yrangetrial, 'Color', [0 0 0 0.5])
-    end
-    hold off
-end
-ylabel('Trials (random ordered)')
-
-% 2. Subplot for overall average
-subplot(p.subplotrows, 1, 1);
-
-% Plot average data
-if p.usemedian
-    trace2plot = nanmedian(datamat2show,2);
-else
-    trace2plot = nanmean(datamat2show,2);
-end
-
-plot(trace2plot);
-xlim(xrange)
-set(gca, 'XTickLabel', xcell);
-
-% Y max
-ymax = max(trace2plot);
-ymin = min(trace2plot);
-
-% Y lim
-if isempty(p.yrange)
-    ylim([ymin - 0.03 ymax + 0.03])
-else
-    ylim(p.yrange);
-    ymin = p.yrange(1) + 0.03;
-    ymax = p.yrange(2) - 0.03;
-end
-
-% Add an y = 0 line and motion
-hold on
-plot(xrange, [0 0], 'Color', [0 0 0]);
-if ~isempty(p.optolength)
-    plot([prew_f prew_f + p.optolength], [ymax ymax],...
-        'Color', [1 0 0], 'LineWidth', 2);
-end
-
-% Add motion
-if p.showmotion || p.subtractmotion
-    % Calculate
-    motionvec = nanmean(motionmat2show,2);
-    
-    % Normalize
-    motionvec = mat2gray(motionvec) * (ymax - ymin) + ymin;
-    
+for iplot = 1 : 3
     % Plot
-    plot(motionvec, 'Color', [0.8 0.8 0.8], 'LineWidth', 1)
-end
-
-% Add licking
-if p.showlick
-    % Calculate
-    lickvec = nanmean(lickmat2show,2);
+    figure('position',[200+iplot*10 50+iplot*10 600 600]);
     
-    % Normalize
-    lickvec = mat2gray(lickvec) * (ymax - ymin) + ymin;
+    % 1. Subplot for imagesc
+    subplot(p.subplotrows, 1, 2 : p.subplotrows);
     
-    % Smoowth
-    if p.licksmoothwin > 0
-        lickvec = movmean(lickvec, p.licksmoothwin);
+    % Imagesc
+    if iplot == 1
+        imagesc(datamat2show');
+        colormap(b2r_arbitrary_input(p.heatmaprange(1), p.heatmaprange(2), [1 0 0], [0 0 1], [1 1 1]));
+    elseif iplot == 2
+        if p.showmotion
+            imagesc(motionmat2show');
+            colormap(b2r_arbitrary_input(-4, 4, [1 0 0], [0 0 1], [1 1 1]));
+        else
+            close(gcf);
+        end
+    elseif iplot == 3
+        if p.showlick
+            imagesc(lickmat2show');
+            colormap(b2r_arbitrary_input(-4, 4, [1 0 0], [0 0 1], [1 1 1]));
+        else
+            close(gcf);
+        end
     end
-
-    % Plot
-    plot(lickvec, 'Color', [0.1 0.6 0.6], 'LineWidth', 1)
-end
-
-hold off
-if p.flip_signal
-    ylabel('-F/F (z)')
-else
-    ylabel('F/F (z)')
-end
-
-% Title
-if ~isempty(p.title)
-    title(p.title);
+    
+    xrange = get(gca,'xlim');
+    yrange = get(gca, 'ylim');
+    xlabel('Time (s)')
+    
+    % X axis
+    Fs = optostruct(1).Fs;
+    xcell = get(gca, 'XTickLabel');
+    for i = 1 : length(xcell)
+        xcell{i} = num2str(str2double(xcell{i}) / Fs);
+    end
+    set(gca, 'XTickLabel', xcell);
+    
+    % Add line for stim
+    if p.optolength > 0
+        hold on
+        plot([prew_f prew_f], yrange, ...
+            [prew_f + p.optolength, prew_f + p.optolength], yrange, 'Color', [0 0 0 0.5])
+        hold off
+    elseif p.optolength < 0
+        hold on
+        for i = 1 : size(datamat, 2)
+            yrangetrial = [yrange(1)+(i-1) yrange(1)+i];
+            plot([prew_f prew_f], yrangetrial, ...
+                [prew_f + tls(i), prew_f + tls(i)], yrangetrial, 'Color', [0 0 0 0.5])
+        end
+        hold off
+    end
+    ylabel('Trials (random ordered)')
+    
+    % 2. Subplot for overall average
+    subplot(p.subplotrows, 1, 1);
+    
+    % Plot average data
+    if p.usemedian
+        trace2plot = nanmedian(datamat2show,2);
+    else
+        trace2plot = nanmean(datamat2show,2);
+    end
+    
+    plot(trace2plot);
+    xlim(xrange)
+    set(gca, 'XTickLabel', xcell);
+    
+    % Y max
+    ymax = max(trace2plot);
+    ymin = min(trace2plot);
+    
+    % Y lim
+    if isempty(p.yrange)
+        ylim([ymin - 0.03 ymax + 0.03])
+    else
+        ylim(p.yrange);
+        ymin = p.yrange(1) + 0.03;
+        ymax = p.yrange(2) - 0.03;
+    end
+    
+    % Add an y = 0 line and motion
+    hold on
+    plot(xrange, [0 0], 'Color', [0 0 0]);
+    if ~isempty(p.optolength)
+        plot([prew_f prew_f + p.optolength], [ymax ymax],...
+            'Color', [1 0 0], 'LineWidth', 2);
+    end
+    
+    % Add motion
+    if p.showmotion || p.subtractmotion
+        % Calculate
+        motionvec = nanmean(motionmat2show,2);
+        
+        % Normalize
+        motionvec = mat2gray(motionvec) * (ymax - ymin) + ymin;
+        
+        % Plot
+        plot(motionvec, 'Color', [0.8 0.8 0.8], 'LineWidth', 1)
+    end
+    
+    % Add licking
+    if p.showlick
+        % Calculate
+        lickvec = nanmean(lickmat2show,2);
+        
+        % Normalize
+        lickvec = mat2gray(lickvec) * (ymax - ymin) + ymin;
+        
+        % Smoowth
+        if p.licksmoothwin > 0
+            lickvec = movmean(lickvec, p.licksmoothwin);
+        end
+    
+        % Plot
+        plot(lickvec, 'Color', [0.1 0.6 0.6], 'LineWidth', 1)
+    end
+    
+    hold off
+    if p.flip_signal
+        ylabel('-F/F (z)')
+    else
+        ylabel('F/F (z)')
+    end
+    
+    % Title
+    if ~isempty(p.title)
+        title(p.title);
+    end
 end
 
 %% Output data
