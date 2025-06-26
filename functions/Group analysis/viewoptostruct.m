@@ -290,7 +290,7 @@ end
 %% Plot
 for iplot = 1 : 3
     % Plot
-    figure('position',[200+iplot*10 50+iplot*10 600 600]);
+    figure('position',[200+iplot*10 50+iplot*10 600 600],'Renderer','painters');
     
     % 1. Subplot for imagesc
     subplot(p.subplotrows, 1, 2 : p.subplotrows);
