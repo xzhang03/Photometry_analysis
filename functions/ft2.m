@@ -44,7 +44,7 @@ freq = samplingrate*(0:(n/2))/n;
 
 if Plot_or_not > 0
     figure
-    plot(freq,P_total)
+    plot(freq(2:end),P_total(2:end))
     xlabel('Frequency')
     ylabel('Power')
 end

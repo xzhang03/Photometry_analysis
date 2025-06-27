@@ -54,6 +54,22 @@ rigs.apollo.licktrig.tone_channel = 10;
 rigs.apollo.licktrig.lick_channel = 8; 
 rigs.apollo.licktrig.ensure_channel = 9; 
 
+% Artemis photometry
+rigs.apollo.photo.name = 'Apolo Pavovian/Conditional';
+rigs.apollo.photo.mode = '4. Green sensor + cue + food';
+rigs.apollo.photo.data_channel = 1;
+rigs.apollo.photo.data_channel2 = 2;
+rigs.apollo.photo.opto_channel = 10;
+rigs.apollo.photo.ch1_pulse_ind = 5;
+rigs.apollo.photo.ch2_pulse_ind = 6;
+rigs.apollo.photo.cam_channel = 7;
+rigs.apollo.photo.ch1_pulse_thresh = 0.5;
+rigs.apollo.photo.ch2_pulse_thresh = 0.5;
+rigs.apollo.photo.optomode = true;
+rigs.apollo.photo.tone_channel = 10; 
+rigs.apollo.photo.lick_channel = 8; 
+rigs.apollo.photo.ensure_channel = 9; 
+
 % Artemis Optophoto
 rigs.artemis.optophoto.name = 'Artemis Optophotometry';
 rigs.artemis.optophoto.mode = '1. Green sensor + red stim';
@@ -71,8 +87,8 @@ rigs.artemis.optophoto.lick_channel = 8;
 rigs.artemis.optophoto.ensure_channel = 9; 
 
 % Artemis photometry
-rigs.artemis.photo.name = 'Artemis Photometry';
-rigs.artemis.photo.mode = '2. Green sensor + food';
+rigs.artemis.photo.name = 'Artemis Pavovian/Conditional';
+rigs.artemis.photo.mode = '2. Green sensor + cue + food';
 rigs.artemis.photo.data_channel = 1;
 rigs.artemis.photo.data_channel2 = 99;
 rigs.artemis.photo.opto_channel = 6;

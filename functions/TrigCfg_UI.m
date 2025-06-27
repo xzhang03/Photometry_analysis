@@ -20,6 +20,13 @@ rigs.Apollo.licks.minpulsewidth = [];
 rigs.Apollo.licks.optomode = true;
 rigs.Apollo.licks.trigtone = false;
 
+% Apollo optophoto (Green Sensor + Red Stim)
+rigs.Apollo.foodphoto.name = 'Apollo GCaMP + Cued feeding';
+rigs.Apollo.foodphoto.mode = '3. Green sensor + Cued';
+rigs.Apollo.foodphoto.minpulsewidth = 5;
+rigs.Apollo.foodphoto.optomode = true;
+rigs.Apollo.foodphoto.trigtone = true;
+
 % Artemis optophoto (Green Sensor + Red Stim)
 rigs.Artemis.optophoto.name = 'Artemis GCaMP + Chrimson';
 rigs.Artemis.optophoto.mode = '1. Green sensor + Red stim';
@@ -29,7 +36,7 @@ rigs.Artemis.optophoto.trigtone = false;
 
 % Artemis optophoto (Green Sensor + Red Stim)
 rigs.Artemis.foodphoto.name = 'Artemis GCaMP + Cued feeding';
-rigs.Artemis.foodphoto.mode = '1. Green sensor + Cued';
+rigs.Artemis.foodphoto.mode = '2. Green sensor + Cued';
 rigs.Artemis.foodphoto.minpulsewidth = 5;
 rigs.Artemis.foodphoto.optomode = true;
 rigs.Artemis.foodphoto.trigtone = true;
@@ -110,11 +117,11 @@ else
 
     % Interpolate out artifacts (problem with small NIDAQs)
     TrigCfg.Remove_artifacts = false;
-    TrigCfg.artifact_ch = [4, 8];
+    TrigCfg.artifact_ch = 1;
 
     % GLM regress out artifacts
     TrigCfg.GLM_artifacts = false;
-    TrigCfg.GLM_ch = 6;
+    TrigCfg.GLM_ch = 1;
 
     % Pulses within this number of seconds will be merged together as the
     % same train. This creates a natural ITI
@@ -248,7 +255,7 @@ hsuffix = uicontrol(hfig, 'Style', 'edit', 'String', TrigCfg.suffix,...
 
 % Interpolate
 currenty = currenty + majory;
-chs = num2cell(1:8)';
+chs = {'Ens', 'Licks', 'Opto'};
 hint = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Interpolate artifact', 'Position', topleft + ...
     [0 currenty 120 20], 'Value', TrigCfg.Remove_artifacts, 'Callback', @intswitch);
 hintch = uicontrol(hfig, 'Style', 'listbox', 'String', chs, 'max', 8, 'min', 0, 'Position', topleft + ...

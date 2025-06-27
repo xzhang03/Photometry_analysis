@@ -226,6 +226,9 @@ end
 trigmat_avg = nanmean(trigmat,2);
 trigmat_avg_unfilt = nanmean(trigmat_unfilt, 2);
 
+trigmat_avg_view = trigmat_avg - mean(trigmat_avg(1:TrigCfg.prew * freq));
+trigmat_avg_unfilt_view = trigmat_avg_unfilt - mean(trigmat_avg_unfilt(1:TrigCfg.prew * freq));
+
 %% Deal with motion
 % Initialize a triggered speed matrix
 speedmat = zeros(l, n_optostims);
@@ -251,11 +254,11 @@ figure
 
 subplot(1,2,1)
 hold on
-plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg)
+plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg_view)
 if TrigCfg.useoffset
-    plot([-tl 0]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
+    plot([-tl 0]/freq, [mean(trigmat_avg_view), mean(trigmat_avg_view)], 'LineWidth', 5)
 else
-    plot([0 tl]/freq, [mean(trigmat_avg), mean(trigmat_avg)], 'LineWidth', 5)
+    plot([0 tl]/freq, [mean(trigmat_avg_view), mean(trigmat_avg_view)], 'LineWidth', 5)
 end
 
 % Plot running
@@ -278,11 +281,11 @@ title('Filtered')
 
 subplot(1,2,2)
 hold on
-plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg_unfilt)
+plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg_unfilt_view)
 if TrigCfg.useoffset
-    plot([-tl 0]/freq, [mean(trigmat_avg_unfilt), mean(trigmat_avg_unfilt)], 'LineWidth', 5)
+    plot([-tl 0]/freq, [mean(trigmat_avg_unfilt_view), mean(trigmat_avg_unfilt_view)], 'LineWidth', 5)
 else
-    plot([0 tl]/freq, [mean(trigmat_avg_unfilt), mean(trigmat_avg_unfilt)], 'LineWidth', 5)
+    plot([0 tl]/freq, [mean(trigmat_avg_unfilt_view), mean(trigmat_avg_unfilt_view)], 'LineWidth', 5)
 end
 
 % Plot running
