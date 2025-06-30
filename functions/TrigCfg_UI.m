@@ -23,7 +23,7 @@ rigs.Apollo.licks.trigtone = false;
 % Apollo optophoto (Green Sensor + Red Stim)
 rigs.Apollo.foodphoto.name = 'Apollo GCaMP + Cued feeding';
 rigs.Apollo.foodphoto.mode = '3. Green sensor + Cued';
-rigs.Apollo.foodphoto.minpulsewidth = 5;
+rigs.Apollo.foodphoto.minpulsewidth = [];
 rigs.Apollo.foodphoto.optomode = true;
 rigs.Apollo.foodphoto.trigtone = true;
 
