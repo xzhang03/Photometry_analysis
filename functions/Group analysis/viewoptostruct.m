@@ -19,6 +19,7 @@ addOptional(p, 'showX', []);    % Just show X of the trials in the heatmap.
 addOptional(p, 'optolength', []); % Optolength (train)
 addOptional(p, 'usemedian', false); % Plot median instead of mean for the plot
 addOptional(p, 'yrange', []); % y range for plotting
+addOptional(p, 'xrange', []);
 
 % Nans and other keep criteria
 addOptional(p, 'removenans', true); % Remove nans or not
@@ -343,7 +344,10 @@ for iplot = 1 : 3
         hold off
     end
     ylabel('Trials (random ordered)')
-    
+    if ~isempty(p.xrange)
+        xlim(p.xrange * Fs);
+    end
+
     % 2. Subplot for overall average
     subplot(p.subplotrows, 1, 1);
     
@@ -355,7 +359,11 @@ for iplot = 1 : 3
     end
     
     plot(trace2plot);
-    xlim(xrange)
+    if ~isempty(p.xrange)
+        xlim(p.xrange * Fs);
+    else
+        xlim(xrange)
+    end
     set(gca, 'XTickLabel', xcell);
     
     % Y max

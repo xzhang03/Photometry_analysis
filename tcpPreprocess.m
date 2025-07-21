@@ -139,7 +139,7 @@ for i = 1 : n_points
     ini_ind = ch1_data_table(i,1) + blackout_window;
     end_ind = ch1_data_table(i,1) + ch1_data_table(i,3) - 1;
     ch1_data_table(i,2) = median(data_notch(ini_ind:end_ind));
-    
+
     % Wavelength 2
     if doch2
         ini_ind = ch2_data_table(i,1) + blackout_window;
@@ -167,10 +167,14 @@ if any(isnan(ch1_data_table(:,2)))
 end
 if doch2 && any(isnan(ch2_data_table(:,2)))
     nanind = find(isnan(ch2_data_table(:,2)));
-    fprintf('Found %i nan in ch1\n', length(nanind));
+    fprintf('Found %i nan in ch2\n', length(nanind));
     for i = 1 : length(nanind)
         ni = nanind(i);
-        ch2_data_table(ni,2) = ch2_data_table(ni-1,2);
+        if ni == 1
+            ch2_data_table(ni,2) = ch2_data_table(ni+1,2);
+        else
+            ch2_data_table(ni,2) = ch2_data_table(ni-1,2);
+        end
     end
 end
 

@@ -12,6 +12,7 @@ rigs.Apollo.scoptophoto.mode = '1. Green sensor + Blue stim';
 rigs.Apollo.scoptophoto.minpulsewidth = [];
 rigs.Apollo.scoptophoto.optomode = true;
 rigs.Apollo.scoptophoto.trigtone = false;
+rigs.Apollo.scoptophoto.triglicks = false;
 
 % Apollo licks (GCaMP + biPAC)
 rigs.Apollo.licks.name = 'Apollo GCaMP (licks)';
@@ -19,6 +20,7 @@ rigs.Apollo.licks.mode = '2. Green sensor + licks (+ red)';
 rigs.Apollo.licks.minpulsewidth = [];
 rigs.Apollo.licks.optomode = true;
 rigs.Apollo.licks.trigtone = false;
+rigs.Apollo.licks.triglicks = true;
 
 % Apollo optophoto (Green Sensor + Red Stim)
 rigs.Apollo.foodphoto.name = 'Apollo GCaMP + Cued feeding';
@@ -26,20 +28,23 @@ rigs.Apollo.foodphoto.mode = '3. Green sensor + Cued';
 rigs.Apollo.foodphoto.minpulsewidth = [];
 rigs.Apollo.foodphoto.optomode = true;
 rigs.Apollo.foodphoto.trigtone = true;
+rigs.Apollo.foodphoto.triglicks = false;
 
 % Artemis optophoto (Green Sensor + Red Stim)
 rigs.Artemis.optophoto.name = 'Artemis GCaMP + Chrimson';
 rigs.Artemis.optophoto.mode = '1. Green sensor + Red stim';
-rigs.Artemis.optophoto.minpulsewidth = 5;
+rigs.Artemis.optophoto.minpulsewidth = [];
 rigs.Artemis.optophoto.optomode = true;
 rigs.Artemis.optophoto.trigtone = false;
+rigs.Artemis.optophoto.triglicks = false;
 
 % Artemis optophoto (Green Sensor + Red Stim)
 rigs.Artemis.foodphoto.name = 'Artemis GCaMP + Cued feeding';
 rigs.Artemis.foodphoto.mode = '2. Green sensor + Cued';
-rigs.Artemis.foodphoto.minpulsewidth = 5;
+rigs.Artemis.foodphoto.minpulsewidth = [];
 rigs.Artemis.foodphoto.optomode = true;
 rigs.Artemis.foodphoto.trigtone = true;
+rigs.Artemis.foodphoto.triglicks = false;
 
 % Cleopatra optophoto (Green Sensor + Red Stim)
 rigs.cleopatra.optophoto.name = 'Cleopatra GCaMP + Chrimson';
@@ -47,6 +52,7 @@ rigs.cleopatra.optophoto.mode = '1. Green sensor + Red stim';
 rigs.cleopatra.optophoto.minpulsewidth = 5;
 rigs.cleopatra.optophoto.optomode = true;
 rigs.cleopatra.optophoto.trigtone = false;
+rigs.cleopatra.optophoto.triglicks = false;
 
 % Minerva optophoto
 rigs.minerva.optophoto.name = 'Minerva placeholder';
@@ -54,6 +60,7 @@ rigs.minerva.optophoto.mode = '1. placeholder';
 rigs.minerva.optophoto.minpulsewidth = 99;
 rigs.minerva.optophoto.optomode = true;
 rigs.minerva.optophoto.trigtone = false;
+rigs.minerva.optophoto.triglicks = false;
 
 % RBG optophoto (RCaMP + ChR2)
 rigs.rbg.optophoto.name = 'RBG RCaMP + ChR2';
@@ -61,6 +68,7 @@ rigs.rbg.optophoto.mode = '1. Red sensor + Blue stim';
 rigs.rbg.optophoto.minpulsewidth = [];
 rigs.rbg.optophoto.optomode = true;
 rigs.rbg.optophoto.trigtone = false;
+rigs.rbg.optophoto.triglicks = false;
 
 % RBG scoptophoto (GCaMP + biPAC)
 rigs.rbg.scoptophoto.name = 'RBG GCaMP + biPAC';
@@ -68,6 +76,7 @@ rigs.rbg.scoptophoto.mode = '2. Green sensor + Blue stim';
 rigs.rbg.scoptophoto.minpulsewidth = [];
 rigs.rbg.scoptophoto.optomode = true;
 rigs.rbg.scoptophoto.trigtone = false;
+rigs.rbg.scoptophoto.triglicks = false;
 
 % RBG scoptophoto (GCaMP + Audio)
 rigs.rbg.audiophoto.name = 'RBG GCaMP + Audio Trigger';
@@ -75,6 +84,7 @@ rigs.rbg.audiophoto.mode = '3. Green sensor + Audio Trig';
 rigs.rbg.audiophoto.minpulsewidth = [];
 rigs.rbg.audiophoto.optomode = true;
 rigs.rbg.audiophoto.trigtone = true;
+rigs.rbg.audiophoto.triglicks = false;
 
 % RBG scoptophoto (GCaMP + Audio)
 rigs.rbg.foodphoto.name = 'RBG GCaMP + Food Trigger';
@@ -82,6 +92,7 @@ rigs.rbg.foodphoto.mode = '4. Green sensor + Food Trig';
 rigs.rbg.foodphoto.minpulsewidth = [];
 rigs.rbg.foodphoto.optomode = true;
 rigs.rbg.foodphoto.trigtone = true;
+rigs.rbg.foodphoto.triglicks = false;
 
 % Check if config exist
 tf = evalin('base','exist(''TrigCfg'')');
@@ -214,6 +225,10 @@ currenty = currenty + minory;
 hc2 = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Use Ch2', 'Position', topleft + ...
     [0 currenty 90 20], 'Value', TrigCfg.usech2, 'callback', @updaterigsfromboxes);
 
+% Licks
+hcl = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Trigger Licks', 'Position', topleft + ...
+    [1.5*minorx currenty 90 20], 'Value', rigs.(rigsel).(exptsel).trigtone, 'callback', @updaterigsfromboxes);
+
 % Tone
 currenty = currenty + minory;
 hct = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Trigger Tone', 'Position', topleft + ...
@@ -308,6 +323,7 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
     function updateboxes()
         hmpw.String = rigs.(rigsel).(exptsel).minpulsewidth;
         hct.Value = rigs.(rigsel).(exptsel).trigtone;
+        hcl.Value = rigs.(rigsel).(exptsel).triglicks;
     end
 
 % Update rigs from boxes
@@ -359,7 +375,8 @@ uicontrol(hfig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', ...
         TrigCfg.minpulsewidth = rigs.(rigsel).(exptsel).minpulsewidth;
         TrigCfg.optomode = rigs.(rigsel).(exptsel).optomode;
         TrigCfg.trigtone = rigs.(rigsel).(exptsel).trigtone;
-        
+        TrigCfg.triglicks = rigs.(rigsel).(exptsel).triglicks;
+
         % Window info
         TrigCfg.prew = str2double(hprew.String);
         TrigCfg.postw = str2double(hpostw.String);

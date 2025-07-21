@@ -14,8 +14,11 @@ addOptional(p, 'roi', []); % [startindex, endindex]
 % Filter parameters
 addOptional(p, 'fcenter', []);
 addOptional(p, 'fwidth', 0.1);
-addOptional(p, 'powerthreshold', 0.001);
+addOptional(p, 'powerthreshold', 0.01);
 addOptional(p, 'minfreq', 0.8); % Signal below this freq will not be filtered
+
+addOptional(p, 'makefftplot', true);
+addOptional(p, 'plotresult', true);
 
 % Unpack if needed
 if iscell(varargin) && size(varargin,1) * size(varargin,2) == 1
@@ -52,15 +55,17 @@ if isempty(p.fcenter)
     [P_total,freq] = ft2(v3, fs, 0);
     P_total = P_total(freq >= p.minfreq);
     freq = freq(freq >= p.minfreq);
-
-    % Plot
-    figure
-    findpeaks(P_total, freq, 'MinPeakProminence', p.powerthreshold);
+    
     [~,p.fcenter] = findpeaks(P_total, freq, 'MinPeakProminence', p.powerthreshold);
-    hold on
-    P_total_thresh = movmedian(P_total, 4) + p.powerthreshold;
-    plot(freq, P_total_thresh);
-    hold off
+    % Plot
+    if p.makefftplot
+        figure
+        findpeaks(P_total, freq, 'MinPeakProminence', p.powerthreshold);
+        hold on
+        P_total_thresh = movmedian(P_total, 4) + p.powerthreshold;
+        plot(freq, P_total_thresh);
+        hold off
+    end
 end
 
 %% Filter
@@ -72,9 +77,11 @@ end
 
 %% Return
 v3 = v3 + mean(v2);
-figure()
-plot([v2, v3])
-legend({'Pre', 'Post'})
+if p.plotresult
+    figure()
+    plot([v2, v3])
+    legend({'Pre', 'Post'})
+end
 
 % Return matrix
 v4 = reshape(v3, size(v));

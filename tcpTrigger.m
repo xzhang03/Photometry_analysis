@@ -80,12 +80,15 @@ l = prew_f + postw_f + 1;
 %% Optopulses
 % Replace with tone if needed
 useTone = TrigCfg.trigtone;
+useLicks = TrigCfg.triglicks;
 
 % Grab the opto pulse info and snap it to the photometry pulses
-if ~useTone
-    opto = opto_pulse_table(:,2);
-else
+if useTone
     opto = tone_pulse_table(:,2);
+elseif useLicks
+    opto = lick_pulse_table(:,2);
+else
+    opto = opto_pulse_table(:,2);
 end
     
 % Find bad pulses if needed
@@ -254,6 +257,7 @@ figure
 
 subplot(1,2,1)
 hold on
+
 plot(-TrigCfg.prew : 1/freq : TrigCfg.postw, trigmat_avg_view)
 if TrigCfg.useoffset
     plot([-tl 0]/freq, [mean(trigmat_avg_view), mean(trigmat_avg_view)], 'LineWidth', 5)
@@ -265,13 +269,13 @@ end
 if ~isempty(speedmat_avg)
     ylims = get(gca, 'YLim');
     plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
-        speedmat_avg / max(speedmat_avg) * max(ylims));
+        speedmat_avg / max(speedmat_avg) / 5 * max(ylims));
 end
 
 % Plot licking
 if ~isempty(lickmat_avg)
     plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
-        lickmat_avg / max(lickmat_avg) * max(ylims));
+        lickmat_avg / max(lickmat_avg) / 5 * max(ylims));
 end
 
 hold off
@@ -292,13 +296,13 @@ end
 if ~isempty(speedmat_avg)
     ylims = get(gca, 'YLim');
     plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
-        speedmat_avg / max(speedmat_avg) * max(ylims));
+        speedmat_avg / max(speedmat_avg) / 5 * max(ylims));
 end
 
 % Plot licking
 if ~isempty(lickmat_avg)
     plot(-TrigCfg.prew : 1/freq : TrigCfg.postw,...
-        lickmat_avg / max(lickmat_avg) * max(ylims));
+        lickmat_avg / max(lickmat_avg) / 5 * max(ylims));
 end
 
 hold off
