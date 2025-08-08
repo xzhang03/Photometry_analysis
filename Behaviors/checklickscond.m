@@ -57,6 +57,12 @@ lickvec = nidaqdata.data(p.lickchs, :);
 ensurevec = nidaqdata.data(p.ensurechs, :);
 cuevec = nidaqdata.data(p.cuechs,:);
 
+if ~any(nidaqdata.data(p.cuechs,:) > 0)
+    fprintf('No cues detected. Switching to pavlovian.\n')
+    p.cuechs = p.ensurechs;
+    cuevec = nidaqdata.data(p.cuechs,:);
+end
+
 % Downsample
 lickvec = tcpBin(lickvec', p.downsample, 1, 'max');
 ensurevec = tcpBin(ensurevec', p.downsample, 1, 'max');
