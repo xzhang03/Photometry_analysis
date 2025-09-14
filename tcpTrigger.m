@@ -81,12 +81,15 @@ l = prew_f + postw_f + 1;
 % Replace with tone if needed
 useTone = TrigCfg.trigtone;
 useLicks = TrigCfg.triglicks;
+useEnsure = TrigCfg.trigensure;
 
 % Grab the opto pulse info and snap it to the photometry pulses
 if useTone
     opto = tone_pulse_table(:,2);
 elseif useLicks
     opto = lick_pulse_table(:,2);
+elseif useEnsure
+    opto = ensure_pulse_table(:,2);
 else
     opto = opto_pulse_table(:,2);
 end

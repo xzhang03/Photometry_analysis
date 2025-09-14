@@ -10,15 +10,15 @@ p = inputParser;
 
 % General parameters
 addOptional(p, 'fpath', '');
-addOptional(p, 'defaultpath', '\\anastasia\data\photometry');
+addOptional(p, 'defaultpath', 'D:\Shared\photometry');
 addOptional(p, 'defaultext', '*.mat');
 
 % Channels
 addOptional(p, 'fs', 30);
 addOptional(p, 'clockch', 5);
-addOptional(p, 'optoch', 6);
-addOptional(p, 'lickchs', [7 8 9]);
-addOptional(p, 'ensurechs', [10 11 12]);
+addOptional(p, 'optoch', []);
+addOptional(p, 'lickchs', [6 7 8]);
+addOptional(p, 'ensurechs', [9 10 11]);
 addOptional(p, 'lickct', 3); % Works out to be ~3 pulses per lick
 
 % Mouse table
@@ -65,19 +65,34 @@ fprintf('Done. %0.1f s\n', t);
 % All channels
 fprintf('Resampling... ');
 tic;
-opto = tcpDatasnapper(nidaqdata.data(p.optoch, :)', nidaqdata.data(p.clockch, :)', 'max', 'pulsetopulse');
-lick1 = tcpDatasnapper(nidaqdata.data(p.lickchs(1), :)', opto, 'max', 'pulsetopulse');
-lick2 = tcpDatasnapper(nidaqdata.data(p.lickchs(2), :)', opto, 'max', 'pulsetopulse');
-lick3 = tcpDatasnapper(nidaqdata.data(p.lickchs(3), :)', opto, 'max', 'pulsetopulse');
-ensure1 = tcpDatasnapper(nidaqdata.data(p.ensurechs(1), :)', opto, 'max', 'pulsetopulse');
-ensure2 = tcpDatasnapper(nidaqdata.data(p.ensurechs(2), :)', opto, 'max', 'pulsetopulse');
-ensure3 = tcpDatasnapper(nidaqdata.data(p.ensurechs(3), :)', opto, 'max', 'pulsetopulse');
+if ~isempty(p.optoch)
+    opto = tcpDatasnapper(nidaqdata.data(p.optoch, :)', nidaqdata.data(p.clockch, :)', 'max', 'pulsetopulse');
+    lick1 = tcpDatasnapper(nidaqdata.data(p.lickchs(1), :)', opto, 'max', 'pulsetopulse');
+    lick2 = tcpDatasnapper(nidaqdata.data(p.lickchs(2), :)', opto, 'max', 'pulsetopulse');
+    lick3 = tcpDatasnapper(nidaqdata.data(p.lickchs(3), :)', opto, 'max', 'pulsetopulse');
+    ensure1 = tcpDatasnapper(nidaqdata.data(p.ensurechs(1), :)', opto, 'max', 'pulsetopulse');
+    ensure2 = tcpDatasnapper(nidaqdata.data(p.ensurechs(2), :)', opto, 'max', 'pulsetopulse');
+    ensure3 = tcpDatasnapper(nidaqdata.data(p.ensurechs(3), :)', opto, 'max', 'pulsetopulse');
+else
+    clock = tcpDatasnapper(nidaqdata.data(p.clockch, :)', nidaqdata.data(p.clockch, :)', 'max', 'pulsetopulse');
+    lick1 = tcpDatasnapper(nidaqdata.data(p.lickchs(1), :)', clock, 'max', 'pulsetopulse');
+    lick2 = tcpDatasnapper(nidaqdata.data(p.lickchs(2), :)', clock, 'max', 'pulsetopulse');
+    lick3 = tcpDatasnapper(nidaqdata.data(p.lickchs(3), :)', clock, 'max', 'pulsetopulse');
+    ensure1 = tcpDatasnapper(nidaqdata.data(p.ensurechs(1), :)', clock, 'max', 'pulsetopulse');
+    ensure2 = tcpDatasnapper(nidaqdata.data(p.ensurechs(2), :)', clock, 'max', 'pulsetopulse');
+    ensure3 = tcpDatasnapper(nidaqdata.data(p.ensurechs(3), :)', clock, 'max', 'pulsetopulse');
+end
+
 t = toc;
 fprintf('Done. %0.1f s\n', t);
 
 %% Make tables
 % Tables
-optotable = chainfinder(opto(:,2)>0.5);
+if ~isempty(p.optoch)
+    optotable = chainfinder(opto(:,2)>0.5);
+else
+    optotable = [];
+end
 licktable1 = chainfinder(lick1(:,2)>0.5);
 licktable2 = chainfinder(lick2(:,2)>0.5);
 licktable3 = chainfinder(lick3(:,2)>0.5);
@@ -116,7 +131,9 @@ if do3
 end
 
 % Set times to min
-optotable(:,1) = optotable(:,1) / p.fs / 60;
+if ~isempty(p.optoch)
+    optotable(:,1) = optotable(:,1) / p.fs / 60;
+end
 if do1
     licktable1(:,1) = licktable1(:,1) / p.fs / 60;
     ensuretable1(:,1) = ensuretable1(:,1) / p.fs / 60;
@@ -140,7 +157,11 @@ if do1
     plot(licktable1(:,1),licktable1(:,3))
     plot(ensuretable1(:,1),ensuretable1(:,3)/4)
     hold off
-    title(p.mousetable{m2, 1});
+    if any(m2)
+        title(p.mousetable{m2, 1});
+    else
+        title('Port 1');
+    end
     xlabel('min')
 end
 
@@ -151,7 +172,11 @@ if do2
     plot(licktable2(:,1),licktable2(:,3))
     plot(ensuretable2(:,1),ensuretable2(:,3)/4)
     hold off
-    title(p.mousetable{m2, 2});
+    if any(m2)
+        title(p.mousetable{m2, 2});
+    else
+        title('Port 2');
+    end
     xlabel('min')
 end
 
@@ -162,7 +187,11 @@ if do3
     plot(licktable3(:,1),licktable3(:,3))
     plot(ensuretable3(:,1),ensuretable3(:,3)/4)
     hold off
-    title(p.mousetable{m2, 3});
+    if any(m2)
+        title(p.mousetable{m2, 3});
+    else
+        title('Port 3');
+    end
     xlabel('min')
 end
 legend({'Licks', 'Ensure'})
@@ -172,11 +201,18 @@ saveas(gcf, fullfile(fpath, fnout));
 fprintf('Figure saved.\n');
 
 %% Save
-savestruct = struct('fn', fn, 'fname', fname, 'ensure1', ensure1, 'ensuretable1', ensuretable1,...
-    'ensure2', ensure2, 'ensuretable2', ensuretable2, 'ensure3', ensure3, 'opto', opto,...
-    'ensuretable3', ensuretable3, 'lick1', lick1, 'licktable1', licktable1, 'lick2', lick2,...
-    'licktable2', licktable2, 'lick3', lick3, 'licktable3', licktable3, 'optotable', optotable,...
-    'p', p);
+if ~isempty(p.optoch)
+    savestruct = struct('fn', fn, 'fname', fname, 'ensure1', ensure1, 'ensuretable1', ensuretable1,...
+        'ensure2', ensure2, 'ensuretable2', ensuretable2, 'ensure3', ensure3, 'opto', opto,...
+        'ensuretable3', ensuretable3, 'lick1', lick1, 'licktable1', licktable1, 'lick2', lick2,...
+        'licktable2', licktable2, 'lick3', lick3, 'licktable3', licktable3, 'optotable', optotable,...
+        'p', p);
+else
+    savestruct = struct('fn', fn, 'fname', fname, 'ensure1', ensure1, 'ensuretable1', ensuretable1,...
+        'ensure2', ensure2, 'ensuretable2', ensuretable2, 'ensure3', ensure3,...
+        'ensuretable3', ensuretable3, 'lick1', lick1, 'licktable1', licktable1, 'lick2', lick2,...
+        'licktable2', licktable2, 'lick3', lick3, 'licktable3', licktable3, 'p', p);
+end
 fnoutmat = sprintf('%s_lickgroup.mat', fname);
 save(fullfile(fpath, fnoutmat), '-struct', 'savestruct', '-v7.3');
 fprintf('Mat saved.\n');
