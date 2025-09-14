@@ -34,13 +34,13 @@ rigs.Apollo.foodphoto.triglicks = false;
 rigs.Apollo.foodphoto.trigensure = false;
 
 % Apollo optophoto (Green Sensor + Red Stim)
-rigs.Apollo.foodphoto.name = 'Apollo GCaMP + ensure delivery';
-rigs.Apollo.foodphoto.mode = '4. Green sensor + Ensure';
-rigs.Apollo.foodphoto.minpulsewidth = [];
-rigs.Apollo.foodphoto.optomode = true;
-rigs.Apollo.foodphoto.trigtone = false;
-rigs.Apollo.foodphoto.triglicks = false;
-rigs.Apollo.foodphoto.trigensure = true;
+rigs.Apollo.ensurephoto.name = 'Apollo GCaMP + ensure delivery';
+rigs.Apollo.ensurephoto.mode = '4. Green sensor + Ensure';
+rigs.Apollo.ensurephoto.minpulsewidth = [];
+rigs.Apollo.ensurephoto.optomode = true;
+rigs.Apollo.ensurephoto.trigtone = false;
+rigs.Apollo.ensurephoto.triglicks = false;
+rigs.Apollo.ensurephoto.trigensure = true;
 
 % Artemis optophoto (Green Sensor + Red Stim)
 rigs.Artemis.optophoto.name = 'Artemis GCaMP + Chrimson';
@@ -252,7 +252,7 @@ hce = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Trigger Ensure', 'Posit
 
 % Licks
 hcl = uicontrol(hfig, 'Style', 'radiobutton', 'String', 'Trigger Licks', 'Position', topleft + ...
-    [1.5*minorx currenty 90 20], 'Value', rigs.(rigsel).(exptsel).trigtone, 'callback', @updaterigsfromboxes);
+    [1.5*minorx currenty 90 20], 'Value', rigs.(rigsel).(exptsel).triglicks, 'callback', @updaterigsfromboxes);
 
 % Tone
 currenty = currenty + minory;
