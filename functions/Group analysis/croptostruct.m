@@ -26,11 +26,15 @@ end
 parse(p, varargin{:});
 p = p.Results;
 
+if isscalar(p.powerthreshold)
+    p.powerthreshold = p.powerthreshold * ones(length(datastruct), 1);
+end
+
 for i = 1 : length(datastruct)
     startpoint = datastruct(i).window_info(1)+datastruct(i).tls(1);
-
+    % disp(i)
     datastruct(i).photometry_trig =...
       multinotch(datastruct(i).photometry_trig, datastruct(i).Fs, 'roi', [startpoint+p.window(1),...
-        startpoint+p.window(2)], 'fcenter', p.fcenter, 'fwidth', p.fwidth, 'powerthreshold', p.powerthreshold,...
+        startpoint+p.window(2)], 'fcenter', p.fcenter, 'fwidth', p.fwidth, 'powerthreshold', p.powerthreshold(i),...
         'minfreq', p.minfreq, 'makefftplot', p.makefftplot, 'plotresult', false);
 end

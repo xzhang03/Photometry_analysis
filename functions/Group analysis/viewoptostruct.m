@@ -1,5 +1,4 @@
-function [dataout, motionout, lickout, datamat2show, motionmat2show, lickmat2show]...
-    = viewoptostruct(optostruct, varargin)
+function outputstruct = viewoptostruct(optostruct, varargin)
 % View opto structures
 % Dataout is a x-by-3 matrix of [mean SEM N].
 
@@ -38,6 +37,7 @@ addOptional(p, 'motiondelay', 0); % Debug variable. Don't change
 % Show licking
 addOptional(p, 'showlick', false);
 addOptional(p, 'licksmoothwin', 0);
+addOptional(p, 'showensure', false);
 
 % Output settings
 addOptional(p, 'outputdata', false); % Output data
@@ -126,6 +126,15 @@ if p.showlick
     end
 end
 
+% Ensure mat
+if p.showensure
+    if isempty(p.datasets)
+        ensuremat = cell2mat({optostruct(:).ensure});
+    else
+        ensuremat = cell2mat({optostruct(p.datasets).ensure});
+    end
+end
+
 % Trigger length
 if p.sortbytls
     if isempty(p.datasets)
@@ -174,6 +183,11 @@ if ~isempty(p.keepc{1,2}) && strcmp(p.datatype, 'trig')
     if p.showlick
         lickmat = lickmat(:, keepvec > 0);
     end
+
+    % Update lick data
+    if p.showensure
+        ensuremat = ensuremat(:, keepvec > 0);
+    end
     
     % Update trigger lengths
     if p.sortbytls
@@ -204,6 +218,11 @@ if p.removenans
     if p.showlick
         lickmat = lickmat(:, goodtrials);
     end
+
+    % Update lick data
+    if p.showensure
+        ensuremat = ensuremat(:, goodtrials);
+    end
     
     % Update trigger lengths
     if p.sortbytls
@@ -222,6 +241,9 @@ if isempty(p.showX)
     if p.showlick
         lickmat2show = lickmat;
     end
+    if p.showensure
+        ensuremat2show = ensuremat;
+    end
 
 elseif isscalar(p.showX)
     % If specifying the number of trials
@@ -235,6 +257,10 @@ elseif isscalar(p.showX)
         if p.showlick
             lickmat2show = lickmat(:, showind);
         end
+        if p.showensure
+            ensuremat2show = ensuremat(:, showind);
+        end
+
         if p.sortbytls
             tls = tls(showind);
         end
@@ -249,6 +275,9 @@ else
     end
     if p.showlick
         lickmat2show = lickmat(:, p.showX);
+    end
+    if p.showensure
+        ensuremat2show = ensuremat(:, p.showX);
     end
     if p.sortbytls
         tls = tls(p.showX);
@@ -287,10 +316,13 @@ if p.sortbytls
     if p.showlick
         lickmat2show = lickmat2show(:,ki);
     end
+    if p.showensure
+        ensuremat2show = ensuremat2show(:,ki);
+    end
 end
 
 %% Plot
-for iplot = 1 : 3
+for iplot = 1 : 4
     % Plot
     figure('position',[200+iplot*10 50+iplot*10 600 600],'Renderer','painters');
     
@@ -311,6 +343,13 @@ for iplot = 1 : 3
     elseif iplot == 3
         if p.showlick
             imagesc(lickmat2show');
+            colormap(b2r_arbitrary_input(-4, 4, [1 0 0], [0 0 1], [1 1 1]));
+        else
+            close(gcf);
+        end
+    elseif iplot == 4
+        if p.showensure
+            imagesc(ensuremat2show');
             colormap(b2r_arbitrary_input(-4, 4, [1 0 0], [0 0 1], [1 1 1]));
         else
             close(gcf);
@@ -359,7 +398,7 @@ for iplot = 1 : 3
         trace2plot = nanmean(datamat2show,2);
     end
     
-    plot(trace2plot);
+    plot(trace2plot, 'LineWidth', 2);
     if ~isempty(p.xrange)
         xlim(p.xrange * Fs);
     else
@@ -397,7 +436,7 @@ for iplot = 1 : 3
         motionvec = mat2gray(motionvec) * (ymax - ymin) + ymin;
         
         % Plot
-        plot(motionvec, 'Color', [0.8 0.8 0.8], 'LineWidth', 1)
+        plot(motionvec, 'Color', [0.8 0.8 0.8 0.1], 'LineWidth', 1)
     end
     
     % Add licking
@@ -414,7 +453,19 @@ for iplot = 1 : 3
         end
     
         % Plot
-        plot(lickvec, 'Color', [0.1 0.6 0.6], 'LineWidth', 1)
+        plot(lickvec, 'Color', [0.1 0.6 0.6 0.1], 'LineWidth', 1)
+    end
+
+    % Add licking
+    if p.showensure
+        % Calculate
+        ensurevec = nanmean(ensuremat2show,2);
+        
+        % Normalize
+        ensurevec = mat2gray(ensurevec) * (ymax - ymin) + ymin;
+        
+        % Plot
+        plot(ensurevec, 'Color', [0.6 0.1 0.6 0.1], 'LineWidth', 1)
     end
     
     hold off
@@ -446,22 +497,58 @@ if p.outputdata
     dataout(:,2) = nanstd(datamat,[],2);
     dataout(:,3) = ones(size(datamat,1),1) * N_plotted;
     
+    % Mouse
+    if isempty(p.datasets)
+        mid = cat(2, optostruct(:).mouseid);
+    else
+        mid = cat(2, optostruct(p.datasets).mouseid);
+    end
+    umid = unique(mid);
+    datamouse = zeros(size(datamat, 1), length(umid));
+    for i = 1 : length(umid)
+        datamouse(:,i) = mean(datamat(:, mid == umid(i)), 2);
+    end
+
     if p.showmotion
         motionout = nanmean(motionmat, 2);
         motionout(:,2) = nanstd(motionmat,[],2);
         motionout(:,3) = ones(size(motionmat,1),1) * N_plotted;
+        motionmouse = zeros(size(motionmat, 1), length(umid));
+        for i = 1 : length(umid)
+            motionmouse(:,i) = mean(motionmat(:, mid == umid(i)), 2);
+        end
     else
         motionout = [];
         motionmat2show = [];
+        motionmouse = [];
     end
     
     if p.showlick
         lickout = nanmean(lickmat, 2);
         lickout(:,2) = nanstd(lickmat,[],2);
         lickout(:,3) = ones(size(lickmat,1),1) * N_plotted;
+        lickmouse = zeros(size(lickmat, 1), length(umid));
+        for i = 1 : length(umid)
+            lickmouse(:,i) = mean(lickmat(:, mid == umid(i)), 2);
+        end
     else
         lickout = [];
         lickmat2show = [];
+        lickmouse = [];
+    end
+
+    if p.showensure
+        ensureout = nanmean(ensuremat, 2);
+        ensureout(:,2) = nanstd(ensuremat,[],2);
+        ensureout(:,3) = ones(size(ensuremat,1),1) * N_plotted;
+        ensuremouse = zeros(size(ensuremat, 1), length(umid));
+        for i = 1 : length(umid)
+            ensuremouse(:,i) = mean(ensuremat(:, mid == umid(i)), 2);
+        end
+    else
+        ensureout = [];
+        ensuremat2show = [];
+        ensuremouse = [];
     end
 
     % Adjust output sampling rate if needed
@@ -469,7 +556,8 @@ if p.outputdata
         dataout2 = tcpBin(dataout(:,1), Fs, p.outputfs, 'median');
         dataout2(:,2) = tcpBin(dataout(:,2), Fs, p.outputfs, 'median');
         dataout2(:,3) = tcpBin(dataout(:,3), Fs, p.outputfs, 'median');
-        
+        datamouse = tcpBin(datamouse, Fs, p.outputfs, 'mean');
+
         % Put the variable back
         dataout = dataout2;
 
@@ -477,6 +565,7 @@ if p.outputdata
             motionout2 = tcpBin(motionout(:,1), Fs, p.outputfs, 'median');
             motionout2(:,2) = tcpBin(motionout(:,2), Fs, p.outputfs, 'median');
             motionout2(:,3) = tcpBin(motionout(:,3), Fs, p.outputfs, 'median');
+            motionmouse = tcpBin(motionmouse, Fs, p.outputfs, 'mean');
             motionout = motionout2;
         end
         
@@ -484,9 +573,22 @@ if p.outputdata
             lickout2 = tcpBin(lickout(:,1), Fs, p.outputfs, 'median');
             lickout2(:,2) = tcpBin(lickout(:,2), Fs, p.outputfs, 'median');
             lickout2(:,3) = tcpBin(lickout(:,3), Fs, p.outputfs, 'median');
+            lickmouse = tcpBin(lickmouse, Fs, p.outputfs, 'mean');
             lickout = lickout2;
         end
         
+        if p.showensure
+            ensureout2 = tcpBin(ensureout(:,1), Fs, p.outputfs, 'median');
+            ensureout2(:,2) = tcpBin(ensureout(:,2), Fs, p.outputfs, 'median');
+            ensureout2(:,3) = tcpBin(ensureout(:,3), Fs, p.outputfs, 'median');
+            ensuremouse = tcpBin(ensuremouse, Fs, p.outputfs, 'mean');
+            ensureout = ensureout2;
+        end
     end
+
+    outputstruct = struct('dataout', dataout, 'motionout', motionout, 'lickout', lickout,...
+        'ensureout', ensureout, 'datamat2show', datamat2show, 'motionmat2show', motionmat2show,...
+        'lickmat2show', lickmat2show, 'ensuremat2show', ensuremat2show, 'datamouse', datamouse,...
+        'motionmouse', motionmouse, 'lickmouse', lickmouse, 'ensuremouse', ensuremouse);
 end
 end

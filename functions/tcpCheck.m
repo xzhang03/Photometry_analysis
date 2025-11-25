@@ -4,7 +4,7 @@ function Flags = tcpCheck(inputloadingcell, varargin)
 
 % Parser inputs
 p = inputParser;
-addOptional(p, 'defaultpath', '\\anastasia\data\photometry');
+addOptional(p, 'defaultpath', '\\zhanglab.cns.nyu.edu\server\photometry');
 addOptional(p, 'twocolor', true); % Check for alignment
 addOptional(p, 'headfixed', false); % Head fix mode (no A mat and with triggers)
 

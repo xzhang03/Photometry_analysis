@@ -5,7 +5,7 @@ function [datastruct, n_series] = mkoptostruct(inputloadingcell, varargin)
 % Parse input
 p  = inputParser;
 
-addOptional(p, 'defaultpath', 'D:\Shared\photometry'); % Default photometry path
+addOptional(p, 'defaultpath', '\\zhanglab.cns.nyu.edu\server\photometry'); % Default photometry path
 addOptional(p, 'trigsuffix', '');
 
 % Data type
@@ -37,11 +37,18 @@ addOptional(p, 'posttrigwindow', []);   % Add data that are triggered after the 
                                         % (intput as [Seconds_after_stim_1 Seconds_after_stim_2])
                                         % The window is only applied to the start of each trigger
 
+% Load data2use
+addOptional(p, 'load_data2use', false);
+addOptional(p, 'trim_data2use', []);
+
 % Show motion
 addOptional(p, 'showmotion', false); % locomotion data
 
 % Show licking
 addOptional(p, 'showlicking', false);
+
+% Show esnreu
+addOptional(p, 'showensure', false);
                                         
 % Shuffle for stats
 addOptional(p, 'shuffledata', false); % Add a field of shuffled photometry data for stats.
@@ -124,6 +131,17 @@ for i = 1 : n_series
         
         % Apply zscore
         datastruct(i).photometry_trig = (loaded.trigmat - mu) / gamma;
+    end
+
+    if p.load_data2use
+        datastruct(i).data2use = loaded.data2use;
+        if ~isempty(p.trim_data2use)
+            if length(datastruct(i).data2use) > p.trim_data2use(2)
+                datastruct(i).data2use = datastruct(i).data2use(p.trim_data2use(1):p.trim_data2use(2));
+            else
+                datastruct(i).data2use = cat(1, datastruct(i).data2use, nan(p.trim_data2use(2)-length(datastruct(i).data2use), 1));
+            end
+        end
     end
     
     % Checking opto
@@ -310,6 +328,16 @@ for i = 1 : n_series
         else
             disp('No licking data found');
             p.showlicking = false;
+        end
+    end
+
+    % Ensure
+    if p.showensure
+        if isfield(loaded, 'ensuremat')
+            datastruct(i).ensure = loaded.ensuremat;
+        else
+            disp('No ensure data found');
+            p.showensure = false;
         end
     end
     

@@ -16,7 +16,7 @@ elseif exist('filepath2', 'var')
 else
     clear
     % common path
-    defaultpath = 'D:\Shared\photometry\';
+    defaultpath = '\\zhanglab.cns.nyu.edu\server\photometry\';
 end
 
 % Use UI

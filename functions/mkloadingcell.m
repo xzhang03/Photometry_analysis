@@ -16,7 +16,7 @@ function loadingcell = mkloadingcell(inputcell, genpath, triggersuffix)
 if nargin < 3
     triggersuffix = '';
     if nargin < 2
-        genpath = 'D:\Shared\photometry';
+        genpath = '\\zhanglab.cns.nyu.edu\server\photometry';
     end
 end
 

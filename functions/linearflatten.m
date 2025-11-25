@@ -1,6 +1,10 @@
-function [outvec, subvec] = linearflatten(invec, pts)
+function [outvec, subvec] = linearflatten(invec, pts, scale)
 % linearflatten flattens the input vector with a linear fit
-% [outvec, subvec] = linearflatten(invec)
+% [outvec, subvec] = linearflatten(invec, pts, scale)
+
+if nargin < 3
+    scale = 1;
+end
 
 if nargin < 2
     pts = [1, length(invec)];
@@ -25,6 +29,6 @@ end
 subvec  = f1_lin(x);
 
 % Subtract slope component
-outvec = invec - subvec;
+outvec = invec - subvec * scale;
     
 end

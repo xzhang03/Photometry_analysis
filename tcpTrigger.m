@@ -5,7 +5,7 @@
 if ~exist('filepath', 'var')
     clear
     % common path
-    defaultpath = 'D:\Shared\photometry';
+    defaultpath = '\\zhanglab.cns.nyu.edu\server\photometry';
 elseif exist('TrigCfg', 'var')
     defaultpath = filepath;
     keep defaultpath TrigCfg
@@ -248,12 +248,16 @@ speedmat_avg = mean(speedmat,2);
 %% Deal with licking
 % Initialize a triggered lick matrix
 lickvec = lick_pulse_table(:,2);
+ensurevec = ensure_pulse_table(:,2);
 
 lickmat = zeros(l, n_optostims);
+ensuremat = zeros(l, n_optostims);
 for i = 1 : n_optostims
     lickmat(:,i) = lickvec(inds(i,1) : inds(i,2));
+    ensuremat(:,i) = ensurevec(inds(i,1) : inds(i,2));
 end
 lickmat_avg = mean(lickmat,2);
+ensuremat_avg = mean(ensuremat,2);
 
 %% Plot
 figure
@@ -313,9 +317,37 @@ xlabel('time (s)')
 ylabel('Fluorescence')
 title('Unfiltered')
 
+%% Fix errors
+if ~exist('trigmat', 'var')
+    trigmat = [];
+    trigmat_avg = [];
+    trigmat_unfilt = [];
+    trigmat_avg_unfilt = [];
+end
+
+if ~exist('inds', 'var')
+    inds = [];
+    n_optostims = [];
+    tl = [];
+    tls = [];
+end
+
+if ~exist('speedmat', 'var')
+    speedmat = [];
+    speedmat_avg = [];
+end
+
+if ~exist('lickmat', 'var')
+    lickmat = [];
+    lickmat_avg = [];
+    ensuremat = [];
+    ensuremat_avg = [];
+end
+ 
+
 %% Save results
 save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
     'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
     'trigmat_avg', 'data2use' , 'tl', 'tls', 'opto', 'data2use_unfilt', 'exp_fit',...
-    'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'useTone',...
+    'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'ensuremat', 'ensuremat_avg', 'useTone',...
     'trigmat_unfilt', 'trigmat_avg_unfilt');

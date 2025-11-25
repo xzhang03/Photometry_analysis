@@ -7,7 +7,7 @@ function tcpZ(inputloadingcell, varargin)
 %% Parse input
 p  = inputParser;
 
-addOptional(p, 'defaultpath', '\\anastasia\data\photometry'); % Default photometry path
+addOptional(p, 'defaultpath', '\\zhanglab.cns.nyu.edu\server\photometry'); % Default photometry path
 
 addOptional(p, 'inputdatatype', 'filtered'); % Can be 'filtered' or 'raw'
 
@@ -21,7 +21,11 @@ addOptional(p, 'flattenbeforez', false); % Use single-exponential flattening bef
 
 addOptional(p, 'externalZ', []); % Allow to copy Zs
 
+addOptional(p, 'externalZscale', 1);
+
 addOptional(p, 'trigsuffix', '');
+
+addOptional(p, 'mice', {});
 
 % Unpack if needed
 if size(varargin,1) == 1 && size(varargin,2) == 1
@@ -43,6 +47,10 @@ loadingcell = mkloadingcell(inputloadingcell, p.defaultpath, p.trigsuffix);
 %% Process each mouse
 % A cell of unique mice
 mice_cell = unique(inputloadingcell(:,1));
+if ~isempty(p.mice)
+    [~, miceinds] = intersect(mice_cell, p.mice);
+    mice_cell = mice_cell(miceinds);
+end
 nmice = length(mice_cell);
 
 % Start
@@ -123,6 +131,9 @@ for mouseind = 1 : nmice
 
         % Get Z
         Z = nanstd(datavec1);
+        if p.externalZscale ~= 1
+            Z = p.externalZscale * Z;
+        end
         fprintf('%s has a z-value of %3.3f in Channel 1\n', mice_cell{mouseind}, Z);
 
         % Second channel if needed
@@ -132,6 +143,10 @@ for mouseind = 1 : nmice
 
             % Get Z
             Z(2) = nanstd(datavec2);
+            
+            if p.externalZscale ~= 1
+                Z(2) = p.externalZscale * Z(2);
+            end
 
             % Second channel
             fprintf('%s has a z-value of %3.3f in Channel 2\n',...
