@@ -9,7 +9,7 @@ if ~exist('filepath', 'var')
 elseif exist('TrigCfg', 'var')
     defaultpath = filepath;
     keep defaultpath TrigCfg
-else
+else 
     defaultpath = filepath;
     keep defaultpath
 end
@@ -26,7 +26,7 @@ if isempty(TrigCfg.suffix)
 else
     filename_output_triggered = sprintf('%s_trig_%s.mat', filename(1:end-4), TrigCfg.suffix);
 end
-load(fullfile(filepath, filename), 'freq', 'ch1_data_table', 'Ch1_filtered',...
+load(fullfile(filepath, filename), 'freq', 'ch1_data_table', 'Ch1_filtered', 'ch2_data_table', 'Ch2_filtered',...
     'n_points', 'opto_pulse_table', 'tone_pulse_table', 'ensure_pulse_table', 'speedvec', 'lick_pulse_table');
 
 %% GLM remove channel artifacts
@@ -36,7 +36,8 @@ if isfield(TrigCfg, 'GLM_artifacts')
     if TrigCfg.GLM_artifacts
         % Interpolate method (last resort)
         ch1_data_table = artifact_glm(ch1_data_table, data, TrigCfg.GLM_ch, 9);
-        
+        ch2_data_table = artifact_glm(ch2_data_table, data, TrigCfg.GLM_ch, 9);
+
         % Filter
         % Design a filter kernel
         switch freq
@@ -53,6 +54,7 @@ if isfield(TrigCfg, 'GLM_artifacts')
 
         % Filter data
         Ch1_filtered = filtfilt(d,ch1_data_table(:,2));
+        Ch2_filtered = filtfilt(d,ch2_data_table(:,2));
     end
 else
     TrigCfg.GLM_artifacts = false;
@@ -64,11 +66,19 @@ end
 if isfield(TrigCfg, 'Remove_artifacts')
     if TrigCfg.Remove_artifacts
         % Interpolate method (last resort)
-        datavec_artifactremoved = artifact_interpolate(TrigCfg, data, ch1_data_table);
+        if ~TrigCfg.usech2
+            datavec_artifactremoved = artifact_interpolate(TrigCfg, data, ch1_data_table);
+        else
+            datavec_artifactremoved = artifact_interpolate(TrigCfg, data, ch2_data_table);
+        end
     end
 else
     TrigCfg.Remove_artifacts = false;
-    datavec_artifactremoved = Ch1_filtered;
+    if ~TrigCfg.usech2
+        datavec_artifactremoved = Ch1_filtered;
+    else
+        datavec_artifactremoved = Ch2_filtered;
+    end
 end
 
 %% Window info
@@ -173,7 +183,11 @@ tls = tls(badstims == 0);
 
 %% Flatten data
 % Pull data
-data2use = Ch1_filtered;
+if ~TrigCfg.usech2
+    data2use = Ch1_filtered;
+else
+    data2use = Ch2_filtered;
+end
 flattenmode = 1;
 
 % Flatten if needed
@@ -183,13 +197,21 @@ if TrigCfg.flatten_data
         data2use_unfilt = datavec_artifactremoved - exp_fit;
     else
         [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, opto, flattenmode);
-        data2use_unfilt = ch1_data_table(:, 2) - exp_fit;
+        if ~TrigCfg.usech2
+            data2use_unfilt = ch1_data_table(:, 2) - exp_fit;
+        else
+            data2use_unfilt = ch2_data_table(:, 2) - exp_fit;
+        end
     end
 else
     if TrigCfg.Remove_artifacts
         data2use_unfilt = datavec_artifactremoved;
     else
-        data2use_unfilt = ch1_data_table(:, 2);
+        if ~TrigCfg.usech2
+            data2use_unfilt = ch1_data_table(:, 2);
+        else
+            data2use_unfilt = ch2_data_table(:, 2);
+        end
     end
     exp_fit = [];
 end
@@ -199,14 +221,22 @@ plot([data2use, opto])
 % Dff data if needed
 if TrigCfg.dff_data
     % Pull data
-    data2use = Ch1_filtered;
+    if ~TrigCfg.usech2
+        data2use = Ch1_filtered;
+    else
+        data2use = Ch2_filtered;
+    end
 
     if TrigCfg.Remove_artifacts
         data2use = tcpPercentiledff(datavec_artifactremoved, freq, TrigCfg.dff_win, TrigCfg.dff_prc);
         data2use_unfilt = data2use;
     else
         data2use = tcpPercentiledff(data2use, freq, TrigCfg.dff_win, TrigCfg.dff_prc);
-        data2use_unfilt = tcpPercentiledff(ch1_data_table(:, 2), freq, TrigCfg.dff_win, TrigCfg.dff_prc);
+        if ~TrigCfg.usech2
+            data2use_unfilt = tcpPercentiledff(ch1_data_table(:, 2), freq, TrigCfg.dff_win, TrigCfg.dff_prc);
+        else
+            data2use_unfilt = tcpPercentiledff(ch2_data_table(:, 2), freq, TrigCfg.dff_win, TrigCfg.dff_prc);
+        end
     end
     exp_fit = [];
     plot([data2use, opto])

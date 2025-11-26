@@ -49,7 +49,7 @@ cam_channel = ppCfg.cam_channel;
 % Work out outputpath
 [filename, filepath] = uigetfile(fullfile(defaultpath, '*.mat'));
 filename_output = [filename(1:end-4), '_preprocessed.mat'];
-load(fullfile(filepath, filename), 'data', 'timestamps', 'Fs');
+load(fullfile(filepath, filename));
 
 
 %% Basic channel info and point indices
@@ -271,11 +271,16 @@ end
 % Grab position vec
 ix = strfind(filename, '-nidaq');
 rundir = dir(fullfile(filepath, sprintf('%srunning.mat', filename(1:ix))));
-position = load(fullfile(rundir.folder, rundir.name), 'position');
-position = position.position;
-
-% cam pulse
-speedvec = resamplepos(position, data(cam_channel,:), ch1_data_table);
+if ~isempty(rundir)
+    position = load(fullfile(rundir.folder, rundir.name), 'position');
+    position = position.position;
+    
+    % cam pulse
+    speedvec = resamplepos(position, data(cam_channel,:), ch1_data_table);
+else
+    position = [];
+    speedvec = [];
+end
 
 %% Plot raw data data
 figure(100)

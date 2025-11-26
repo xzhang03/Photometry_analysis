@@ -26,6 +26,9 @@ switch mode
     case 3
         f1_exp = fit(x(~isnan(raw)), raw(~isnan(raw)), 'a*exp(-b*x) + c*exp(-d*x)',...
             'Lower', [0, 0, 0, 0], 'StartPoint', [0.2, 0.0001, 0.2, 0.0001]);
+    case 4
+        f1_exp = fit(x(~isnan(raw)), raw(~isnan(raw)), 'a*exp(-b*x) + c*exp(-d*x) + e',...
+            'Lower', [0, 0, 0, 0, 0], 'StartPoint', [0.2, 0.0001, 0.2, 0.0001, 1]);
 end
         
 % Subtract exponential component
