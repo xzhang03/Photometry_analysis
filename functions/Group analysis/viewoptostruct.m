@@ -48,6 +48,7 @@ addOptional(p, 'datatype', 'trig'); % Can specify 'pretrig' or 'posttrig' or 'sh
 
 % Title
 addOptional(p, 'title', '');
+addOptional(p, 'savefig', false);
 addOptional(p, 'savefolder', '');
                                                              
 % Unpack if needed
@@ -480,7 +481,7 @@ for iplot = 1 : 4
         title(p.title);
     end
 
-    if ~isempty(p.savefolder)
+    if p.savefig && ~isempty(p.savefolder)
         saveas(gcf, fullfile(p.savefolder, sprintf('%s_%i.fig', p.title, iplot)), 'fig');
         saveas(gcf, fullfile(p.savefolder, sprintf('%s_%i.eps', p.title, iplot)), 'epsc');
     end

@@ -59,9 +59,9 @@ if ~isempty(p.Fs) && ~isempty(p.prew) && ~isempty(p.postw)
             postloco = datastruct(i).locomotion(datastruct(i).window_info(1)+2:end, :);
             
             % Lick tranches
-            prelick = datastruct(i).locomotion(1:datastruct(i).window_info(1), :);
-            midlick = datastruct(i).locomotion(datastruct(i).window_info(1)+1, :);
-            postlick = datastruct(i).locomotion(datastruct(i).window_info(1)+2:end, :);
+            prelick = datastruct(i).lick(1:datastruct(i).window_info(1), :);
+            midlick = datastruct(i).lick(datastruct(i).window_info(1)+1, :);
+            postlick = datastruct(i).lick(datastruct(i).window_info(1)+2:end, :);
 
             % Bin pre
             if  datastruct(i).Fs ~= p.Fs 
