@@ -1,4 +1,12 @@
 function y = logifun(x, x0, k, k2)
+
+if nargin < 3
+    k = 1;
+    if nargin < 2
+        x0 = 0;
+    end
+end
+
 if nargin < 4
     y = 1./(1 + exp(-k*(x-x0)));
 else
