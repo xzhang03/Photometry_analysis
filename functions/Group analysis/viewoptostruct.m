@@ -323,7 +323,8 @@ if p.sortbytls
 end
 
 %% Plot
-for iplot = 1 : 4
+nplot = [1, p.showmotion * 2, p.showlick * 3, p.showensure * 4];
+for iplot = nplot
     % Plot
     figure('position',[200+iplot*10 50+iplot*10 600 600],'Renderer','painters');
     

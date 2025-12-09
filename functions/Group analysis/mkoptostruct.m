@@ -39,6 +39,8 @@ addOptional(p, 'posttrigwindow', []);   % Add data that are triggered after the 
 
 % Load data2use
 addOptional(p, 'load_data2use', false);
+addOptional(p, 'load_lickvec', false);
+addOptional(p, 'load_speedvec', false);
 addOptional(p, 'trim_data2use', []);
 
 % Show motion
@@ -133,6 +135,7 @@ for i = 1 : n_series
         datastruct(i).photometry_trig = (loaded.trigmat - mu) / gamma;
     end
 
+    % Load data2use
     if p.load_data2use
         datastruct(i).data2use = loaded.data2use;
         if ~isempty(p.trim_data2use)
@@ -140,6 +143,34 @@ for i = 1 : n_series
                 datastruct(i).data2use = datastruct(i).data2use(p.trim_data2use(1):p.trim_data2use(2));
             else
                 datastruct(i).data2use = cat(1, datastruct(i).data2use, nan(p.trim_data2use(2)-length(datastruct(i).data2use), 1));
+            end
+        end
+    end
+
+    % Load lickvec (0.5s bins)
+    if p.load_lickvec
+        loaded_lick = load(fullfile(loadingcell{i,1}, loadingcell{i,4}), 'lick_pulse_table', 'freq');
+        lickvec = loaded_lick.lick_pulse_table(:,2);
+        datastruct(i).lickrate = lickrate(lickvec, loaded_lick.freq, round(loaded_lick.freq/2));
+        if ~isempty(p.trim_data2use)
+            if length(datastruct(i).lickrate) > p.trim_data2use(2)
+                datastruct(i).lickrate = datastruct(i).lickrate(p.trim_data2use(1):p.trim_data2use(2));
+            else
+                datastruct(i).lickrate = cat(1, datastruct(i).lickrate, nan(p.trim_data2use(2)-length(datastruct(i).lickrate), 1));
+            end
+        end
+    end
+
+    % Load speed (0.5s bins)
+    if p.load_speedvec
+        loaded_speed = load(fullfile(loadingcell{i,1}, loadingcell{i,4}), 'speedvec', 'freq');
+        speedvec = loaded_speed.speedvec;
+        datastruct(i).speed = runningspeed(speedvec, loaded_lick.freq, round(loaded_lick.freq/2));
+        if ~isempty(p.trim_data2use)
+            if length(datastruct(i).speed) > p.trim_data2use(2)
+                datastruct(i).speed = datastruct(i).speed(p.trim_data2use(1):p.trim_data2use(2));
+            else
+                datastruct(i).speed = cat(1, datastruct(i).speed, nan(p.trim_data2use(2)-length(datastruct(i).speed), 1));
             end
         end
     end
