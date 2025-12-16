@@ -41,6 +41,7 @@ addOptional(p, 'posttrigwindow', []);   % Add data that are triggered after the 
 addOptional(p, 'load_data2use', false);
 addOptional(p, 'load_lickvec', false);
 addOptional(p, 'load_speedvec', false);
+addOptional(p, 'load_cue', false);
 addOptional(p, 'trim_data2use', []);
 
 % Show motion
@@ -175,6 +176,18 @@ for i = 1 : n_series
         end
     end
     
+    % Load speed (0.5s bins)
+    if p.load_cue
+        datastruct(i).cue = loaded.opto;
+        if ~isempty(p.trim_data2use)
+            if length(datastruct(i).cue) > p.trim_data2use(2)
+                datastruct(i).cue = datastruct(i).cue(p.trim_data2use(1):p.trim_data2use(2));
+            else
+                datastruct(i).cue = cat(1, datastruct(i).cue, nan(p.trim_data2use(2)-length(datastruct(i).cue), 1));
+            end
+        end
+    end
+
     % Checking opto
     if p.checkoptopulses
         % Initialize a triggered matrix
