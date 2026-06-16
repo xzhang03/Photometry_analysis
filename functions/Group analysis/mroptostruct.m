@@ -37,6 +37,7 @@ n = length(datastruct);
 for i = 1 : n
     % Get the dataout
     d = datastruct(i).photometry_trig;
+    % for j = 1:size(d,2), d(:,j) = d(:,j) - mean(d(1:230,j)); end
     m = datastruct(i).locomotion;
     if p.reglicking
         l = datastruct(i).lick;
@@ -104,16 +105,18 @@ for i = 1 : n
    	t0 = ones(sizevec(1) * sizevec(2), 1);
     
     % Look
-%     figure
-%     plot(mean(d2,2));
-%     hold on
-%     plot(mean(reshape(t, sizevec),2));
-%     plot(mean(reshape(t2, sizevec),2));
-%     hold off
+    % figure
+    % plot(mean(d2,2));
+    % hold on
+    % plot(mean(reshape(t, sizevec),2));
+    % plot(mean(reshape(t2, sizevec),2));
+    % plot(mean(reshape(l, sizevec),2));
+    % hold off
     
     % Weights
     if p.reglicking
-        wt = [t, t2, l, t0] \ d2v;
+        wt = [t, t2, l, l2, t0] \ d2v;
+        % wt = glmfit([t, t2, l, t0], d2v, 'normal', 'Constant', 'off');
     else
         wt = [t, t2, t0] \ d2v;
     %     wt = glmfit([t],d2v, 'normal');
@@ -121,7 +124,7 @@ for i = 1 : n
     
     % Subtract
     if p.reglicking
-        d2s = d2v - [t, t2, l, t0] * wt;
+        d2s = d2v - [t, t2, l, l2, t0] * wt;
     else
         d2s = d2v - [t, t2, t0] * wt;
     %     d2s = d2v - [t, t0] * wt([1 3]);

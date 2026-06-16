@@ -155,6 +155,9 @@ if TrigCfg.minITI > 0
     opto_ons = opto_ons(opto_ons(:,7)==0 & opto_ons(:,8)==0, :);
 end
 
+% load('D:\Shared\Dropbox\Analysis_codebase\taylor\goodtrigs_mc4rgcamp.mat', 'opto', 'opto_ons');
+% opto = opto(1:n_points);
+
 tls = opto_ons(:,2);
 tl = TrigCfg.merge * freq;
 
@@ -277,15 +280,19 @@ speedmat_avg = mean(speedmat,2);
 
 %% Deal with licking
 % Initialize a triggered lick matrix
+cuevec = tone_pulse_table(:,2);
 lickvec = lick_pulse_table(:,2);
 ensurevec = ensure_pulse_table(:,2);
 
+cuemat = zeros(l, n_optostims);
 lickmat = zeros(l, n_optostims);
 ensuremat = zeros(l, n_optostims);
 for i = 1 : n_optostims
+    cuemat(:,i) = cuevec(inds(i,1) : inds(i,2));
     lickmat(:,i) = lickvec(inds(i,1) : inds(i,2));
     ensuremat(:,i) = ensurevec(inds(i,1) : inds(i,2));
 end
+cuemat_avg = mean(cuemat, 2);
 lickmat_avg = mean(lickmat,2);
 ensuremat_avg = mean(ensuremat,2);
 
@@ -372,6 +379,8 @@ if ~exist('lickmat', 'var')
     lickmat_avg = [];
     ensuremat = [];
     ensuremat_avg = [];
+    cuemat = [];
+    cuemat_avg = [];
 end
  
 
@@ -379,5 +388,5 @@ end
 save(fullfile(filepath,filename_output_triggered), 'TrigCfg', 'trigmat',...
     'freq', 'prew_f', 'postw_f', 'l', 'opto_ons', 'inds', 'n_optostims',...
     'trigmat_avg', 'data2use' , 'tl', 'tls', 'opto', 'data2use_unfilt', 'exp_fit',...
-    'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'ensuremat', 'ensuremat_avg', 'useTone',...
-    'trigmat_unfilt', 'trigmat_avg_unfilt');
+    'speedmat', 'speedmat_avg', 'lickmat', 'lickmat_avg', 'ensuremat', 'ensuremat_avg',...
+    'cuemat', 'cuemat_avg', 'useTone', 'trigmat_unfilt', 'trigmat_avg_unfilt');

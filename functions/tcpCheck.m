@@ -1,21 +1,23 @@
-function Flags = tcpCheck(inputloadingcell, varargin)
+function [Flags, confignames, trialstructure] = tcpCheck(inputloadingcell, varargin)
 % tcpCheck checks the data processing status
 % Flags = tcpCheck(inputloadingcell, varargin)
 
 % Parser inputs
 p = inputParser;
-addOptional(p, 'defaultpath', '\\zhanglab.cns.nyu.edu\server\photometry');
-addOptional(p, 'twocolor', true); % Check for alignment
-addOptional(p, 'headfixed', false); % Head fix mode (no A mat and with triggers)
+addOptional(p, 'defaultpath', 'Z:\photometry');
+addOptional(p, 'twocolor', false); % Check for alignment
+addOptional(p, 'headfixed', true); % Head fix mode (no A mat and with triggers)
+addOptional(p, 'mousedate', true);
 
 % Checking stuff
 addOptional(p, 'checkpreprocess', true); % Check preprocessing, generally true
 addOptional(p, 'checktrigger', true); % Check trigger, generally true for headfixed
+addOptional(p, 'checkconfigs', false); % Check trigger, generally true for headfixed
 
 % Trigger suffix
 addOptional(p, 'trigsuffix', '');
 
-% A mat check and fixing
+% A mat check and fixing (old)
 addOptional(p, 'checkAmat', false); % Open and check A mats (will take longer)
 addOptional(p, 'checkDLC', false); % Check DLC files exist
 addOptional(p, 'RangeRatioThresh', 1.3); % When the warn that the ratios are off
@@ -31,7 +33,7 @@ p = p.Results;
 
 
 % Make actual loading cell
-loadingcell = mkloadingcell(inputloadingcell, p.defaultpath, p.trigsuffix);
+loadingcell = mkloadingcell(inputloadingcell, p.defaultpath, p.trigsuffix, p.mousedate);
 
 % Grabbing basic data
 n_expts = size(inputloadingcell, 1);
@@ -41,6 +43,14 @@ n_expts = size(inputloadingcell, 1);
 % Third column for opto (triggered): 1 - exist
 % Fourth column for DLC: 1 - exist
 Flags = nan(n_expts, 4);
+
+% config names
+confignames = cell(n_expts, 1);
+trialstructure = struct('rig', '', 'configname', '',...
+    'behavior', [], 'cueenable', [], 'cuedelay', [], 'cuedur', [], 'conditional', [], ...
+    'actiondelay', [], 'actiondur', [], 'fooddelay', [], 'foodpulsewidth', [], 'foodcycle', [], 'foodtrainlength', [],...
+    'ntrialtypes', [], 'trialfreq', [], 'schedulerenable', [], 'schedulerdelay', [], 'schedulertrials', []);
+trialstructure = repmat(trialstructure, [n_expts 1]);
 
 % Start
 fprintf('========== Checking %i experiments ==========\n', n_expts);
@@ -156,6 +166,34 @@ for i = 1 : n_expts
             fprintf('%s: missing DLC file\n', experiment_name);
         end
     end
+
+    % Config
+    if p.checkconfigs
+        loaded = load(fullfile(loadingcell{i, 1}, loadingcell{i, 5}), 'configfp', 'omniboxsetting');
+        [~, confignames{i}, ~] = fileparts(loaded.configfp);
+        trialstructure(i).behavior = loaded.omniboxsetting.optodelayTTL.enable;
+        trialstructure(i).ntrialtypes = loaded.omniboxsetting.optodelayTTL.ntrialtypes;
+        trialstructure(i).trialfreq = loaded.omniboxsetting.optodelayTTL.trialfreq;
+        trialstructure(i).cueenable = loaded.omniboxsetting.optodelayTTL.cueenable;
+        trialstructure(i).cuedelay = loaded.omniboxsetting.optodelayTTL.cuedelay;
+        trialstructure(i).cuedur = loaded.omniboxsetting.optodelayTTL.cuedur;
+        trialstructure(i).conditional = loaded.omniboxsetting.optodelayTTL.conditional;
+        trialstructure(i).actiondelay = loaded.omniboxsetting.optodelayTTL.actiondelay;
+        trialstructure(i).actiondur = loaded.omniboxsetting.optodelayTTL.actiondur;
+        trialstructure(i).fooddelay = loaded.omniboxsetting.optodelayTTL.delay;
+        trialstructure(i).foodpulsewidth = loaded.omniboxsetting.optodelayTTL.pulsewidth;
+        trialstructure(i).foodcycle = loaded.omniboxsetting.optodelayTTL.cycle;
+        trialstructure(i).foodtrainlength = loaded.omniboxsetting.optodelayTTL.trainlength;
+        trialstructure(i).schedulerenable = loaded.omniboxsetting.scheduler.enable;
+        trialstructure(i).schedulerdelay = loaded.omniboxsetting.scheduler.delay;
+        trialstructure(i).schedulertrials = loaded.omniboxsetting.scheduler.ntrains;
+        trialstructure(i).rig = loaded.omniboxsetting.Rig;
+        trialstructure(i).configname = confignames{i};
+    end
+end
+
+if p.checkconfigs
+    disp(confignames)
 end
 
 fprintf('Done.\n')

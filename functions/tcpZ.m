@@ -7,7 +7,7 @@ function tcpZ(inputloadingcell, varargin)
 %% Parse input
 p  = inputParser;
 
-addOptional(p, 'defaultpath', '\\zhanglab.cns.nyu.edu\server\photometry'); % Default photometry path
+addOptional(p, 'defaultpath', 'Z:\photometry'); % Default photometry path
 
 addOptional(p, 'inputdatatype', 'filtered'); % Can be 'filtered' or 'raw'
 

@@ -341,6 +341,7 @@ for iplot = nplot
             colormap(b2r_arbitrary_input(-4, 4, [1 0 0], [0 0 1], [1 1 1]));
         else
             close(gcf);
+            continue;
         end
     elseif iplot == 3
         if p.showlick
@@ -348,6 +349,7 @@ for iplot = nplot
             colormap(b2r_arbitrary_input(-4, 4, [1 0 0], [0 0 1], [1 1 1]));
         else
             close(gcf);
+            continue;
         end
     elseif iplot == 4
         if p.showensure
@@ -355,7 +357,11 @@ for iplot = nplot
             colormap(b2r_arbitrary_input(-4, 4, [1 0 0], [0 0 1], [1 1 1]));
         else
             close(gcf);
+            continue;
         end
+    elseif iplot == 0
+        close(gcf)
+        continue;
     end
     
     xrange = get(gca,'xlim');
@@ -479,7 +485,16 @@ for iplot = nplot
     
     % Title
     if ~isempty(p.title)
-        title(p.title);
+        switch iplot
+            case 1
+                title(sprintf('%s photometry', p.title));
+            case 2
+                title(sprintf('%s locomotion', p.title));
+            case 3
+                title(sprintf('%s licks', p.title));
+            case 4
+                title(sprintf('%s ensure', p.title));
+        end
     end
 
     if p.savefig && ~isempty(p.savefolder)
@@ -504,6 +519,9 @@ if p.outputdata
         mid = cat(2, optostruct(:).mouseid);
     else
         mid = cat(2, optostruct(p.datasets).mouseid);
+    end
+    if exist('keepvec', 'var')
+        mid = mid(keepvec > 0);
     end
     umid = unique(mid);
     datamouse = zeros(size(datamat, 1), length(umid));
@@ -592,5 +610,9 @@ if p.outputdata
         'ensureout', ensureout, 'datamat2show', datamat2show, 'motionmat2show', motionmat2show,...
         'lickmat2show', lickmat2show, 'ensuremat2show', ensuremat2show, 'datamouse', datamouse,...
         'motionmouse', motionmouse, 'lickmouse', lickmouse, 'ensuremouse', ensuremouse);
+
+    if p.savefig && ~isempty(p.savefolder)
+        save(fullfile(p.savefolder, sprintf('%s.mat', p.title)), 'outputstruct');
+    end
 end
 end

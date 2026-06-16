@@ -1,4 +1,4 @@
-function loadingcell = mkloadingcell(inputcell, genpath, triggersuffix)
+function loadingcell = mkloadingcell(inputcell, genpath, triggersuffix, mousedate)
 % mkloadingcell makes a loading cell for pathing. Inputcell should be in
 % the format of {mouse, date, run}.
 % loadingcell = mkloadingcell(inputcell, genpath)
@@ -12,11 +12,13 @@ function loadingcell = mkloadingcell(inputcell, genpath, triggersuffix)
 % 7. Running
 % 8. DLC
 
-
-if nargin < 3
-    triggersuffix = '';
-    if nargin < 2
-        genpath = '\\zhanglab.cns.nyu.edu\server\photometry';
+if nargin <4
+    mousedate = true;
+    if nargin < 3
+        triggersuffix = '';
+        if nargin < 2
+            genpath = '\\zhanglab.cns.nyu.edu\server\photometry';
+        end
     end
 end
 
@@ -49,10 +51,13 @@ for i = 1 : size(inputcell,1)
     
     
     % Folder name
-    loadingcell{i,1} =...
-        fullfile(genpath, inputcell{i,1}, [mouse,'_',date]);
-    % loadingcell{i,1} =...
-    %     fullfile(genpath, inputcell{i,1}, [date,'_',mouse]);
+    if mousedate
+        loadingcell{i,1} =...
+            fullfile(genpath, inputcell{i,1}, [mouse,'_',date]);
+    else
+        loadingcell{i,1} =...
+            fullfile(genpath, inputcell{i,1}, [date,'_',mouse]);
+    end
 
     % Photometry data name
     loadingcell{i,2} =...

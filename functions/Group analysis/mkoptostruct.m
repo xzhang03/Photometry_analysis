@@ -7,6 +7,7 @@ p  = inputParser;
 
 addOptional(p, 'defaultpath', '\\zhanglab.cns.nyu.edu\server\photometry'); % Default photometry path
 addOptional(p, 'trigsuffix', '');
+addOptional(p, 'mousedate', true);
 
 % Data type
 addOptional(p, 'useunfiltered', false); % Use unfiltered data (and retrigger)
@@ -41,8 +42,11 @@ addOptional(p, 'posttrigwindow', []);   % Add data that are triggered after the 
 addOptional(p, 'load_data2use', false);
 addOptional(p, 'load_lickvec', false);
 addOptional(p, 'load_speedvec', false);
-addOptional(p, 'load_cue', false);
+addOptional(p, 'load_cuevec', false);
 addOptional(p, 'trim_data2use', []);
+
+% Show cue
+addOptional(p, 'showcue', false);
 
 % Show motion
 addOptional(p, 'showmotion', false); % locomotion data
@@ -72,7 +76,7 @@ p = p.Results;
 
 
 %% Make actual loading cell
-loadingcell = mkloadingcell(inputloadingcell, p.defaultpath, p.trigsuffix);
+loadingcell = mkloadingcell(inputloadingcell, p.defaultpath, p.trigsuffix, p.mousedate);
 
 % data samples
 n_series = size(loadingcell, 1);
@@ -176,8 +180,8 @@ for i = 1 : n_series
         end
     end
     
-    % Load speed (0.5s bins)
-    if p.load_cue
+    % Load Cue <=== this needs to be fixed by stephen
+    if p.load_cuevec
         datastruct(i).cue = loaded.opto;
         if ~isempty(p.trim_data2use)
             if length(datastruct(i).cue) > p.trim_data2use(2)
@@ -351,6 +355,20 @@ for i = 1 : n_series
         datastruct(i).photometry_posttrig = posttrigmat;
     end
     
+    % Show cue
+    if p.showcue
+        if isfield(loaded, 'cuemat')
+            datastruct(i).cue = loaded.cuemat;
+        else
+            % Make new cue mat from opto
+            cuemat = zeros(size(loaded.trigmat));
+            for j = 1 : size(loaded.trigmat, 2)
+                cuemat(:,j) = loaded.opto(loaded.inds(j,1) : loaded.inds(j,2));
+            end
+            datastruct(i).cue = cuemat;
+        end
+    end
+
     % Locomotion
     if p.showmotion
         if isfield(loaded, 'speedmat')

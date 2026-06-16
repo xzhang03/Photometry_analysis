@@ -9,6 +9,12 @@ if nargin < 3
     mode = 1;
 end
 
+%% Empty chain
+if isempty(chainmat_in)
+    chainmat_out = [];
+    return;
+end
+
 %% Chain lengths
 if mode == 1
     % End to start
