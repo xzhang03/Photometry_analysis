@@ -72,7 +72,7 @@ end
 for i = 1 : length(p.fcenter)
     d_notch = designfilt('bandstopiir','FilterOrder',2, 'HalfPowerFrequency1', p.fcenter(i)-p.fwidth,...
         'HalfPowerFrequency2', min(fs/2-0.01, p.fcenter(i)+p.fwidth), 'DesignMethod','butter','SampleRate', fs);
-    v3 = filter(d_notch, v3);
+    v3 = filtfilt(d_notch, v3);
 end
 
 %% Return
