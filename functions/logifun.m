@@ -1,4 +1,9 @@
 function y = logifun(x, x0, k, k2)
+%           ____________
+%          |
+%          |
+%         /
+% _______/
 
 if nargin < 3
     k = 1;
@@ -23,7 +28,9 @@ else
     
 end
 
-figure
-plot(x,y)
+if nargout == 0
+    figure
+    plot(x,y)
+end
 
 end
