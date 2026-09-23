@@ -191,7 +191,12 @@ if ~TrigCfg.usech2
 else
     data2use = Ch2_filtered;
 end
-flattenmode = 1;
+flattenmode = 4;    % Modes:
+                    % 1. a*exp(-b*x)+c [default]
+                    % 2. a*exp(-b*x)
+                    % 3. a*exp(-b*x)+c*exp(-d*x)
+                    % 4. a*exp(-b*x)+c*exp(-d*x)+e
+flattenusingopto = 0; % Set 0 to use ensure, 1 for opto
 
 % Flatten if needed
 if TrigCfg.flatten_data
@@ -199,7 +204,11 @@ if TrigCfg.flatten_data
         [data2use, ~, exp_fit, ~] = tcpUIflatten(datavec_artifactremoved, opto, flattenmode);
         data2use_unfilt = datavec_artifactremoved - exp_fit;
     else
-        [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, opto, flattenmode);
+        if flattenusingopto == 1
+            [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, opto, flattenmode);
+        else
+            [data2use, ~, exp_fit, ~] = tcpUIflatten(data2use, ensure_pulse_table(:,2), flattenmode);
+        end
         if ~TrigCfg.usech2
             data2use_unfilt = ch1_data_table(:, 2) - exp_fit;
         else
@@ -218,7 +227,12 @@ else
     end
     exp_fit = [];
 end
-plot([data2use, opto])
+
+if flattenusingopto == 1
+    plot([data2use, opto])
+else
+    plot([data2use, ensure_pulse_table(:,2)])
+end
 
 %% Sliding window dff data
 % Dff data if needed

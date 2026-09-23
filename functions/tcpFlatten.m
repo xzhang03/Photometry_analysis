@@ -6,6 +6,7 @@ function [flattened, f1_exp] = tcpFlatten(raw, n_points, mode)
 % 1. a*exp(-b*x)+c [default]
 % 2. a*exp(-b*x)
 % 3. a*exp(-b*x)+c*exp(-d*x)
+% 4. a*exp(-b*x)+c*exp(-d*x)+e
 
 if nargin < 3
     mode = 1;

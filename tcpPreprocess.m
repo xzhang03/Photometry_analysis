@@ -1,7 +1,7 @@
 %% Initialization
 % Stephen Zhang 2019/07/30
 
-% Use previous path if exists
+% Use previous path 08/06/26
 if exist('filepath', 'var')
     if exist('ppCfg', 'var')
         defaultpath = filepath;
